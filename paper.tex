@@ -112,6 +112,11 @@
 \begin{abstract}
 \end{abstract}
 
+\section{Introducing visual programs}
+
+In this work we consider programs that draw diagrams, similar to those found in papers.
+
+
 \section{Neural networks for guiding SMC}
 
 Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
@@ -170,6 +175,29 @@ So actually the form of NN is:
 Do you think this is a problem? The neural network puts almost all of its mass on a few guesses.
 In order to get the correct line of code I sometimes need to get something like the 50th  top guess,
 so I don't want to literally just sample from the distribution suggested by the neural network.
+
+
+  \begin{algorithm}[tb]
+   \caption{Neurally guided SMC}
+   \label{guideAlgorithm}
+\begin{algorithmic}
+  \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
+  \STATE {\bfseries Output:} Samples of the program trace
+  \STATE Set $B_0 = \{\text{empty program}\}$
+  \FOR{$1\leq l\leq L$}
+  \FOR{$1\leq n\leq N$}
+  \STATE{ $p_n\sim \text{Uniform}(B_{l - 1})$}
+  \STATE{ $p'_{n}\sim \text{NN}(\text{render}(p),x)$}
+  \STATE{ Define $r_n = p'_n\cdot p_n$}
+  \STATE{ Set $\tilde{w}(r_n) = \frac{L(x|r_n)}{L(x|p_n)}\times\frac{\probability [p'_n]}{\probability [p'_n = \text{NN}(\text{render}(p),x)]}$}
+  \ENDFOR
+  \STATE{ Define $w(p) = \frac{\tilde{w}(p)}{\sum_{p'}\tilde{w}(p')}$}
+  \STATE{ Set $B_l$ to be $N$ samples from $r_n$ distributed according to $w(\cdot)$}
+  \ENDFOR
+  \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
+\end{algorithmic}
+  \end{algorithm}
+
 
 \section{Submission of papers to NIPS 2017}
 
