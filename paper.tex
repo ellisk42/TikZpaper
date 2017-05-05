@@ -48,6 +48,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{tikz}
+\usetikzlibrary{fit}
 % As of 2011, we use the hyperref package to produce hyperlinks in the
 % resulting PDF.  If this breaks your system, please commend out the
 % following usepackage line and replace \usepackage{icml2016} with
@@ -116,6 +117,44 @@
 
 In this work we consider programs that draw diagrams, similar to those found in papers.
 
+
+\section{Neural architecture for inferring image parses}
+
+\begin{tikzpicture}
+  \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
+  \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm,label=below:Canvas] (canvas) at (0,-5) {};
+
+  \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
+
+  \node[rotate = -90,draw,thick,inner sep=0pt,minimum width = 3cm,minimum height = 0.5cm] (features) at ([xshift = 1cm]CNN.east) {Image features};
+
+  \node[draw,thick,circle,minimum size = 1cm](c1) at ([xshift = 1.5cm]features.north);
+  \node(l1) at ([yshift = -2cm]c1.south) {\verb|CIRCLE(|};
+  \node[draw,thick,circle,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east);
+  \draw[->,thick] (c1.south) -- (l1.north);
+  \node(l2) at ([yshift = -2cm]c2.south) {\verb|X=3,|};
+  \draw[->,thick] (c2.south) -- (l2.north);
+  \node[draw,thick,circle,minimum size = 1cm](c3) at ([xshift = 1cm]c2.east);
+  \node(l3) at ([yshift = -2cm]c3.south) {\verb|Y=14)|};
+  \draw[->,thick] (c3.south) -- (l3.north);
+
+  
+  \draw[->,thick] (features.north) -- (c1.west);
+  \draw[->,thick] (c1.east) -- (c2.west);
+  \draw[->,thick] (c2.east) -- (c3.west);
+
+  \node(next)[draw,fit = (l1) (l2) (l3), dashed, label = below:{Next line of code}] {};
+
+  \draw[->,thick,dashed] (next.west) -- node[below] {Renderer} (canvas.east);
+  
+  \draw[->,thick] (canvas.east) -- ([yshift = -0.5cm]CNN.west);
+  \draw[->,thick] (observation.east) -- ([yshift = 0.5cm]CNN.west);
+  \draw[->,thick] (CNN.east) -- (features.south);
+%  \draw[]
+  
+%  \node at (canvas.x,canvas.y) {Canvas};
+  
+  \end{tikzpicture}
 
 \section{Neural networks for guiding SMC}
 
