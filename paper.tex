@@ -114,6 +114,30 @@
 
 \section{Introducing visual programs}
 
+\textbf{Comment for reader: this paragraph is a little grandiose and goes
+  beyond what we've actually done. But these are the kinds of things
+  that motivate the work, and I think that in some form these ideas
+  should be in the introduction or the conclusion.} How could an agent go from noisy,
+high-dimensional perceptual input to a symbolic, abstract object, like
+a computer program?  Here we consider this problem within the context
+of \emph{graphics program synthesis}.  We develop an approach for
+converting natural images, such as hand drawings, into executable
+source code for drawing the original image.
+The source code captures not just the objects in the image,
+but also describes their geometric relationships.
+
+High dimensional perceptual input is ill matched to the abstract
+semantics of a programming language. But programs with constructs like
+recursion or iteration produce a simpler \emph{execution trace} of
+primitive actions. Our hypothesis is that the execution trace of the
+program is better aligned with the perceptual input, and that the
+trace can act as a kind of bridge between perception and programs. We
+test this hypothesis by developing a model that learns to map from an
+image to the execution trace of the graphics program that drew it.
+With the execution trace in hand, we can bring to bear techniques from
+the program synthesis community to recover the latent graphics program.
+
+
 
 In this work we consider programs that draw diagrams, similar to those found in papers.
 
@@ -183,14 +207,13 @@ images $I$ for randomly generated scenes, and maximizing
 (\ref{objective}) wrt $\theta$ by gradient ascent. Despite the
 architecture being recurrent, training is fully supervised. In a
 sense, this model is like an autoregressive variant of AIR. When we
-have the generative model (the rendering function), we need not solve
-an unsupervised or reinforcement learning problem.
+have the generative model (the rendering function) and treat the trace
+as fully observed, we need not solve an unsupervised or reinforcement
+learning problem.
 
-
-
-
-\begin{tikzpicture}
-  \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image $I$](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
+\begin{figure}
+  \begin{tikzpicture}
+  \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image: $I$](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
   \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm,label=below:Canvas: render$(T)$] (canvas) at (0,-5) {};
   % draw partial image on canvas
   \draw (0.5cm,-4cm) circle (0.1875cm);
@@ -218,7 +241,7 @@ an unsupervised or reinforcement learning problem.
 
   \node(next)[draw,fit = (l1) (l2) (l3), dashed, label = below:{Next line of code}] {};
 
-  \draw[->,thick,dashed] (next.west) -- node[below] {Renderer} (canvas.east);
+  \draw[->,thick,dashed] (next.west) -- node[below] {Renderer: \LaTeX} (canvas.east);
   
   \draw[->,thick] (canvas.east) -- ([yshift = -0.5cm]CNN.west);
   \draw[->,thick] (observation.east) -- ([yshift = 0.5cm]CNN.west);
@@ -226,8 +249,30 @@ an unsupervised or reinforcement learning problem.
 %  \draw[]
   
 %  \node at (canvas.x,canvas.y) {Canvas};
-\caption{Our neural architecture for inferring the execution trace of a graphics program from its output.}  \label{architecture}
 \end{tikzpicture}
+\caption{Our neural architecture for inferring the execution trace of a graphics program from its output.}  \label{architecture}
+  \end{figure}
+
+\begin{table}
+\begin{tabular}{ll}\toprule
+  \begin{tabular}{l}
+    \verb|CIRCLE|$(x,y)$
+    \end{tabular}& Circle at $(x,y)$\\
+  \begin{tabular}{l}
+    \verb|RECTANGLE|$(x_1,y_1,x_2,y_2)$
+    \end{tabular}&Rectangle with corners at $(x_1,y_1)$ \& $(x_2,y_2)$\\
+  \begin{tabular}{l}
+    \verb|LINE|$(x_1,y_1,x_2,y_2,$\\
+    \hspace{1cm}$\text{arrow}\in\{0,1\},\text{dashed}\in\{0,1\})$
+    \end{tabular}&Line from $(x_1,y_1)$ to  $(x_2,y_2)$, optionally with an arrow and/or dashed\\
+  \begin{tabular}{l}
+    \verb|STOP|
+  \end{tabular}&Finishes execution trace inference
+\\  \bottomrule
+\end{tabular}
+\caption{The deep network in (\ref{architecture}) predicts drawing commands, shown above.}
+\label{drawingCommandTable}
+\end{table}
 
 \section{Generalizing to hand drawings}
 
@@ -247,6 +292,25 @@ an unsupervised or reinforcement learning problem.
   \end{minipage}
   \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}
   \end{figure}
+
+\section{Synthesizing graphics programs from execution traces}
+
+\begin{table}
+  \begin{tabular}{rl}
+  Program$\to$&Command; $\cdots$; Command\\
+  Command$\to$&\texttt{CIRCLE}(Expression,Expression)\\
+  Command$\to$&\texttt{RECTANGLE}(Expression,Expression,Expression,Expression)\\
+  Command$\to$&\texttt{LINE}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
+  Command$\to$&\texttt{FOR}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ }Program\texttt{ \}}\\
+  Command$\to$&\texttt{REFLECT}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
+  Expression$\to$&\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}\\
+  Var$\to$&A free (unused) variable\\
+  \mathcal{Z}$\to$&an integer\\
+  Axis$\to$&\texttt{X = }\mathcal{Z}\\
+  Axis$\to$&\texttt{Y = }\mathcal{Z}
+  \end{tabular}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{FOR}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}
+  \end{table}
 
 \section{Neural networks for guiding SMC}
 
