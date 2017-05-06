@@ -137,11 +137,61 @@ downstream tasks.
 
 \section{Neural architecture for inferring image parses}
 
+We developed a deep network architecture for efficiently inferring a
+execution trace, $T$, from an image, $I$.  Our model constructs the
+trace one drawing command at a time.  When predicting the next drawing
+command, the network takes as input the target image $I$ as well as
+the rendered output of previous drawing commands.  Intuitively, the
+network looks at the image it wants to explain, as well as what it has
+already drawn.  It then decides either to stop drawing or proposes
+another drawing command to add to the execution trace; if it decides
+to continue drawing, the predicted primitive is rendered to its
+``canvas'' and the process repeats.
+
+Figure~\ref{architecture} illustrates this architecture.  We first
+pass the target image and a rendering of the trace so far to a
+convolutional network. Given the features extracted by the
+convolutionional network, a multilayer perceptron then predicts a
+distribution over the next drawing command to add to the trace.  We
+predict the drawing command token-by-token, and condition each token
+both on the image features and on the previously generated tokens.
+For example, the network first decides to emit the \verb|CIRCLE| token
+conditioned on the image features, then it emits the $x$ coordinate of
+the circle conditioned on the image features and the \verb|CIRCLE|
+token, and finally it predicts the $y$ coordinate of the circle
+conditioned on the image features, the \verb|CIRCLE| token, and the
+$x$ coordinate.
+
+The distribution over the next drawing command factorizes:
+\begin{equation}
+  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta [t_k | f_\theta(I,\text{render}(T)), \{t_j\}_{j = 1}^{k - 1}]
+\end{equation}
+where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
+the target image, $T$ is an execution trace, $\theta$ are the
+parameters of the neural network, and $f_\theta(\cdot,\cdot)$ is the
+image feature extractor (convolutional network). The distribution over
+execution traces factorizes as:
+\begin{equation}
+  \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
+\end{equation}
+where $|T|$ is the length of execution trace $T$, and the \verb|STOP|
+token is emitted by the network to signal that the execution trace
+explains the image.
+
+We train the network by sampling execution traces $T$ and target
+images $I$ for randomly generated scenes, and maximizing
+(\ref{objective}) wrt $\theta$ by gradient ascent. Despite the
+architecture being recurrent, training is fully supervised. In a
+sense, this model is like an autoregressive variant of AIR. When we
+have the generative model (the rendering function), we need not solve
+an unsupervised or reinforcement learning problem.
+
+
 
 
 \begin{tikzpicture}
-  \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
-  \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm,label=below:Canvas] (canvas) at (0,-5) {};
+  \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image $I$](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
+  \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm,label=below:Canvas: render$(T)$] (canvas) at (0,-5) {};
   % draw partial image on canvas
   \draw (0.5cm,-4cm) circle (0.1875cm);
   \draw (1.2cm,-4.3) circle (0.1875cm);
@@ -176,7 +226,7 @@ downstream tasks.
 %  \draw[]
   
 %  \node at (canvas.x,canvas.y) {Canvas};
-  
+\caption{Our neural architecture for inferring the execution trace of a graphics program from its output.}  \label{architecture}
 \end{tikzpicture}
 
 \section{Generalizing to hand drawings}
@@ -199,6 +249,8 @@ downstream tasks.
   \end{figure}
 
 \section{Neural networks for guiding SMC}
+
+
 
 Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
 function: it takes two images, an observed target image and a
