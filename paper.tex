@@ -206,10 +206,12 @@ We train the network by sampling execution traces $T$ and target
 images $I$ for randomly generated scenes, and maximizing
 (\ref{objective}) wrt $\theta$ by gradient ascent. Despite the
 architecture being recurrent, training is fully supervised. In a
-sense, this model is like an autoregressive variant of AIR. When we
-have the generative model (the rendering function) and treat the trace
-as fully observed, we need not solve an unsupervised or reinforcement
-learning problem.
+sense, this model is like an autoregressive variant of AIR.
+
+%% When we
+%% have the generative model (the rendering function) and treat the trace
+%% as fully observed, we need not solve an unsupervised or reinforcement
+%% learning problem.
 
 \begin{figure}
   \begin{tikzpicture}
