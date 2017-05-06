@@ -26,7 +26,6 @@
 \usepackage{subfig} 
 \usepackage{fancyvrb}
 
-
 \usepackage{caption}
 \usepackage{subcaption}
 
@@ -115,14 +114,38 @@
 
 \section{Introducing visual programs}
 
+
 In this work we consider programs that draw diagrams, similar to those found in papers.
 
+We develop a hybrid architecture for inferring graphics programs.  Our
+approach uses a deep network infer an execution trace from an image;
+this recovers primitive drawing operations like lines, circles, or
+arrows.  For added robustness we use the deep network as a proposal
+distribution for a stochastic search over execution traces.
+Finally we use techniques in the program synthesis community to
+recover the program from its trace.
+
+Each of these three components -- the deep network, the stochastic
+search, the program synthesizer -- confers its own advantages. From
+the deep network we get a very fast system that can recover plausible
+execution traces in about a minute. From the stochastic search we get
+added robustness; essentially the stochastic search can correct
+mistakes made by the deep network's proposals.  From the program
+synthesizer we get abstraction: our system recovers coordinate
+transformations, for loops, and subroutines, which are useful for
+downstream tasks.
 
 \section{Neural architecture for inferring image parses}
+
+
 
 \begin{tikzpicture}
   \node[draw,ultra thick,anchor = west,inner sep=0pt,label=below:Target image](observation) at (0,0) {\includegraphics[width = 3cm]{figures/expert-18.png}};
   \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm,label=below:Canvas] (canvas) at (0,-5) {};
+  % draw partial image on canvas
+  \draw (0.5cm,-4cm) circle (0.1875cm);
+  \draw (1.2cm,-4.3) circle (0.1875cm);
+  \draw (0.85cm,-4.6) circle (0.1875cm);
 
   \node[draw,thick,anchor = west,inner sep=0pt,minimum width = 3cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
 
@@ -154,7 +177,26 @@ In this work we consider programs that draw diagrams, similar to those found in 
   
 %  \node at (canvas.x,canvas.y) {Canvas};
   
-  \end{tikzpicture}
+\end{tikzpicture}
+
+\section{Generalizing to hand drawings}
+
+\begin{figure}
+  \begin{minipage}[b]{0.3\textwidth}
+    \centering\includegraphics[width = 3cm]{figures/expert-60.png}
+    \subcaption{(a)}
+  \end{minipage}%
+  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-groundTruth.png}
+    \subcaption{(b)}
+  \end{minipage}\\
+  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-1.png}
+    \subcaption{(c)}
+  \end{minipage}%
+  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-2.png}
+    \subcaption{(d)}
+  \end{minipage}
+  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}
+  \end{figure}
 
 \section{Neural networks for guiding SMC}
 
