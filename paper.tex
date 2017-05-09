@@ -114,22 +114,27 @@
 \begin{abstract}
 \end{abstract}
 
-\section{Introducing visual programs}
+\section{Introduction}
 
-\textbf{Comment for reader: this paragraph is a little grandiose and goes
-  beyond what we've actually done. But these are the kinds of things
-  that motivate the work, and I think that in some form these ideas
-  should be in the introduction or the conclusion.} How could an agent go from noisy,
-high-dimensional perceptual input to a symbolic, abstract object, like
-a computer program?  Here we consider this problem within the context
-of \emph{graphics program synthesis}.  We develop an approach for
-converting natural images, such as hand drawings, into executable
-source code for drawing the original image.
-\remark{The use of `graphics programs / visual programs' in the paper title, title of this section, and the body of this section feels too broad. `Graphics program' could conjur a lot of different ideas (esp. 3D graphics); don't want to set the reader up to expect one thing and then be disappointed that what you've done isn't that. You bring up diagram-drawing later in the intro; I think it should be made clear sooner (and certainly mentioned explicitly in the abstract, when you get around to writing that).}
+ How could an agent go from noisy, high-dimensional perceptual input
+ to a symbolic, abstract object, like a computer program?  Here we
+ consider this problem within a graphics program synthesis domain.  We
+ develop an approach for converting natural images, such as hand
+ drawings, into executable source code for drawing the original image.
+ The graphics programs in our domain draw simple figures like those found in
+ machine learning papers (see Fig.\ref{firstPageExamples}).
+ \remark{The use of `graphics programs / visual programs' in the paper
+   title, title of this section, and the body of this section feels
+   too broad. `Graphics program' could conjur a lot of different ideas
+   (esp. 3D graphics); don't want to set the reader up to expect one
+   thing and then be disappointed that what you've done isn't
+   that. You bring up diagram-drawing later in the intro; I think it
+   should be made clear sooner (and certainly mentioned explicitly in
+   the abstract, when you get around to writing that).}
 
 \newcommand{\exampleImageSize}{2cm}
 \begin{figure}[h]
-  \begin{minipage}[t]{0.8\linewidth}  
+  \begin{minipage}[t]{0.7\linewidth}  
 \begin{tabular}{llll}
   \includegraphics[width = \exampleImageSize]{figures/expert-60.png}&
   \includegraphics[width = \exampleImageSize]{figures/expert-5.png}&
@@ -142,35 +147,37 @@ source code for drawing the original image.
 \end{tabular}
 \subcaption{}
   \end{minipage}%
-  \begin{minipage}[t]{0.2\linewidth}
+  \begin{minipage}[t]{0.3\linewidth}
     \begin{tikzpicture}
       \node(picture) at (0,0) {\includegraphics[width = 2cm]{figures/expert-31.png}};
       \draw[very thick,->] (picture.south)  -- (0,-2);
-    \end{tikzpicture}
-    \texttt{FOR} $0\leq i\leq 3$:\\
-    \texttt{RECTANGLE} $()$\\
-    \texttt{FOR} $0\leq j < i$:\\
-    \texttt{CIRCLE} $()$\\
+    \end{tikzpicture}\\
+    \texttt{for} $0\leq i < 4$:\\
+    \texttt{rectangle} $(-3i + 9,2i - 2, -3i + 11,6)$\\
+    \texttt{for} $0\leq j < i$:\\
+    \texttt{circle} $(3i-2,-2j+5)$\\
     \subcaption{}
   \end{minipage}
-  \caption{(a): Model parses hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}
+  \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
   \end{figure}
 
-High dimensional perceptual input is ill matched to the abstract
+High dimensional perceptual input may seem ill matched to the abstract
 semantics of a programming language. But programs with constructs like
 recursion or iteration produce a simpler \emph{execution trace} of
-primitive actions. Our hypothesis is that the execution trace of the
-program is better aligned with the perceptual input, and that the
-trace can act as a kind of bridge between perception and programs. We
-test this hypothesis by developing a model that learns to map from an
-image to the execution trace of the graphics program that drew it.
-With the execution trace in hand, we can bring to bear techniques from
-the program synthesis community to recover the latent graphics program.
-\remark{This is an \emph{excellent} explanation! I would add maybe one more sentence / citation to elaborate on what you mean by `techniques from the program synthesis community', as this will be an unfamiliar concept to some readers, I imagine.}
+primitive actions; for our domain the primitive actions are drawing
+commands. Our hypothesis is that the execution trace of the program is
+better aligned with the perceptual input, and that the trace can act
+as a kind of bridge between perception and programs. We test this
+hypothesis by developing a model that learns to map from an image to
+the execution trace of the graphics program that drew it.  With the
+execution trace in hand, we can bring to bear techniques from the
+program synthesis community to recover the latent graphics program.
+\remark{This is an \emph{excellent} explanation! I would add maybe one
+  more sentence / citation to elaborate on what you mean by
+  `techniques from the program synthesis community', as this will be
+  an unfamiliar concept to some readers, I imagine.}
 
 
-
-In this work we consider programs that draw diagrams, similar to those found in papers.
 
 We develop a hybrid architecture for inferring graphics programs.  Our
 approach uses a deep neural network infer an execution trace from an image;
@@ -230,11 +237,11 @@ convolutionional network, a multilayer perceptron then predicts a
 distribution over the next drawing command to add to the trace.  We
 predict the drawing command token-by-token, and condition each token
 both on the image features and on the previously generated tokens.
-For example, the network first decides to emit the \verb|CIRCLE| token
+For example, the network first decides to emit the \verb|circle| token
 conditioned on the image features, then it emits the $x$ coordinate of
-the circle conditioned on the image features and the \verb|CIRCLE|
+the circle conditioned on the image features and the \verb|circle|
 token, and finally it predicts the $y$ coordinate of the circle
-conditioned on the image features, the \verb|CIRCLE| token, and the
+conditioned on the image features, the \verb|circle| token, and the
 $x$ coordinate.
 \remark{There are some more details that are important to provide about this architecture, though possibly in an Appendix: the functional form(s) of the probability distributions over tokens, the network layer sizes, which MLPs share parameters, etc.}
 
@@ -258,9 +265,12 @@ explains the image.
 
 We train the network by sampling execution traces $T$ and target
 images $I$ for randomly generated scenes, and maximizing
-(\ref{objective}) wrt $\theta$ by gradient ascent. Despite the
-architecture being recurrent, training is fully supervised. In a
-sense, this model is like an autoregressive variant of AIR.
+(\ref{objective}) wrt $\theta$ by gradient ascent.
+Training does not require backpropagation across the entire sequence of drawing commands:
+drawing to the canvas `blocks' the gradients,
+effectively offloading memory to an external visual store.
+In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603attend} without attention.
+
 \remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
 \remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
 
@@ -283,7 +293,7 @@ sense, this model is like an autoregressive variant of AIR.
   \node[rotate = -90,draw,thick,inner sep=0pt,minimum width = 3cm,minimum height = 0.5cm] (features) at ([xshift = 1cm]CNN.east) {Image features};
 
   \node[draw,thick,circle,minimum size = 1cm](c1) at ([xshift = 1.5cm]features.north);
-  \node(l1) at ([yshift = -2cm]c1.south) {\verb|CIRCLE(|};
+  \node(l1) at ([yshift = -2cm]c1.south) {\verb|circle(|};
   \node[draw,thick,circle,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east);
   \draw[->,thick] (c1.south) -- (l1.north);
   \node(l2) at ([yshift = -2cm]c2.south) {\verb|X=3,|};
@@ -314,10 +324,10 @@ sense, this model is like an autoregressive variant of AIR.
 \begin{table}
 \begin{tabular}{ll}\toprule
   \begin{tabular}{l}
-    \verb|CIRCLE|$(x,y)$
+    \verb|circle|$(x,y)$
     \end{tabular}& Circle at $(x,y)$\\
   \begin{tabular}{l}
-    \verb|RECTANGLE|$(x_1,y_1,x_2,y_2)$
+    \verb|rectangle|$(x_1,y_1,x_2,y_2)$
     \end{tabular}&Rectangle with corners at $(x_1,y_1)$ \& $(x_2,y_2)$\\
   \begin{tabular}{l}
     \verb|LINE|$(x_1,y_1,x_2,y_2,$\\
@@ -370,10 +380,10 @@ sense, this model is like an autoregressive variant of AIR.
 \begin{table}
   \begin{tabular}{rl}
   Program$\to$&Command; $\cdots$; Command\\
-  Command$\to$&\texttt{CIRCLE}(Expression,Expression)\\
-  Command$\to$&\texttt{RECTANGLE}(Expression,Expression,Expression,Expression)\\
+  Command$\to$&\texttt{circle}(Expression,Expression)\\
+  Command$\to$&\texttt{rectangle}(Expression,Expression,Expression,Expression)\\
   Command$\to$&\texttt{LINE}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
-  Command$\to$&\texttt{FOR}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ }Program\texttt{ \}}\\
+  Command$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ }Program\texttt{ \}}\\
   Command$\to$&\texttt{REFLECT}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
   Expression$\to$&\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}\\
   Var$\to$&A free (unused) variable\\
@@ -381,7 +391,7 @@ sense, this model is like an autoregressive variant of AIR.
   Axis$\to$&\texttt{X = }\mathcal{Z}\\
   Axis$\to$&\texttt{Y = }\mathcal{Z}
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{FOR}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}
   \end{table}
 
 \section{Neural networks for guiding SMC}
