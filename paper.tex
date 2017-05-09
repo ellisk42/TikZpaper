@@ -394,6 +394,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}
   \end{table}
 
+
 \section{Neural networks for guiding SMC}
 
 
@@ -476,6 +477,10 @@ so I don't want to literally just sample from the distribution suggested by the 
   \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
 \end{algorithmic}
   \end{algorithm}
+
+  \pagebreak
+  \section{Preliminary Synthesis results}
+\input{synthesizerOutputs.tex}
 
 
 \bibliographystyle{unsrt}
