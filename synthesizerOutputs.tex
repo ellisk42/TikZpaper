@@ -3,10 +3,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-41.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
+  Rectangle(0,0,1,6)
   Rectangle(2,0,3,6)
   Rectangle(4,0,5,6)
-  Rectangle(0,0,1,6)
-  Rectangle(0 * None + None,0,5,6)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -16,11 +15,12 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-17.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (4)
-      Line(-2 * i + 9,3 * i + None,-2 * i + 10,3 * i + -2,arrow = True,solid = True)
-      Line(-2 * i + 9,3 * i + None,-2 * i + 8,3 * i + -2,arrow = True,solid = True)
-      Rectangle(2 * i + -2,-3 * i + 9,2 * i + None,-3 * i + 11)
-      Rectangle(2 * i + 2,-3 * i + 9,2 * i + 4,-3 * i + 11)
+  Rectangle(2,9,4,11)
+    for (3)
+        Line(-2*i + 7,3*i + 3,-2*i + 6,3*i + 1,arrow = True,solid = True)
+        Line(2*i + 3,-3*i + 9,2*i + 4,-3*i + 7,arrow = True,solid = True)
+        Rectangle(2*i,-3*i + 6,2*i + 2,-3*i + 8)
+        Rectangle(-2*i + 8,3*i,-2*i + 10,3*i + 2)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -30,9 +30,7 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-43.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(4,0,4,5,arrow = False,solid = True)
-  Line(0,0,0,5,arrow = False,solid = True)
-  Line(0 * None + None,0,4,5,arrow = False,solid = True)
+      Line(0,0,0,5,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -42,10 +40,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-63.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Rectangle(2,2,3,3)
-  Rectangle(1,1,4,4)
   Rectangle(0,0,5,5)
-  Rectangle(1 * None + None,2,3,3)
+  Rectangle(1,1,4,4)
+  Rectangle(2,2,3,3)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -65,12 +62,12 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-45.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(4,6,6,6,arrow = True,solid = True)
+  Rectangle(0,4,4,8)
         reflect(y = 12)
         Circle(7,6)
         Line(2,2,2,4,arrow = True,solid = True)
-        Rectangle(1,10,3,12)
-        Rectangle(0,4,4,8)
+        Line(4,6,6,6,arrow = True,solid = True)
+        Rectangle(1,0,3,2)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -80,10 +77,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-51.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Rectangle(0,0,3,1)
   Rectangle(2,2,5,3)
+  Rectangle(0,0,3,1)
   Rectangle(4,4,7,5)
-  Rectangle(4 * None + None,0,3,1)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -94,12 +90,12 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   Circle(1,5)
-  Rectangle(4,4,6,6)
-  Rectangle(8,4,10,6)
-    for (4)
-        Line(4 * i + -4,1,4 * i + -6,1,arrow = True,solid = True)
-        Line(4 * i + -3,2,4 * i + -3,4,arrow = True,solid = True)
-        Rectangle(4 * i + -4,0,4 * i + -2,2)
+    for (2)
+        Line(-5*i + 9,-1*i + 2,-7*i + 9,-3*i + 4,arrow = True,solid = True)
+        Rectangle(-4*i + 8,4*i,-4*i + 10,4*i + 2)
+              reflect(x = 6)
+              Line(7*i + 1,-1*i + 2,5*i + 1,-3*i + 4,arrow = True,solid = True)
+              Rectangle(8*i,4*i,8*i + 2,4*i + 2)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -112,7 +108,7 @@
   Rectangle(4,2,6,5)
         reflect(y = 7)
         Line(2,6,4,4,arrow = True,solid = True)
-        Rectangle(0,0,2,2)
+        Rectangle(0,5,2,7)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -122,11 +118,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-24.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Rectangle(0,3,6,6)
-  Rectangle(2,0,4,2)
+  Line(3,3,3,2,arrow = True,solid = True)
   Rectangle(0,7,6,9)
+  Rectangle(2,0,4,2)
+  Rectangle(0,3,6,6)
         Line(1,7,1,6,arrow = True,solid = True)
-        Line(3,3,3,2,arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -137,9 +133,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   for (3)
-      Circle(3 * i + 1,6)
-      Circle(-3 * i + 7,1)
-      Line(3 * i + 1,None * i + 2,3 * i + 1,5,arrow = False,solid = True)
+      Circle(-3*i + 7,1)
+      Circle(3*i + 1,6)
+      Line(3*i + 1,2,3*i + 1,5,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -150,7 +146,7 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
       reflect(x = 12)
-      Circle(8,1)
+      Circle(4,1)
       Line(9,1,10,1,arrow = False,solid = True)
       Rectangle(10,0,12,2)
         \end{verbatim}
@@ -163,10 +159,10 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
       reflect(x = 6)
-      Line(1,2,1,4,arrow = False,solid = True)
+      Line(5,2,5,4,arrow = False,solid = True)
             reflect(y = 6)
             Line(2,5,4,5,arrow = False,solid = True)
-            Rectangle(0,0,2,2)
+            Rectangle(0,4,2,6)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -177,9 +173,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   for (2)
-      Rectangle(5 * i + None,5 * i + None,5 * i + 4,5 * i + 4)
-      Rectangle(7 * i + None,-3 * i + 5,7 * i + 2,-3 * i + 7)
-      Rectangle(8 * i + None,-8 * i + 8,8 * i + 1,-8 * i + 9)
+      Rectangle(0,-3*i + 8,1,-2*i + 9)
+      Rectangle(-3*i + 8,5*i,9,8*i + 1)
+      Rectangle(-7*i + 7,-2*i + 2,-5*i + 9,4)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -189,9 +185,10 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-58.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (3)
-      Line(8,0,8 * i + -8,7 * i + -7,arrow = True,solid = True)
-      Rectangle(2 * i + 2,0,2 * i + 3,None * i + 3)
+  Rectangle(4,0,5,4)
+    for (2)
+        Line(8,0,-8*i + 8,-7*i + 7,arrow = True,solid = True)
+        Rectangle(-4*i + 6,0,-4*i + 7,-2*i + 5)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -201,12 +198,13 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-3.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-      reflect(y = 10)
-      Circle(10,5)
-        for (2)
-            Line(-4 * i + 7,-3 * i + 5,-4 * i + 9,-1 * i + 5,arrow = True,solid = True)
-            Rectangle(24 * i + 5,3,-18 * i + 7,7)
-            Rectangle(-1 * i + 1,-1 * i + 1,9 * i + 3,7 * i + 3)
+  Circle(10,5)
+  Line(7,5,9,5,arrow = True,solid = True)
+  Rectangle(5,3,7,7)
+  Rectangle(0,0,12,10)
+        reflect(y = 10)
+        Line(3,2,5,4,arrow = True,solid = True)
+        Rectangle(1,1,3,3)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -216,9 +214,8 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-28.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(0,2,2,2,arrow = False,solid = True)
   Line(0,0,0,2,arrow = False,solid = True)
-  Line(0 * None + None,0,0,2,arrow = False,solid = True)
+  Line(0,2,2,2,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -228,11 +225,12 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-22.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (3)
-      Line(4 * i + 1,4,4 * i + 1,2,arrow = True,solid = True)
-      Line(4 * i + None,5,4 * i + -2,5,arrow = True,solid = True)
-      Rectangle(-4 * i + 8,4,-4 * i + 10,6)
-      Rectangle(-4 * i + 8,0,-4 * i + 10,2)
+  Line(8,5,6,5,arrow = True,solid = True)
+  Line(4,5,2,5,arrow = True,solid = True)
+    for (3)
+        Line(-4*i + 9,4,-4*i + 9,2,arrow = True,solid = True)
+        Rectangle(4*i,0,4*i + 2,2)
+        Rectangle(-4*i + 8,4,-4*i + 10,6)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -255,9 +253,10 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-14.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (4)
-      Rectangle(-2 * i + 6,2 * i + -2,-2 * i + 7,2 * i + -1)
-      Rectangle(2 * i + None,-2 * i + 6,2 * i + 1,-2 * i + 7)
+  Rectangle(0,6,1,7)
+    for (3)
+        Rectangle(-2*i + 6,2*i,-2*i + 7,2*i + 1)
+        Rectangle(-2*i + 4,2*i,-2*i + 5,2*i + 1)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -267,9 +266,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-68.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (4)
-      Circle(-4 * i + 9,1)
-      Rectangle(4 * i + -4,0,4 * i + -2,2)
+  for (3)
+      Circle(4*i + 1,1)
+      Rectangle(4*i,0,4*i + 2,2)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -279,11 +278,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-65.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-      reflect(x = 6)
-      Line(1,2,1,4,arrow = False,solid = True)
-            reflect(y = 6)
-            Circle(5,5)
-            Line(2,5,4,5,arrow = False,solid = True)
+      reflect(y = 6)
+      Line(2,1,4,1,arrow = False,solid = True)
+            reflect(x = 6)
+            Circle(1,1)
+            Line(1,2,1,4,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -295,9 +294,8 @@
         \begin{verbatim}
   Line(1,5,5,1,arrow = False,solid = True)
   Line(1,4,5,0,arrow = False,solid = True)
-  Rectangle(0,4,1,5)
   Rectangle(5,0,6,1)
-  Line(1 * None + None,4,5,0,arrow = False,solid = True)
+  Rectangle(0,4,1,5)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -307,12 +305,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-12.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(2,1,5,1,arrow = False,solid = True)
-        reflect(x = 7)
-        Circle(1,1)
-        Line(1,2,1,5,arrow = False,solid = True)
-        Line(2,6,5,6,arrow = False,solid = True)
-        Rectangle(5,5,7,7)
+  for (2)
+      Circle(-5*i + 6,1)
+      Line(-4*i + 6,-1*i + 2,-1*i + 6,-4*i + 5,arrow = False,solid = True)
+      Line(-1*i + 2,-4*i + 6,-4*i + 5,-1*i + 6,arrow = False,solid = True)
+      Rectangle(5*i,5,5*i + 2,7)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -325,7 +322,6 @@
   Line(0,0,0,5,arrow = False,solid = False)
   Line(4,1,4,5,arrow = False,solid = False)
   Line(4,0,4,1,arrow = False,solid = False)
-  Line(0 * None + None,0,4,1,arrow = False,solid = False)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -345,10 +341,10 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-35.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Circle(6,1)
+  Circle(1,1)
     for (2)
-        Circle(1,5 * i + 1)
-        Line(None * i + 1,None * i + 5,5 * i + 1,2,arrow = True,solid = True)
+        Circle(-5*i + 6,5*i + 1)
+        Line(1,5,5*i + 1,2,arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -358,11 +354,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-31.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Circle(4,5)
-    for (4)
-        Circle(-3 * i + 10,2 * i + -1)
-        Circle(7,2 * i + -1)
-        Rectangle(-3 * i + 9,2 * i + -2,-3 * i + 11,6)
+  Circle(7,3)
+    for (3)
+        Circle(-3*i + 7,5)
+        Circle(-3*i + 7,2*i + 1)
+        Rectangle(-3*i + 6,2*i,-3*i + 8,6)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -373,9 +369,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   Circle(1,8)
-    for (4)
-        Line(4 * i + 1,-5 * i + 7,2 * i + 3,5,arrow = False,solid = True)
-        Rectangle(4 * i + -8,-5 * i + 15,6,-7 * i + 23)
+    for (2)
+        Line(4*i + 1,-5*i + 7,2*i + 3,5,arrow = False,solid = True)
+        Rectangle(-4*i + 4,5*i,6,7*i + 2)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -385,9 +381,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-40.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
+  Circle(7,1)
+  Circle(4,1)
   Circle(1,1)
-        reflect(x = 11)
-        Circle(4,1)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -397,10 +393,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-29.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (3)
-      Line(None * i + None,-1 * i + 6,4 * i + -2,-1 * i + 6,arrow = False,solid = True)
-      Line(None * i + None,-2 * i + 4,None * i + None,-1 * i + 6,arrow = False,solid = True)
-      Line(-2 * i + 2,None * i + 5,-2 * i + 4,None * i + 5,arrow = False,solid = True)
+  Line(1,2,1,5,arrow = False,solid = True)
+    for (2)
+        Line(2,-4*i + 4,-4*i + 6,4,arrow = False,solid = True)
+        Line(0,-2*i + 6,-2*i + 2,6,arrow = False,solid = True)
+        Line(1,5,2*i + 2,5,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -413,7 +410,6 @@
   Rectangle(5,0,8,3)
   Rectangle(2,1,4,3)
   Rectangle(0,2,1,3)
-  Rectangle(2 * None + None,0,8,3)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -424,9 +420,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   for (3)
-      Circle(-4 * i + 9,4)
-      Circle(-4 * i + 9,1)
-      Circle(4 * i + 1,7)
+      Circle(-4*i + 9,4)
+      Circle(-4*i + 9,1)
+      Circle(4*i + 1,7)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -439,7 +435,6 @@
   Circle(1,5)
   Line(1,4,1,2,arrow = True,solid = True)
   Rectangle(0,0,2,2)
-  Circle(1,None * None + None)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -449,10 +444,9 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-66.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(1,1,6,1,arrow = False,solid = True)
   Line(0,2,7,2,arrow = False,solid = True)
+  Line(1,1,6,1,arrow = False,solid = True)
   Line(2,0,5,0,arrow = False,solid = True)
-  Line(2 * None + None,1,6,1,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -462,10 +456,12 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-26.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
+  Circle(1,9)
+  Line(1,8,1,6,arrow = True,solid = True)
+  Line(1,3,1,2,arrow = True,solid = True)
   Line(1,3,1,4,arrow = False,solid = True)
-    for (3)
-        Circle(1,-4 * i + 9)
-        Line(1,-5 * i + 8,1,-4 * i + 6,arrow = True,solid = True)
+        reflect(y = 6)
+        Circle(1,1)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -476,10 +472,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   Line(1,2,3,2,arrow = False,solid = True)
-  Line(0,3,2,3,arrow = False,solid = False)
-  Line(3,0,5,0,arrow = False,solid = True)
   Line(2,1,4,1,arrow = False,solid = False)
-  Line(1 * None + None,1,4,1,arrow = False,solid = False)
+  Line(3,0,5,0,arrow = False,solid = True)
+  Line(0,3,2,3,arrow = False,solid = False)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -492,7 +487,6 @@
   Line(4,4,2,2,arrow = True,solid = True)
   Rectangle(3,4,5,6)
   Rectangle(0,0,2,2)
-  Line(4,4,2,2,arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -502,7 +496,6 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-8.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(0,0,0,4,arrow = False,solid = True)
   Line(0,0,0,4,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
@@ -514,11 +507,11 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   Line(4,1,2,1,arrow = False,solid = True)
-    for (3)
-        Circle(-4 * i + 9,5)
-        Circle(-4 * i + 9,1)
-        Line(-1 * i + 9,-1 * i + 2,-3 * i + 9,-3 * i + 4,arrow = True,solid = False)
-        Line(-4 * i + 5,2,-4 * i + 5,4,arrow = True,solid = True)
+    for (2)
+        Line(-4*i + 5,2,-4*i + 5,4,arrow = True,solid = True)
+          for (3)
+              Circle(-4*j + 9,4*i + 1)
+              Line(8,1,3*i + 6,3*i + 1,arrow = True,solid = False)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -530,10 +523,10 @@
         \begin{verbatim}
   Rectangle(0,3,2,5)
     for (2)
-        Circle(3 * i + 4,1)
-        Circle(2 * i + 5,3 * i + 4)
-        Line(-1 * i + 6,-4 * i + 7,-1 * i + 5,-3 * i + 5,arrow = True,solid = True)
-        Line(-3 * i + 5,None * i + 3,-3 * i + 7,2 * i + 2,arrow = True,solid = True)
+        Circle(3*i + 4,1)
+        Circle(-2*i + 7,-3*i + 7)
+        Line(5,3,-3*i + 7,2,arrow = True,solid = True)
+        Line(4*i + 2,3*i + 4,4,4,arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -543,11 +536,12 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-16.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  for (4)
-      Circle(2 * i + 3,-3 * i + 10)
-      Circle(2 * i + 1,-3 * i + 7)
-      Line(2 * i + 3,-3 * i + 9,2 * i + 4,-3 * i + 7,arrow = False,solid = True)
-      Line(-2 * i + 8,3 * i + -2,-2 * i + 9,3 * i + None,arrow = False,solid = True)
+  Circle(9,1)
+    for (3)
+        Circle(2*i + 3,-3*i + 10)
+        Circle(-2*i + 5,3*i + 1)
+        Line(2*i + 2,-3*i + 7,2*i + 3,-3*i + 9,arrow = False,solid = True)
+        Line(-2*i + 7,3*i + 3,-2*i + 8,3*i + 1,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -558,10 +552,9 @@
         \begin{minipage}{10cm}
         \begin{verbatim}
   Line(5,0,3,0,arrow = True,solid = True)
-  Line(2,1,4,1,arrow = True,solid = True)
   Line(0,3,2,3,arrow = True,solid = True)
   Line(3,2,1,2,arrow = True,solid = True)
-  Line(2 * None + None,2,1,2,arrow = True,solid = True)
+  Line(2,1,4,1,arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -571,11 +564,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-47.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-      reflect(x = 11)
-      Rectangle(9,4,10,7)
-            reflect(y = 11)
-            Rectangle(0,0,3,3)
-            Rectangle(4,9,7,10)
+      reflect(y = 11)
+      Rectangle(4,9,7,10)
+            reflect(x = 11)
+            Rectangle(8,0,11,3)
+            Rectangle(1,4,2,7)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -587,8 +580,8 @@
         \begin{verbatim}
   Line(12,9,12,0,arrow = True,solid = True)
     for (2)
-        Rectangle(-3 * i + 9,2 * i + 3,-3 * i + 11,9)
-        Rectangle(3 * i + None,None * i + 7,3 * i + 2,9)
+        Rectangle(-3*i + 6,3*i + 5,-3*i + 8,9)
+        Rectangle(9*i,-4*i + 7,9*i + 2,9)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -598,7 +591,6 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-59.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(4,0,0,0,arrow = False,solid = False)
   Line(4,0,0,0,arrow = False,solid = False)
         \end{verbatim}
 \end{minipage}
@@ -611,10 +603,10 @@
         \begin{verbatim}
   Line(8,3,9,3,arrow = False,solid = True)
     for (2)
-        Line(-6 * i + 8,3 * i + 3,-3 * i + 7,None * i + 3,arrow = True,solid = True)
-        Line(5 * i + 2,3 * i + 1,5 * i + 4,None * i + 3,arrow = True,solid = True)
-        Rectangle(9 * i + None,2 * i + None,10 * i + 2,3 * i + 2)
-        Rectangle(4 * i + None,-3 * i + 5,5 * i + 2,-2 * i + 7)
+        Line(-6*i + 8,3*i + 3,-3*i + 7,3,arrow = True,solid = True)
+        Line(5*i + 2,3*i + 1,5*i + 4,3,arrow = True,solid = True)
+        Rectangle(9*i,2*i,10*i + 2,3*i + 2)
+        Rectangle(-4*i + 4,3*i + 2,-5*i + 7,2*i + 5)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
@@ -624,11 +616,11 @@
 \includegraphics[width = 5cm]{../TikZ/drawings/expert-6.png}&
         \begin{minipage}{10cm}
         \begin{verbatim}
-  Line(0,4,3,4,arrow = False,solid = True)
+  Line(0,1,0,4,arrow = False,solid = True)
+  Rectangle(2,0,5,3)
     for (2)
-        Line(3 * i + None,3 * i + 1,3 * i + 2,3 * i + None,arrow = False,solid = True)
-        Line(0,3 * i + 1,2 * i + None,-1 * i + 4,arrow = False,solid = True)
-        Rectangle(2,-8 * i + 8,29 * i + -24,12 * i + -9)
+        Line(0,3*i + 1,2,3*i,arrow = False,solid = True)
+        Line(-3*i + 3,4,-2*i + 5,3,arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 \end{tabular}        
