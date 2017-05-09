@@ -23,7 +23,7 @@
 
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
-\usepackage{subfig} 
+%\usepackage{subfig} 
 \usepackage{fancyvrb}
 
 \usepackage{caption}
@@ -120,6 +120,35 @@ a computer program?  Here we consider this problem within the context
 of \emph{graphics program synthesis}.  We develop an approach for
 converting natural images, such as hand drawings, into executable
 source code for drawing the original image.
+
+\newcommand{\exampleImageSize}{2cm}
+\begin{figure}[h]
+  \begin{minipage}[t]{0.8\linewidth}  
+\begin{tabular}{llll}
+  \includegraphics[width = \exampleImageSize]{figures/expert-60.png}&
+  \includegraphics[width = \exampleImageSize]{figures/expert-5.png}&
+    \includegraphics[width = \exampleImageSize]{figures/expert-17.png}&
+    \includegraphics[width = \exampleImageSize]{figures/expert-58.png}\\
+  \includegraphics[width = \exampleImageSize]{figures/60.png}&
+  \includegraphics[width = \exampleImageSize]{figures/5.png}&
+    \includegraphics[width = \exampleImageSize]{figures/17.png}&
+    \includegraphics[width = \exampleImageSize]{figures/58.png}
+\end{tabular}
+\subcaption{}
+  \end{minipage}%
+  \begin{minipage}[t]{0.2\linewidth}
+    \begin{tikzpicture}
+      \node(picture) at (0,0) {\includegraphics[width = 2cm]{figures/expert-31.png}};
+      \draw[very thick,->] (picture.south)  -- (0,-2);
+    \end{tikzpicture}
+    \texttt{FOR} $0\leq i\leq 3$:\\
+    \texttt{RECTANGLE} $()$\\
+    \texttt{FOR} $0\leq j < i$:\\
+    \texttt{CIRCLE} $()$\\
+    \subcaption{}
+  \end{minipage}
+  \caption{(a): Model parses hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}
+  \end{figure}
 
 
 High dimensional perceptual input is ill matched to the abstract
