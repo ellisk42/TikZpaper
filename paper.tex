@@ -344,17 +344,25 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \begin{tabular}{ll}\toprule
   \begin{tabular}{l}
     \verb|circle|$(x,y)$
-    \end{tabular}& Circle at $(x,y)$\\
+  \end{tabular}& \begin{tabular}{l}
+    Circle at $(x,y)$
+    \end{tabular}\\
   \begin{tabular}{l}
     \verb|rectangle|$(x_1,y_1,x_2,y_2)$
-    \end{tabular}&Rectangle with corners at $(x_1,y_1)$ \& $(x_2,y_2)$\\
+  \end{tabular}&\begin{tabular}{l}
+    Rectangle with corners at $(x_1,y_1)$ \& $(x_2,y_2)$
+    \end{tabular}\\
   \begin{tabular}{l}
     \verb|LINE|$(x_1,y_1,x_2,y_2,$\\
     \hspace{1cm}$\text{arrow}\in\{0,1\},\text{dashed}\in\{0,1\})$
-    \end{tabular}&Line from $(x_1,y_1)$ to  $(x_2,y_2)$, optionally with an arrow and/or dashed\\
+  \end{tabular}&\begin{tabular}{l}
+    Line from $(x_1,y_1)$ to  $(x_2,y_2)$,\\\hspace{1cm}optionally with an arrow and/or dashed
+    \end{tabular}\\
   \begin{tabular}{l}
     \verb|STOP|
-  \end{tabular}&Finishes execution trace inference
+  \end{tabular}&\begin{tabular}{l}
+    Finishes execution trace inference
+    \end{tabular}
 \\  \bottomrule
 \end{tabular}
 \caption{The deep network in (\ref{architecture}) predicts drawing commands, shown above.}
