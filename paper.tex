@@ -369,16 +369,17 @@ recover what the network thinks is the most likely execution trace for
 images like these. But, if the network makes a mistake (predicts an
 incorrect line of code), it has no way of recovering from the error.
 In order to derender an image with $n$ objects, it must correctly
-predict $n$ drawing commands -- so is probability of success will
-decrease exponentially in $n$.  For added robustness as $n$ becomes
-large, we treat the neural network outputs as proposals for a SMC
-sampling scheme.  For the SMC sampler, we use pixel wise distance as a
-surrogate for a likelihood function; see
-supplement. Figure~\ref{syntheticResults} compares the neural network
-with SMC against the neural network by itself or SMC by itself.  Only
-the combination of the two passes a critical test of generalization:
-when trained on images with $\leq 8$ objects, it successfully parses
-scenes with many more objects than the training data.
+predict $n$ drawing commands -- so its probability of success will
+decrease exponentially in $n$, assuming it has any nonzero chance of
+making a mistake.  For added robustness as $n$ becomes large, we treat
+the neural network outputs as proposals for a SMC sampling scheme.
+For the SMC sampler, we use pixel wise distance as a surrogate for a
+likelihood function; see supplement. Figure~\ref{syntheticResults}
+compares the neural network with SMC against the neural network by
+itself or SMC by itself.  Only the combination of the two passes a
+critical test of generalization: when trained on images with $\leq 8$
+objects, it successfully parses scenes with many more objects than the
+training data.
 
 
 \begin{figure}
@@ -404,7 +405,7 @@ We designed this noise process to introduce the kinds of variations found in han
 We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
 These were drawn reasonably carefully but not perfectly.
 Because our model assumes that objects are snapped to a $16\times 16$ grid,
-we used graph paper.
+we made the drawings on graph paper.
 \begin{figure}[H]%
   \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
     \subcaption{}
@@ -425,7 +426,7 @@ we used graph paper.
 
 \section{Synthesizing graphics programs from execution traces}
 
-\begin{table}
+\begin{table}[h]
   \begin{tabular}{rl}
   Program$\to$&Command; $\cdots$; Command\\
   Command$\to$&\texttt{circle}(Expression,Expression)\\
