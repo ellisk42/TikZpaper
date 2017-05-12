@@ -339,8 +339,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
 \caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}.~\remark{Thoughts on improving this figure: (1) Convnet diagrams typically show the sequence of layers, if possible (space might not permit it here, but those thin arrows just aren't doing it for me). (2) Are the target image / canvas convolved down independently, or jointly (i.e. starting as a 2-channel image)? That's an important detail that's not clear with the current figure/explanation. (3) The three circles downstream from `Image Features' are supposed to be MLPs, I assume(?), but it took me a little while to parse that. Having some visual way of clearly separating network operations from data (color, perhaps) would go a long way.}}  \label{architecture}
-  \end{figure}
-
+\end{figure}
 \begin{table}
 \begin{tabular}{ll}\toprule
   \begin{tabular}{l}
@@ -363,6 +362,25 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \end{table}
 
 
+
+This network suffices to ``derender'' images like those shown in
+Figure~\ref{trainingData}.  We can perform a beam search decoding to
+recover what the network thinks is the most likely execution trace for
+images like these. But, if the network makes a mistake (predicts an
+incorrect line of code), it has no way of recovering from the error.
+In order to derender an image with $n$ objects, it must correctly
+predict $n$ drawing commands -- so is probability of success will
+decrease exponentially in $n$.  For added robustness as $n$ becomes
+large, we treat the neural network outputs as proposals for a SMC
+sampling scheme.  For the SMC sampler, we use pixel wise distance as a
+surrogate for a likelihood function; see
+supplement. Figure~\ref{syntheticResults} compares the neural network
+with SMC against the neural network by itself or SMC by itself.  Only
+the combination of the two passes a critical test of generalization:
+when trained on images with $\leq 8$ objects, it successfully parses
+scenes with many more objects than the training data.
+
+
 \begin{figure}
   \begin{minipage}[t]{15cm}
     \includegraphics[width = 15cm]{figures/editDistance.png}
@@ -373,27 +391,37 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   \begin{minipage}[t]{15cm}
     \includegraphics[width = 15cm]{figures/time.png}
   \end{minipage}
-  \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own.}
+  \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own.}\label{syntheticResults}
 \end{figure}
 
-\section{Generalizing to hand drawings}
-
-\begin{figure}
-  \begin{minipage}[b]{0.3\textwidth}
-    \centering\includegraphics[width = 3cm]{figures/expert-60.png}
-    \subcaption{(a)}
+\subsection{Generalizing to hand drawings}
+We believe that converting synthetic, noiseless images into a restricted subset of
+\LaTeX has limited usefulness.  A more practical
+application is one that extends to hand drawings.  We train the model
+to generalize to hand drawings by introducing noise into the
+renderings of the training target images.
+We designed this noise process to introduce the kinds of variations found in hand drawings (figure~\ref{handDrawingExamples}).
+We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
+These were drawn reasonably carefully but not perfectly.
+Because our model assumes that objects are snapped to a $16\times 16$ grid,
+we used graph paper.
+\begin{figure}[H]%
+  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
+    \subcaption{}
   \end{minipage}%
-  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-groundTruth.png}
-    \subcaption{(b)}
-  \end{minipage}\\
-  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-1.png}
-    \subcaption{(c)}
+   \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-groundTruth-reduced.png}
+    \subcaption{}
   \end{minipage}%
-  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 3cm]{figures/60-2.png}
-    \subcaption{(d)}
+  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-1-reduced.png}
+    \subcaption{}
+  \end{minipage}%
+  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-2-reduced.png} 
+    \subcaption{}
   \end{minipage}
-  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}
-  \end{figure}
+  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\label{handDrawingExamples}
+\end{figure}
+
+
 
 \section{Synthesizing graphics programs from execution traces}
 
