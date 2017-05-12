@@ -323,7 +323,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   \draw[->,ultra thick] (features.north) to[out = 70,in = 90] (c3.north);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c2.west);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c3.west);
-  \draw[->,ultra thick] ([xshift = 0.25cm]l2.north) -- (c3.west);
+  \draw[->,ultra thick] ([xshift = 0.25cm]l2.north) -- ([yshift = -0.2cm]c3.west);
 
   \node(next)[draw,fit = (l1) (l2) (l3), dashed, label = below:{Next line of code}] {};
 
@@ -337,7 +337,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
-\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial.~\remark{Thoughts on improving this figure: (1) Convnet diagrams typically show the sequence of layers, if possible (space might not permit it here, but those thin arrows just aren't doing it for me). (2) Are the target image / canvas convolved down independently, or jointly (i.e. starting as a 2-channel image)? That's an important detail that's not clear with the current figure/explanation. (3) The three circles downstream from `Image Features' are supposed to be MLPs, I assume(?), but it took me a little while to parse that. Having some visual way of clearly separating network operations from data (color, perhaps) would go a long way.}}  \label{architecture}
+\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs.~\remark{Thoughts on improving this figure: (1) Convnet diagrams typically show the sequence of layers, if possible (space might not permit it here, but those thin arrows just aren't doing it for me). (2) Are the target image / canvas convolved down independently, or jointly (i.e. starting as a 2-channel image)? That's an important detail that's not clear with the current figure/explanation. (3) The three circles downstream from `Image Features' are supposed to be MLPs, I assume(?), but it took me a little while to parse that. Having some visual way of clearly separating network operations from data (color, perhaps) would go a long way.}}  \label{architecture}
   \end{figure}
 
 \begin{table}
