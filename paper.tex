@@ -61,6 +61,8 @@
 \usepackage{hyperref}
 \DeclareMathOperator*{\argmin}{arg\,min} % thin space, limits underneath in displays
 \DeclareMathOperator{\argmin}{argmin} % no space, limits underneath in displays
+\DeclareMathOperator*{\argmax}{arg\,max} % thin space, limits underneath in displays
+\DeclareMathOperator{\argmax}{argmax} % no space, limits underneath in displays
 
 \newcommand{\expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
@@ -180,12 +182,8 @@ program synthesis community to recover the latent graphics program.
 This family of techniques, called \emph{constraint-based program synthesis}~\cite{solar2008program},
 work by modeling a set of possible programs inside of a constraint solver,
 like a SAT or SMT solver~\cite{de2008z3}.
-
-%% \remark{This is an \emph{excellent} explanation! I would add maybe one
-%%   more sentence / citation to elaborate on what you mean by
-%%   `techniques from the program synthesis community', as this will be
-%%   an unfamiliar concept to some readers, I imagine.}
-
+These techniques excel at uncovering high-level symbolic structure,
+but are not well equipped to deal with real-valued perceptual inputs.
 
 
 We develop a hybrid architecture for inferring graphics programs.  Our
@@ -388,7 +386,16 @@ itself or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 8$
 objects, it successfully parses scenes with many more objects than the
 training data.
-
+\begin{wrapfigure}{R}{0.5\textwidth}
+  \begin{center}
+    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
+    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
+    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-25-4.png}}\end{minipage}
+%    \begin{minipage}[t]{2cm}\includegraphics[width=2cm]{figures/randomScene-26-7.png}\end{minipage}
+%    \begin{minipage}[t]{2cm}\includegraphics[width=2cm]{figures/randomScene-19-3.png}\end{minipage}
+  \end{center}
+  \caption{Network is trained to infer execution traces for figures like the three shown above.}\label{trainingData}
+\end{wrapfigure}
 
 \begin{figure}
   \begin{minipage}[t]{15cm}
@@ -434,14 +441,20 @@ we made the drawings on graph paper.
 
 \section{Synthesizing graphics programs from execution traces}
 Although the execution trace of a graphics program describes the parts
-of a scene,
-it fails to encode higher-level features of the image,
-such as repeated motifs,
-symmetries or reflections.
+of a scene, it fails to encode higher-level features of the image,
+such as repeated motifs, symmetries or reflections.  A \emph{graphics
+  program} better describe structures like these,
+and we now take as our goal to synthesize simple graphics programs from
+their execution traces.
 
+We constrain the space of allowed programs by writing down a context
+free grammar over a space of programs. Although it might be desirable
+to synthesize programs in a Turing-complete language like Lisp or
+Python, a more tractable approach is to specify what in the program
+languages community is called a Domain Specific Language (DSL). Our DSL (Table~\ref{DSL})
+encodes prior knowledge of what graphics programs tend to look like.
 
-
-\begin{table}[h]
+\begin{table}[H]
   \begin{tabular}{rl}
   Program$\to$&Command; $\cdots$; Command\\
   Command$\to$&\texttt{circle}(Expression,Expression)\\
@@ -455,96 +468,77 @@ symmetries or reflections.
   Axis$\to$&\texttt{X = }\mathcal{Z}\\
   Axis$\to$&\texttt{Y = }\mathcal{Z}
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}
-  \end{table}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}\label{DSL}
+\end{table}
+
+Given the DSL and a trace $T$, we want a program that evaluates to $T$
+and also minimizes some measure of program cost:
+\begin{equation}
+  \text{program}(T) = \argmin_{\substack{p\in \text{DSL}\\p \text{ evaluates to } T}} \text{cost}(p)\label{programObjective}
+\end{equation}
+An intuitive measure of program cost is its length.  We define the
+cost of a program to be the number of statements it contains, where a
+statement is a ``Command'' in Table~\ref{DSL}.
+
+The constrained optimization problem in
+equation~\ref{programObjective} is intractable in general, but there
+exist efficient-in-practice tools for finding exact solutions to
+program synthesis problems like these. We use the state-of-the-art Sketch
+tool~\cite{solar2008program}. Describing Sketch's program synthesis
+algorithm is beyond the scope of this paper; see supplement.  At a
+high level, Sketch takes as input a space of programs, along with a
+specification of the program 's behavior and optionally a cost
+function.  It translates the synthesis problem into a constraint
+satisfaction problem, and then uses a quasiboolean solver to find a
+minimum cost program satisfying the specification.  In exchange for
+not having any guarantees on how long it will take to find a minimum
+cost solution, it comes with the guarantee that it will always find a
+globally optimal program.
+
+Why synthesize a graphics program,
+if the execution trace already suffices to recover the objects in an image?
+Within our domain of hand-drawn figures, graphics program synthesis has several important uses:
+\subsection{Extrapolating figures}
+Given the source code of a graphics program,
+we can automatically tweak the program
+to make natural-feeling changes to the figure.
+For example,
+we can change all of the circles to squares,
+were make all of the lines be dashed.
+We can also \textbf{extrapolate} figures
+by increasing the number of times that loops are executed.
+\input{extrapolations.tex}
+
+\subsection{Modeling similarity between figures}
 
 
-\section{Neural networks for guiding SMC}
 
-
+\subsection{Correcting errors made by the neural network}
 
 Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
 function: it takes two images, an observed target image and a
 hypothesized program output, and gives the likelihood of the observed
-image conditioned on the program output. We want to sample from:
+image conditioned on the program output.
+Write $\hat{T}(I)$ for the trace the model predicts for image $I$.
+
+We can extract a few basic features of a program, like its size or how many
+loops it has,
+and use these features to help predict
+whether a trace is the correct explanation for an image.
 \begin{equation}
-\probability [p|x]  \propto L(x | \text{render}(p)) \probability [p]
+\hat{T}(I) = \argmax_{T} L(I | \text{render}(T)) + \theta\cdot  \phi \left( \text{program}(T) \right)
 \end{equation}
-where $\probability [p]$ is the prior probability of program $p$, and $x$ is the observed image.
-
-Let $p$ be a program with $L$ lines, which we will write as $p = (p_1,p_2,\cdots,p_L)$. Assume the prior factors into:
-\begin{equation}
-  \probability [p]\propto \prod_{l\leq L}\probability [p_l]
-\end{equation}
-Define the distribution $q_L(\cdot)$, which happens to be proportional to the above posterior:
-\begin{equation}
-  q_L(p_1,p_2,\cdots,p_{L - 1},p_L)\propto q_{L - 1}(p_1,p_2,\cdots,p_{L - 1})\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]
-\end{equation}
-Now suppose we have some samples from $q_{L - 1}(\cdot)$, and that we
-then sample a $p_L$ from a distribution proportional to $\frac{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$.
-The resulting programs $p$ are distributed according to $q_L$, and so
-are also distributed according to $\probability [p|x]$.
-
-How do we sample $p_L$ from a distribution proportional to $\frac{L(x
-  | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$?
-We have a neural network that takes as input the target image $x$ and
-the program so far, and produces a distribution over next lines of
-code ($p_L$).  We write $\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)$ for
-the distribution output by the neural network. So we can sample from NN and then weight the samples by:
-\begin{equation}
-  w(p_L) = \frac{\probability [p_L]}{\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)}\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}
-\end{equation}
-Then we can resample from these now weighted samples to get a new
-population of particles (here programs are particles), where each
-program now has $L$ lines instead of $L - 1$.
-
-This procedure can be seen as a particle filter, where each successive
-latent variable is another line of code, and the emission
-probabilities are successive ratios of likelihoods under $L(\cdot |
-\cdot)$.
-
-\textbf{Comments for Dan}. Right now I'm not actually sampling from
-the neural network - instead, I enumerate the top few hundred lines of
-code suggested by the network, and then weight them by their
-likelihoods.
-So actually the form of NN is:
-\begin{equation}
-  \text{NN}(p_L | p_1,\cdots,p_{L - 1};x)\propto \begin{cases}
-    1,&\text{ if }p_L \in \text{top hundred neural network proposals}\\
-0,&\text{otherwise}.    \end{cases}
-\end{equation}
-Do you think this is a problem? The neural network puts almost all of its mass on a few guesses.
-In order to get the correct line of code I sometimes need to get something like the 50th  top guess,
-so I don't want to literally just sample from the distribution suggested by the neural network.
+where $\phi (\cdot)$ is a feature extractor for programs.
+This is equivalent to doing MAP inference in a generative model where the program
+is first drawn from a log linear distribution $\propto \exp (\theta\cdot \phi (\text{program}))$,
+than the program is executed deterministically,
+and then we observe a noisy version of the program's output,
+where $L$ is the noise model.
 
 
-  \begin{algorithm}[tb]
-   \caption{Neurally guided SMC}
-   \label{guideAlgorithm}
-\begin{algorithmic}
-  \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
-  \STATE {\bfseries Output:} Samples of the program trace
-  \STATE Set $B_0 = \{\text{empty program}\}$
-  \FOR{$1\leq l\leq L$}
-  \FOR{$1\leq n\leq N$}
-  \STATE{ $p_n\sim \text{Uniform}(B_{l - 1})$}
-  \STATE{ $p'_{n}\sim \text{NN}(\text{render}(p),x)$}
-  \STATE{ Define $r_n = p'_n\cdot p_n$}
-  \STATE{ Set $\tilde{w}(r_n) = \frac{L(x|r_n)}{L(x|p_n)}\times\frac{\probability [p'_n]}{\probability [p'_n = \text{NN}(\text{render}(p),x)]}$}
-  \ENDFOR
-  \STATE{ Define $w(p) = \frac{\tilde{w}(p)}{\sum_{p'}\tilde{w}(p')}$}
-  \STATE{ Set $B_l$ to be $N$ samples from $r_n$ distributed according to $w(\cdot)$}
-  \ENDFOR
-  \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
-\end{algorithmic}
-  \end{algorithm}
 
   \pagebreak
   \section{Preliminary extrapolation results} 
-\input{extrapolations.tex} 
 
 
 
