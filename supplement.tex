@@ -1,0 +1,196 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+% \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading nips_2016
+%
+% to avoid loading the natbib package, add option nonatbib:
+% \usepackage[nonatbib]{nips_2016}
+
+
+\usepackage{dsfont}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+\usepackage{nips_2016}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+\usepackage{listings}
+\usepackage{amsthm}
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+\usepackage{subfig} 
+\usepackage{fancyvrb}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\fvset{fontsize=\footnotesize}
+
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+
+\usepackage{verbatim}
+ \usepackage{booktabs}
+ % For algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+% As of 2011, we use the hyperref package to produce hyperlinks in the
+% resulting PDF.  If this breaks your system, please commend out the
+% following usepackage line and replace \usepackage{icml2016} with
+% \usepackage[nohyperref]{icml2016} above.
+\usepackage{amsmath}
+\usepackage{hyperref}
+\DeclareMathOperator*{\argmin}{arg\,min} % thin space, limits underneath in displays
+\DeclareMathOperator{\argmin}{argmin} % no space, limits underneath in displays
+
+
+
+% Packages hyperref and algorithmic misbehave sometimes.  We can fix
+% this with the following command.
+
+\newcommand{\Expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
+\newcommand{\Probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
+
+\newtheorem{proposition}{Proposition}
+
+\newcommand\modt{\stackrel{\mathclap{\normalfont 2}}{\equiv}}
+
+
+\title{Supplement to: Inferring Graphics Programs from Images}
+
+% The \author macro works with any number of authors. There are two
+% commands used to separate the names and addresses of multiple
+% authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to
+% break the lines. Using \AND forces a line break at that point. So,
+% if LaTeX puts 3 of 4 authors names on the first line, and the last
+% on the second line, try using \AND instead of \And before the third
+% author name.
+
+\author{
+Kevin Ellis \\
+Brain and Cognitive Sciences\\
+MIT\\
+%Pittsburgh, PA 15213 \\
+\texttt{ellisk@mit.edu} \\
+Daniel Ritchie\\
+Department of Computer Science\\
+Brown
+\And
+Armando Solar-Lezama \\
+  CSAIL\\
+MIT \\
+\texttt{asolar@csail.mit.edu} \\
+\And
+Joshua B. Tenenbaum \\
+Brain and Cognitive Sciences\\
+MIT\\
+\texttt{jbt@mit.edu} \\
+}
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+\section{Neural networks for guiding SMC}
+
+
+
+Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
+function: it takes two images, an observed target image and a
+hypothesized program output, and gives the likelihood of the observed
+image conditioned on the program output. We want to sample from:
+\begin{equation}
+\probability [p|x]  \propto L(x | \text{render}(p)) \probability [p]
+\end{equation}
+where $\probability [p]$ is the prior probability of program $p$, and $x$ is the observed image.
+
+Let $p$ be a program with $L$ lines, which we will write as $p = (p_1,p_2,\cdots,p_L)$. Assume the prior factors into:
+\begin{equation}
+  \probability [p]\propto \prod_{l\leq L}\probability [p_l]
+\end{equation}
+Define the distribution $q_L(\cdot)$, which happens to be proportional to the above posterior:
+\begin{equation}
+  q_L(p_1,p_2,\cdots,p_{L - 1},p_L)\propto q_{L - 1}(p_1,p_2,\cdots,p_{L - 1})\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]
+\end{equation}
+Now suppose we have some samples from $q_{L - 1}(\cdot)$, and that we
+then sample a $p_L$ from a distribution proportional to $\frac{L(x |
+  \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
+  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$.
+The resulting programs $p$ are distributed according to $q_L$, and so
+are also distributed according to $\probability [p|x]$.
+
+How do we sample $p_L$ from a distribution proportional to $\frac{L(x
+  | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
+  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$?
+We have a neural network that takes as input the target image $x$ and
+the program so far, and produces a distribution over next lines of
+code ($p_L$).  We write $\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)$ for
+the distribution output by the neural network. So we can sample from NN and then weight the samples by:
+\begin{equation}
+  w(p_L) = \frac{\probability [p_L]}{\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)}\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}
+\end{equation}
+Then we can resample from these now weighted samples to get a new
+population of particles (here programs are particles), where each
+program now has $L$ lines instead of $L - 1$.
+
+This procedure can be seen as a particle filter, where each successive
+latent variable is another line of code, and the emission
+probabilities are successive ratios of likelihoods under $L(\cdot |
+\cdot)$.
+
+\textbf{Comments for Dan}. Right now I'm not actually sampling from
+the neural network - instead, I enumerate the top few hundred lines of
+code suggested by the network, and then weight them by their
+likelihoods.
+So actually the form of NN is:
+\begin{equation}
+  \text{NN}(p_L | p_1,\cdots,p_{L - 1};x)\propto \begin{cases}
+    1,&\text{ if }p_L \in \text{top hundred neural network proposals}\\
+0,&\text{otherwise}.    \end{cases}
+\end{equation}
+Do you think this is a problem? The neural network puts almost all of its mass on a few guesses.
+In order to get the correct line of code I sometimes need to get something like the 50th  top guess,
+so I don't want to literally just sample from the distribution suggested by the neural network.
+
+
+  \begin{algorithm}[tb]
+   \caption{Neurally guided SMC}
+   \label{guideAlgorithm}
+\begin{algorithmic}
+  \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
+  \STATE {\bfseries Output:} Samples of the program trace
+  \STATE Set $B_0 = \{\text{empty program}\}$
+  \FOR{$1\leq l\leq L$}
+  \FOR{$1\leq n\leq N$}
+  \STATE{ $p_n\sim \text{Uniform}(B_{l - 1})$}
+  \STATE{ $p'_{n}\sim \text{NN}(\text{render}(p),x)$}
+  \STATE{ Define $r_n = p'_n\cdot p_n$}
+  \STATE{ Set $\tilde{w}(r_n) = \frac{L(x|r_n)}{L(x|p_n)}\times\frac{\probability [p'_n]}{\probability [p'_n = \text{NN}(\text{render}(p),x)]}$}
+  \ENDFOR
+  \STATE{ Define $w(p) = \frac{\tilde{w}(p)}{\sum_{p'}\tilde{w}(p')}$}
+  \STATE{ Set $B_l$ to be $N$ samples from $r_n$ distributed according to $w(\cdot)$}
+  \ENDFOR
+  \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
+\end{algorithmic}
+  \end{algorithm}
+
+\end{document}
