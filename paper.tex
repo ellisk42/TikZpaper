@@ -434,10 +434,42 @@ we made the drawings on graph paper.
   \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-2-reduced.png} 
     \subcaption{}
   \end{minipage}
-  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\label{handDrawingExamples}
+  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\ref{handDrawingExamples}
 \end{figure}
 
-
+\begin{figure}[H]
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-10.png}
+    \includegraphics[width = 2cm]{figures/10-parse.png}    
+    \subcaption{Noisy input}
+  \end{minipage}
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-21.png}
+    \includegraphics[width = 2cm]{figures/21-parse.png}    
+    \subcaption{A graphical model}
+  \end{minipage}
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-77.png}
+    \includegraphics[width = 2cm]{figures/77-parse.png}    
+    \subcaption{A figure from a deep learning textbook}
+    \end{minipage}
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-0.png}
+    \includegraphics[width = 2cm]{figures/0-parse.png}    
+    \subcaption{Near miss}
+  \end{minipage}
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-38.png}
+    \includegraphics[width = 2cm]{figures/38-parse.png}    
+    \subcaption{Failing on a Ising model}
+  \end{minipage}
+  \begin{minipage}[t]{2.25cm}
+    \includegraphics[width = 2cm]{figures/expert-34.png}
+    \includegraphics[width = 2cm]{figures/34-parse.png}     
+    \subcaption{Illusory contours}
+    \end{minipage}
+  \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}}\label{handDrawingExamples}
+  \end{figure}
 
 \section{Synthesizing graphics programs from execution traces}
 Although the execution trace of a graphics program describes the parts
