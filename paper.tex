@@ -231,7 +231,7 @@ Prior work has also applied sketch-based program synthesis to authoring graphics
 
 
 
-\section{Neural architecture for inferring drawing execution traces}
+\section{Neural architecture for inferring drawing execution traces}\label{neuralNetworkSection}
 
 We developed a deep network architecture for efficiently inferring a
 execution trace, $T$, from an image, $I$.  Our model constructs the
@@ -261,8 +261,6 @@ the image features, the \verb|circle| token, and the $x$ coordinate.
   about this architecture, though possibly in an Appendix: the
   functional form(s) of the probability distributions over tokens, the
   network layer sizes, which MLPs share parameters, etc.}
-
-\remark{Planning to move the description of SMC / beam search up here, too?}
 
 The distribution over the next drawing command factorizes:
 \begin{equation}
@@ -374,18 +372,26 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 
 
 
+
 This network suffices to ``derender'' images like those shown in
 Figure~\ref{trainingData}.  We can perform a beam search decoding to
 recover what the network thinks is the most likely execution trace for
-images like these. But, if the network makes a mistake (predicts an
-incorrect line of code), it has no way of recovering from the error.
-In order to derender an image with $n$ objects, it must correctly
-predict $n$ drawing commands -- so its probability of success will
-decrease exponentially in $n$, assuming it has any nonzero chance of
-making a mistake.  For added robustness as $n$ becomes large, we treat
-the neural network outputs as proposals for a SMC sampling scheme.
-For the SMC sampler, we use pixel wise distance as a surrogate for a
-likelihood function; see supplement. Figure~\ref{syntheticResults}
+images like these, recovering traces maximizing $\probability_\theta
+[T|I]$. But, if the network makes a mistake (predicts an incorrect
+line of code), it has no way of recovering from the error.  In order
+to derender an image with $n$ objects, it must correctly predict $n$
+drawing commands -- so its probability of success will decrease
+exponentially in $n$, assuming it has any nonzero chance of making a
+mistake.  For added robustness as $n$ becomes large, we treat the
+neural network outputs as proposals for a SMC sampling scheme.  For
+the SMC sampler, we use pixel wise distance as a surrogate for a
+likelihood function. The SMC sampler is designed to produce samples
+from the distribution $\propto L(I|\text{render}(T))
+\probability_\theta[T|I]$, where $L(\cdot | \cdot):\text{image}^2\to
+\mathcal{R}$ uses the distance between two images as a proxy for a
+likelihood.
+
+Figure~\ref{syntheticResults}
 compares the neural network with SMC against the neural network by
 itself or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 8$
@@ -508,15 +514,19 @@ encodes prior knowledge of what graphics programs tend to look like.
   \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}\label{DSL}
 \end{table}
 
-Given the DSL and a trace $T$, we want a program that evaluates to $T$
-and also minimizes some measure of program cost:
+Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
+and, at the same time, is the ``best'' explanation of $T$.
+For example, we might prefer more general programs or, in the spirit of Occam's razor,
+prefer shorter programs.
+We wrap these intuitions up into a cost function over programs,
+and seek the minimum cost program consistent with $T$:
 \begin{equation}
   \text{program}(T) = \argmin_{\substack{p\in \text{DSL}\\p \text{ evaluates to } T}} \text{cost}(p)\label{programObjective}
 \end{equation}
-An intuitive measure of program cost is its length.  We define the
+We define the
 cost of a program to be the number of statements it contains, where a
 statement is a ``Command'' in Table~\ref{DSL}.
-\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
+%\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
 The constrained optimization problem in
 equation~\ref{programObjective} is intractable in general, but there
@@ -527,7 +537,7 @@ algorithm is beyond the scope of this paper; see supplement.  At a
 high level, Sketch takes as input a space of programs, along with a
 specification of the program 's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
-satisfaction problem, and then uses a quasiboolean solver to find a
+satisfaction problem, and then uses a SAT solver to find a
 minimum cost program satisfying the specification.  In exchange for
 not having any guarantees on how long it will take to find a minimum
 cost solution, it comes with the guarantee that it will always find a
@@ -535,7 +545,7 @@ globally optimal program.
 
 Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
-Within our domain of hand-drawn figures, graphics program synthesis has several important uses:
+Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 \subsection{Extrapolating figures}
 Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
 For example,
@@ -543,35 +553,55 @@ we can change all of the circles to squares,
 were make all of the lines be dashed.
 We can also \textbf{extrapolate} figures
 by increasing the number of times that loops are executed.
-\input{extrapolations.tex}
+%\input{extrapolations.tex}
+
 
 \subsection{Modeling similarity between figures}
 
 \includegraphics[width = 8in]{figures/similarity.png}
 
 \subsection{Correcting errors made by the neural network}
+The program synthesizer can help correct errors from  the neural network by favoring execution traces which lead to more concise or general programs.
+For example, one generally prefers figures with neatly aligned objects over figures whose parts are slightly misaligned -- and nice alignment lends itself to short programs.
+Similarly, figures often have repeated parts,
+which the program synthesizer might model as a reflection.
+So, if one is considering several candidate traces proposed by the neural network,
+we might prefer traces whose best programs have desirable features like being short or having iterated structures.
+
+Concretely we implemented the following scheme: the neurally guided sampling scheme of section~\ref{neuralNetworkSection} for image $I$ produces (samples) candidate traces, $\mathcal{F}(I)$.
+Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
+we can take into account the programs that best explain the traces. 
+Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
+\begin{equation}
+\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L(I | \text{render}(T)) \times\probability_{\theta_p} [ \text{program}(T)] 
+\end{equation}
+where $\probability_{\theta_p} [\cdot]$ is a prior probability
+distribution over programs parameterized by $\theta_p$.
+This is equivalent to doing
+MAP inference in a generative model where the program is first drawn
+from $\probability_{\theta_p} [\cdot]$, then the program is executed deterministically,
+and then we observe a noisy version of the program's output, where $L$
+is the noise model.
+
+Given a corpus of graphics program synthesis problems with annotated ground truth traces (so pairs of $(I,T)$),
+we find a maximum likelihood estimate of $\theta_p$:
+\begin{equation}
+  \theta_p^* = \argmax_{\theta_p} \expect \left[ \log \frac{\probability_{\theta_p} [\text{program}(T)]\times L(I|\text{render}(T))}{\sum_{T'\in \mathcal{F}(I)} \probability_{\theta_p} [\text{program}(T')]\times L(I|\text{render}(T'))} \right]
+\end{equation}
+where the expectation is taken both over the model predictions and the
+$(I,T)$ pairs in the training corpus.  We define $\probability_{\theta_p}
+[\cdot]$ to be a log linear distribution $\propto \exp
+(\theta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
+extractor for programs.  We can extract a few basic features of a
+program, like its size or how many loops it has, and use these
+features to help predict whether a trace is the correct explanation
+for an image.
+
+
 
 \remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Equation 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
 
-Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
-function: it takes two images, an observed target image and a
-hypothesized program output, and gives the likelihood of the observed
-image conditioned on the program output.
-Write $\hat{T}(I)$ for the trace the model predicts for image $I$.
 
-We can extract a few basic features of a program, like its size or how many
-loops it has,
-and use these features to help predict
-whether a trace is the correct explanation for an image.
-\begin{equation}
-\hat{T}(I) = \argmax_{T} L(I | \text{render}(T)) + \theta\cdot  \phi \left( \text{program}(T) \right)
-\end{equation}
-where $\phi (\cdot)$ is a feature extractor for programs.
-This is equivalent to doing MAP inference in a generative model where the program
-is first drawn from a log linear distribution $\propto \exp (\theta\cdot \phi (\text{program}))$,
-than the program is executed deterministically,
-and then we observe a noisy version of the program's output,
-where $L$ is the noise model.
 
 
 
@@ -582,7 +612,7 @@ where $L$ is the noise model.
 
 \pagebreak
   \section{Preliminary Synthesis results} 
-\input{synthesizerOutputs.tex}
+%\input{synthesizerOutputs.tex}
 
 
 \bibliographystyle{unsrt}
