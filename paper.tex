@@ -211,18 +211,23 @@ downstream tasks and can help correct some mistakes of the earlier stages.
 
 
 \section{Related work}
-attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
-that they focus on learning the generative model jointly with the
-inference network. Advantages of our system is that we learn symbolic
-programs, and that we do it from hand sketches rather than synthetic
-renderings.
 
-ngpm:~\cite{ritchie2016neurally}. We build on the idea of a guide program, extending it to scenes composed of objects, and then show how to learn programs from the objects we discover.
+Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on parsing and interpreting hand-drawn sketches.
+% attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
+% that they focus on learning the generative model jointly with the
+% inference network. Advantages of our system is that we learn symbolic
+% programs, and that we do it from hand sketches rather than synthetic
+% renderings.
 
-Sketch-n-Sketch:~\cite{Hempel:2016:SSP:2984511.2984575}. Semiautomated synthesis presented in a nice user interface. Complementary to our work: you could pass a sketch to our system and then pass the program to sketch-n-sketch
+Our image-to-execution-trace parsing architecture builds on prior work on controlling procedural graphics programs~\cite{ritchie2016neurally}. Given a program which generates random 2D recursive structures such as vines, that system learns a structurally-identical ``guide program'' whose output can be directed, via neural networks, to resemble a given target image. 
+We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the execution trace through the guide program as a symbolic parse of the target image.
+We then show how to synthesize higher-level programs from these execution traces.
 
+In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically learn a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
-Converting hand drawings into procedural models using deep networks:~\cite{huang2017shape,Nishida:2016:ISU:2897824.2925951}.
+Prior work has also applied sketch-based program synthesis to authoring graphics programs. In particular, Sketch-n-Sketch presents a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
+
+\remark{Do you also want to cite your own work on ``Unsupverised Learning by Program Synthesis'' here?}
 
 
 
