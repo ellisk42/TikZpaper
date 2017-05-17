@@ -203,23 +203,30 @@ approach uses a deep neural network infer an execution trace from an
 image; this network recovers primitive drawing operations such as
 lines, circles, or arrows, along with their parameters. For added
 robustness, we use the deep network as a proposal distribution for a
-stochastic search over execution traces.  Finally, we use program synthesis to recover the program from its
+stochastic search over execution traces.  Section~\ref{neuralNetworkSection} describes this first stage of the architecture where we infer drawing commands from images, and explains how we handle noisy hand drawings.
+Finally, we use program synthesis techniques to recover the program from its
 trace.  The program synthesizer discovers constructs such as loops and
 geometric operations such as reflections and affine transformations.
-% \remark{This paragraph is all about making things a bit more specific,
+% \remark{This paragraph is all about making things a bit more
+Section~\ref{programSynthesisSection} describes how the architecture
+synthesizes programs from execution traces,
+and how those programs are used for measuring similarity between hand drawings,
+extrapolating figures, and correcting errors made by the deep network.
+
+
 %   so you really need more specifics about program synth here.}
 
-Each of these three components -- the deep network, the stochastic
-search, the program synthesizer -- confers its own advantages. From
-the deep network, we get a fast system that can recover plausible
-execution traces in about a minute~\remark{A minute seems slow to me, for deep net inference...}. From the stochastic search, we get
-added robustness: essentially, the stochastic search can correct
-mistakes made by the deep network's proposals.  From the program
-synthesizer, we get abstraction: our system recovers coordinate
-transformations, for loops, and subroutines, which are useful for
-downstream tasks and can help correct some mistakes of the earlier stages.
-% \remark{I wonder if this would work even better as a bulleted list...}
-\remark{Tie these claims into the paper results: state what the `downstream' tasks are that you actually do, and refer to the sections where they occur}
+%% Each of these three components -- the deep network, the stochastic
+%% search, the program synthesizer -- confers its own advantages. From
+%% the deep network, we get a fast system that can recover plausible
+%% execution traces in about a minute~\remark{A minute seems slow to me, for deep net inference...}. From the stochastic search, we get
+%% added robustness: essentially, the stochastic search can correct
+%% mistakes made by the deep network's proposals.  From the program
+%% synthesizer, we get abstraction: our system recovers coordinate
+%% transformations, for loops, and subroutines, which are useful for
+%% downstream tasks and can help correct some mistakes of the earlier stages.
+%% % \remark{I wonder if this would work even better as a bulleted list...}
+%% \remark{Tie these claims into the paper results: state what the `downstream' tasks are that you actually do, and refer to the sections where they occur}
 
 
 \section{Related work}
@@ -517,7 +524,7 @@ a user sketches a diagram,
 and the system responds by proposing a few candidate interpretations.
 The user could then select the one closest to their intention and edit it if necessary.
 
-\section{Synthesizing graphics programs from execution traces}
+\section{Synthesizing graphics programs from execution traces}\label{programSynthesisSection}
 Although the execution trace of a graphics program describes the parts
 of a scene, it fails to encode higher-level features of the image,
 such as repeated motifs or symmetries.  A \emph{graphics
