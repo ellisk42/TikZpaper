@@ -223,6 +223,10 @@ downstream tasks and can help correct some mistakes of the earlier stages.
 
 \section{Related work}
 
+The CogSketch~\cite{forbus2011cogsketch} system also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling, whereas we are interested in building an automated AI application.
+
+%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
+
 Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on parsing and interpreting hand-drawn sketches.
 % attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
 % that they focus on learning the generative model jointly with the
