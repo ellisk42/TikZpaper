@@ -316,9 +316,9 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(T)$] (canvas) at (0,-4) {};
   \draw[lightgray,ultra thin,step = 0.125] ([xshift = 0.5,yshift = 0.5]canvas.south west) grid ([xshift = -0.5,yshift = -0.5]canvas.north east);
   % draw partial image on canvas
-  \draw (0.5cm,-4cm) circle (0.1875cm);
-  \draw (1.2cm,-4.3) circle (0.1875cm);
-  \draw (0.85cm,-4.6) circle (0.1875cm);
+  \draw (0.375cm,-3.25cm) circle (0.125cm);
+  \draw (0.625cm,-3.625) circle (0.125cm);
+  \draw (0.75cm,-3.375) circle (0.125cm);
 
   \node[draw,ultra thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
   \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.5cm]CNN.west) {$\bigotimes$};
