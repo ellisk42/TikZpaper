@@ -397,29 +397,20 @@ itself or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 8$
 objects, it successfully parses scenes with many more objects than the
 training data.
-\begin{wrapfigure}{R}{0.5\textwidth}
-  \begin{center}
+
+\begin{figure}\centering
+  \begin{minipage}{0.35\textwidth}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
-    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-25-4.png}}\end{minipage}
-%    \begin{minipage}[t]{2cm}\includegraphics[width=2cm]{figures/randomScene-26-7.png}\end{minipage}
-%    \begin{minipage}[t]{2cm}\includegraphics[width=2cm]{figures/randomScene-19-3.png}\end{minipage}
-  \end{center}
-  \caption{Network is trained to infer execution traces for figures like the three shown above.}\label{trainingData}
-\end{wrapfigure}
-
-\begin{figure}
-  \begin{minipage}[t]{15cm}
-    \includegraphics[width = 15cm]{figures/editDistance.png}
-  \end{minipage}\\
-  \begin{minipage}[t]{15cm}
-    \includegraphics[width = 15cm]{figures/accuracy.png}
-  \end{minipage}\\
-  \begin{minipage}[t]{15cm}
-    \includegraphics[width = 15cm]{figures/time.png}
-  \end{minipage}
-  \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own.}\label{syntheticResults}
-\end{figure}
+    \caption{Network is trained to infer execution traces for randomly generated figures like the two shown above.}\label{trainingData}
+  \end{minipage}\hfill
+  \begin{minipage}{0.6\textwidth}
+    \includegraphics[width = 4cm]{figures/editDistance.png}
+    \includegraphics[width = 4cm]{figures/accuracy.png}
+      \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own.}\label{syntheticResults}
+    \end{minipage}
+  
+  \end{figure}
 
 \subsection{Generalizing to hand drawings}
 A practical application of our neural network is the automatic conversion of hand drawings into a subset of \LaTeX.
@@ -438,7 +429,7 @@ is a convolutional network that we train to predict
 the distance between two traces conditioned upon their renderings.
 Formally we train our likelihood surrogate to approximate:
 \begin{equation}
-  L(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|
+-\log L(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|
   \end{equation}
 
 
