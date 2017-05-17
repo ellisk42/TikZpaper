@@ -496,7 +496,22 @@ we made the drawings on graph paper.
     \subcaption{Illusory contours}
     \end{minipage}
   \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}}\label{handDrawingExamples}
-  \end{figure}
+\end{figure}
+For each drawing we annotated a ground truth trace, and evaluated the
+model by asking it to sample many candidate traces for each drawing.
+For 55\% of the drawings the Top-1 most likely sample matches the
+ground truth; as we consider more samples the model encounters traces
+that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
+\begin{figure}
+  \includegraphics[width = 5cm]{figures/drawingAccuracy.png}
+  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 10, 100 samples)?
+  Distance to the ground truth trace is measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
+\end{figure}
+Because our current model sometimes makes mistakes on hand drawings,
+we envision the current system working as follows:
+a user sketches a diagram,
+and the system responds by proposing a few candidate interpretations.
+The user could then select the one closest to their intention and edit it if necessary.
 
 \section{Synthesizing graphics programs from execution traces}
 Although the execution trace of a graphics program describes the parts
