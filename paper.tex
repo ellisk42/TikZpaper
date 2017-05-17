@@ -130,14 +130,14 @@
  drawings, into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
  machine learning papers (see Fig.\ref{firstPageExamples}).
- \remark{The use of `graphics programs / visual programs' in the paper
-   title, title of this section, and the body of this section feels
-   too broad. `Graphics program' could conjur a lot of different ideas
-   (esp. 3D graphics); don't want to set the reader up to expect one
-   thing and then be disappointed that what you've done isn't
-   that. You bring up diagram-drawing later in the intro; I think it
-   should be made clear sooner (and certainly mentioned explicitly in
-   the abstract, when you get around to writing that).}
+ %% \remark{The use of `graphics programs / visual programs' in the paper
+ %%   title, title of this section, and the body of this section feels
+ %%   too broad. `Graphics program' could conjur a lot of different ideas
+ %%   (esp. 3D graphics); don't want to set the reader up to expect one
+ %%   thing and then be disappointed that what you've done isn't
+ %%   that. You bring up diagram-drawing later in the intro; I think it
+ %%   should be made clear sooner (and certainly mentioned explicitly in
+ %%   the abstract, when you get around to writing that).}
 
 \newcommand{\exampleImageSize}{2cm}
 \begin{figure}[h]
@@ -286,8 +286,8 @@ drawing to the canvas `blocks' the gradients,
 effectively offloading memory to an external visual store.
 In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603attend} without attention.
 
-\remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
-\remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
+%% \remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
+%% \remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
 
 %% When we
 %% have the generative model (the rendering function) and treat the trace
@@ -339,7 +339,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
-\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}.~\remark{Thoughts on improving this figure: (1) Convnet diagrams typically show the sequence of layers, if possible (space might not permit it here, but those thin arrows just aren't doing it for me). (2) Are the target image / canvas convolved down independently, or jointly (i.e. starting as a 2-channel image)? That's an important detail that's not clear with the current figure/explanation. (3) The three circles downstream from `Image Features' are supposed to be MLPs, I assume(?), but it took me a little while to parse that. Having some visual way of clearly separating network operations from data (color, perhaps) would go a long way.}}  \label{architecture}
+\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}.~\remark{Thoughts on improving this figure: (1) Convnet diagrams typically show the sequence of layers, if possible (space might not permit it here, but those thin arrows just aren't doing it for me).}}  \label{architecture}
 \end{figure}
 \begin{table}
 \begin{tabular}{ll}\toprule
@@ -422,12 +422,26 @@ training data.
 \end{figure}
 
 \subsection{Generalizing to hand drawings}
-We believe that converting synthetic, noiseless images into a restricted subset of
-\LaTeX has limited usefulness.  A more practical
-application is one that extends to hand drawings.  We train the model
+A practical application of our neural network is the automatic conversion of hand drawings into a subset of \LaTeX.
+ We train the model
 to generalize to hand drawings by introducing noise into the
 renderings of the training target images.
 We designed this noise process to introduce the kinds of variations found in hand drawings (figure~\ref{handDrawingExamples}).
+Our neurally-guided SMC procedure
+used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in section~\ref{neuralNetworkSection}).
+But pixel-wise distance fares poorly on hand drawings, which never exactly match
+the model's renders.
+So, for hand drawings,
+we \emph{learned} a surrogate likelihood function.
+Our learned $L(\cdot|\cdot)$
+is a convolutional network that we train to predict
+the distance between two traces conditioned upon their renderings.
+Formally we train our likelihood surrogate to approximate:
+\begin{equation}
+  L(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|
+  \end{equation}
+
+
 We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
 These were drawn reasonably carefully but not perfectly.
 Because our model assumes that objects are snapped to a $16\times 16$ grid,
@@ -558,7 +572,11 @@ by increasing the number of times that loops are executed.
 
 \subsection{Modeling similarity between figures}
 
+Similarity metric in program space:\\
 \includegraphics[width = 8in]{figures/similarity.png}
+
+Similarity metric in image space:\\
+\includegraphics[width = 8in]{figures/imageSimilarity.png}
 
 \subsection{Correcting errors made by the neural network}
 The program synthesizer can help correct errors from  the neural network by favoring execution traces which lead to more concise or general programs.
@@ -573,25 +591,25 @@ Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the
 we can take into account the programs that best explain the traces. 
 Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
 \begin{equation}
-\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L(I | \text{render}(T)) \times\probability_{\theta_p} [ \text{program}(T)] 
+\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L(I | \text{render}(T)) \times\probability_{\beta} [ \text{program}(T)] 
 \end{equation}
-where $\probability_{\theta_p} [\cdot]$ is a prior probability
-distribution over programs parameterized by $\theta_p$.
+where $\probability_{\beta} [\cdot]$ is a prior probability
+distribution over programs parameterized by $\beta$.
 This is equivalent to doing
 MAP inference in a generative model where the program is first drawn
-from $\probability_{\theta_p} [\cdot]$, then the program is executed deterministically,
+from $\probability_{\beta} [\cdot]$, then the program is executed deterministically,
 and then we observe a noisy version of the program's output, where $L$
 is the noise model.
 
 Given a corpus of graphics program synthesis problems with annotated ground truth traces (so pairs of $(I,T)$),
-we find a maximum likelihood estimate of $\theta_p$:
+we find a maximum likelihood estimate of $\beta$:
 \begin{equation}
-  \theta_p^* = \argmax_{\theta_p} \expect \left[ \log \frac{\probability_{\theta_p} [\text{program}(T)]\times L(I|\text{render}(T))}{\sum_{T'\in \mathcal{F}(I)} \probability_{\theta_p} [\text{program}(T')]\times L(I|\text{render}(T'))} \right]
+  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L(I|\text{render}(T))}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L(I|\text{render}(T'))} \right]
 \end{equation}
 where the expectation is taken both over the model predictions and the
-$(I,T)$ pairs in the training corpus.  We define $\probability_{\theta_p}
+$(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
 [\cdot]$ to be a log linear distribution $\propto \exp
-(\theta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
+(\beta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
 extractor for programs.  We can extract a few basic features of a
 program, like its size or how many loops it has, and use these
 features to help predict whether a trace is the correct explanation
