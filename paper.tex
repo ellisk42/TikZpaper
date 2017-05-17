@@ -119,6 +119,17 @@
 \maketitle
 
 \begin{abstract}
+  We introduce a model that learns to convert simple hand drawings
+  into graphics programs written in a subset of \LaTeX.~The model
+  combines techniques from deep learning and program synthesis.  We
+  learn a neural network that proposes plausible drawing primitives
+  that explain an image.  From these deep net proposals we can use
+  program synthesis techniques to recover a graphics
+  program with constructs like variable bindings, iterative loops, or
+  simple kinds of conditionals. With a graphics program in hand,
+  we can extrapolate figures, form visual analogies, \remark{what else should go here?}, and correct errors made by the deep network.
+  Taken together these results are a step towards
+  agents that induce programs from perceptual input.  
 \end{abstract}
 
 \section{Introduction}
@@ -329,7 +340,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 
   \node(next)[draw,very thick,fit = (l1) (l2) (l3), dashed, label = below:{Next line of code}] {};
 
-  \draw[-{>[scale = 1.5]},very thick,dashed] (next.west) -- ([yshift = -0.2cm]canvas.east) node [midway, below, sloped] (TextNode) {Renderer: \LaTeX};
+  \draw[-{>[scale = 1.5]},very thick,dashed] (next.west) -- ([yshift = -0.2cm]canvas.east) node [midway, below, sloped] (TextNode) {Renderer: \LaTeX~Ti\emph{k}Z};
   
   \draw[->,ultra thick] (canvas.east) -- (tensorProduct.south);%[yshift = -0.5cm]CNN.west);
   \draw[->,ultra thick] (observation.east) -- (tensorProduct.north);%([yshift = 0.5cm]CNN.west);
@@ -354,7 +365,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
     Rectangle with corners at $(x_1,y_1)$ \& $(x_2,y_2)$
     \end{tabular}\\
   \begin{tabular}{l}
-    \verb|LINE|$(x_1,y_1,x_2,y_2,$\\
+    \verb|line|$(x_1,y_1,x_2,y_2,$\\
     \hspace{1cm}$\text{arrow}\in\{0,1\},\text{dashed}\in\{0,1\})$
   \end{tabular}&\begin{tabular}{l}
     Line from $(x_1,y_1)$ to  $(x_2,y_2)$,\\\hspace{1cm}optionally with an arrow and/or dashed
@@ -407,7 +418,7 @@ training data.
   \begin{minipage}{0.6\textwidth}
     \includegraphics[width = 4cm]{figures/editDistance.png}
     \includegraphics[width = 4cm]{figures/accuracy.png}
-      \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own.}\label{syntheticResults}
+      \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
     \end{minipage}
   
   \end{figure}
@@ -503,20 +514,20 @@ languages community is called a Domain Specific Language (DSL). Our DSL (Table~\
 encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
-  \begin{tabular}{rl}
+  \begin{tabular}{rl}\toprule
   Program$\to$&Command; $\cdots$; Command\\
   Command$\to$&\texttt{circle}(Expression,Expression)\\
   Command$\to$&\texttt{rectangle}(Expression,Expression,Expression,Expression)\\
-  Command$\to$&\texttt{LINE}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
-  Command$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ }Program\texttt{ \}}\\
-  Command$\to$&\texttt{REFLECT}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
+  Command$\to$&\texttt{line}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
+  Command$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ if }$(\text{Var} > 0)$\texttt{ \{ }Program\texttt{ \}; }Program\texttt{ \}}\\
+  Command$\to$&\texttt{reflect}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
   Expression$\to$&\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}\\
   Var$\to$&A free (unused) variable\\
   \mathcal{Z}$\to$&an integer\\
   Axis$\to$&\texttt{X = }\mathcal{Z}\\
-  Axis$\to$&\texttt{Y = }\mathcal{Z}
+  Axis$\to$&\texttt{Y = }\mathcal{Z}\\\bottomrule
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{for}), vertical/horizontal reflections (\texttt{REFLECT}), and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}\label{DSL}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}\label{DSL}
 \end{table}
 
 Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
@@ -531,6 +542,8 @@ and seek the minimum cost program consistent with $T$:
 We define the
 cost of a program to be the number of statements it contains, where a
 statement is a ``Command'' in Table~\ref{DSL}.
+We also penalize using more distant constants,
+which encourages reuse of coefficients.
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
 The constrained optimization problem in
@@ -616,13 +629,7 @@ for an image.
 
 
 
-  \pagebreak
-  \section{Preliminary extrapolation results} 
 
-
-
-\pagebreak
-  \section{Preliminary Synthesis results} 
 %\input{synthesizerOutputs.tex}
 
 
