@@ -448,21 +448,26 @@ We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
 These were drawn reasonably carefully but not perfectly.
 Because our model assumes that objects are snapped to a $16\times 16$ grid,
 we made the drawings on graph paper.
-\begin{figure}[H]%
-  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
+\begin{figure}\centering
+  \begin{minipage}{0.45\textwidth}
+  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/expert-60-reduced.png}
     \subcaption{}
   \end{minipage}%
-   \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-groundTruth-reduced.png}
+   \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/60-groundTruth-reduced.png}
     \subcaption{}
   \end{minipage}%
-  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-1-reduced.png}
+  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/60-1-reduced.png}
     \subcaption{}
   \end{minipage}%
-  \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-2-reduced.png} 
-    \subcaption{}
-  \end{minipage}
-  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\ref{handDrawingExamples}
+    \caption{(a): a hand drawing. (b): Rendering of the trace our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) for a noisy rendering of (b).}\ref{handDrawingExamples}
+  \end{minipage}\hfill
+  \begin{minipage}{0.45\textwidth}
+  \includegraphics[width = 6cm]{figures/drawingAccuracy.png}
+  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 10, 100 samples)?
+  Distance to the ground truth trace is measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
+    \end{minipage}
 \end{figure}
+
 
 \begin{figure}[H]
   \begin{minipage}[t]{2.25cm}
@@ -499,14 +504,9 @@ we made the drawings on graph paper.
 \end{figure}
 For each drawing we annotated a ground truth trace, and evaluated the
 model by asking it to sample many candidate traces for each drawing.
-For 55\% of the drawings the Top-1 most likely sample matches the
+For 55\% of the drawings the Top-1 most likely sample exactly matches the
 ground truth; as we consider more samples the model encounters traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
-\begin{figure}
-  \includegraphics[width = 5cm]{figures/drawingAccuracy.png}
-  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 10, 100 samples)?
-  Distance to the ground truth trace is measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
-\end{figure}
 Because our current model sometimes makes mistakes on hand drawings,
 we envision the current system working as follows:
 a user sketches a diagram,
@@ -586,8 +586,19 @@ we can change all of the circles to squares,
 were make all of the lines be dashed.
 We can also \textbf{extrapolate} figures
 by increasing the number of times that loops are executed.
+Extrapolating repetitive visuals patterns comes naturally to humans,
+and building this ability into an application is practical:
+imagine hand drawing a repetitive graphical model structure
+and having the model automatically induce and extend the pattern.
+Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from ground truth traces;
+see supplement for our full set of extrapolations.
 
-\includegraphics[width = 8in]{figures/extrapolationMatrix.png}
+\begin{figure}
+  \includegraphics[width = 8in]{figures/extrapolationMatrix.png}
+  \caption{Left: hand drawings. Right: extrapolations produced by
+    running different parts of different loops either forward or
+    backward an extra iteration.}\label{extrapolationFigure}
+  \end{figure}
 %\input{extrapolations.tex}
 
 
