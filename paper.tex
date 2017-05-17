@@ -70,7 +70,8 @@
 \newcommand{\remark}[1]{\textcolor{red}{[#1]}}
 
 
-\title{Inferring Graphics Programs from Images}
+% \title{Inferring Graphics Programs from Images}
+\title{Learning to Infer Graphics Programs from Hand-Drawn Images}
 
 % The \author macro works with any number of authors. There are two
 % commands used to separate the names and addresses of multiple
@@ -122,25 +123,25 @@
   We introduce a model that learns to convert simple hand drawings
   into graphics programs written in a subset of \LaTeX.~The model
   combines techniques from deep learning and program synthesis.  We
-  learn a neural network that proposes plausible drawing primitives
+  learn a convolutional neural network that proposes plausible drawing primitives
   that explain an image.  From these deep net proposals we can use
   program synthesis techniques to recover a graphics
   program with constructs like variable bindings, iterative loops, or
-  simple kinds of conditionals. With a graphics program in hand,
-  we can extrapolate figures, form visual analogies, \remark{what else should go here?}, and correct errors made by the deep network.
+  simple kinds of conditionals.~\remark{Can you (concisely) communicate the idea of treating the deep net proposal as an `execution trace?' It's a really neat intellectual framing that deserves to be foregrounded.} With a graphics program in hand,
+  we can correct errors made by the deep network, extrapolate drawings, and~\remark{what else: `visual analogies' is vague. `Cluster drawings by use of similar high-level program structures?'}
   Taken together these results are a step towards
-  agents that induce programs from perceptual input.  
+  agents that induce useful, human-readable programs from perceptual input.  
 \end{abstract}
 
 \section{Introduction}
 
- How could an agent go from noisy, high-dimensional perceptual input
- to a symbolic, abstract object, like a computer program?  Here we
+ How can an agent convert noisy, high-dimensional perceptual input
+ to a symbolic, abstract object, such as a computer program?  Here we
  consider this problem within a graphics program synthesis domain.  We
  develop an approach for converting natural images, such as hand
  drawings, into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
- machine learning papers (see Fig.\ref{firstPageExamples}).
+ machine learning papers (see Figure~\ref{firstPageExamples}).
  %% \remark{The use of `graphics programs / visual programs' in the paper
  %%   title, title of this section, and the body of this section feels
  %%   too broad. `Graphics program' could conjur a lot of different ideas
@@ -176,13 +177,13 @@
     \texttt{circle} $(3i-2,-2j+5)$\\
     \subcaption{}
   \end{minipage}
-  \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
+  \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.~\remark{Any objection to putting this on page bottom?}}\label{firstPageExamples}
   \end{figure}
 
 High dimensional perceptual input may seem ill matched to the abstract
-semantics of a programming language. But programs with constructs like
+semantics of a programming language. But programs with constructs such as
 recursion or iteration produce a simpler \emph{execution trace} of
-primitive actions; for our domain the primitive actions are drawing
+primitive actions; for our domain, the primitive actions are drawing
 commands. Our hypothesis is that the execution trace of the program is
 better aligned with the perceptual input, and that the trace can act
 as a kind of bridge between perception and programs. We test this
@@ -192,7 +193,7 @@ execution trace in hand, we can bring to bear techniques from the
 program synthesis community to recover the latent graphics program.
 This family of techniques, called \emph{constraint-based program synthesis}~\cite{solar2008program},
 work by modeling a set of possible programs inside of a constraint solver,
-like a SAT or SMT solver~\cite{de2008z3}.
+such as a SAT or SMT solver~\cite{de2008z3}.
 These techniques excel at uncovering high-level symbolic structure,
 but are not well equipped to deal with real-valued perceptual inputs.
 
@@ -202,23 +203,23 @@ approach uses a deep neural network infer an execution trace from an
 image; this network recovers primitive drawing operations such as
 lines, circles, or arrows, along with their parameters. For added
 robustness, we use the deep network as a proposal distribution for a
-stochastic search over execution traces.  Finally, we use techniques
-in the program synthesis community to recover the program from its
-trace.  The program synthesizer discovers constructs like loops and
-geometric operations like reflections and affine transformations.
-\remark{This paragraph is all about making things a bit more specific,
-  so you really need more specifics about program synth here.}
+stochastic search over execution traces.  Finally, we use program synthesis to recover the program from its
+trace.  The program synthesizer discovers constructs such as loops and
+geometric operations such as reflections and affine transformations.
+% \remark{This paragraph is all about making things a bit more specific,
+%   so you really need more specifics about program synth here.}
 
 Each of these three components -- the deep network, the stochastic
 search, the program synthesizer -- confers its own advantages. From
 the deep network, we get a fast system that can recover plausible
-execution traces in about a minute~\remark{A minute seems slow to me, for deep net inference. Are you talking about training time, here, or...?}. From the stochastic search we get
-added robustness; essentially, the stochastic search can correct
+execution traces in about a minute~\remark{A minute seems slow to me, for deep net inference...}. From the stochastic search, we get
+added robustness: essentially, the stochastic search can correct
 mistakes made by the deep network's proposals.  From the program
 synthesizer, we get abstraction: our system recovers coordinate
 transformations, for loops, and subroutines, which are useful for
 downstream tasks and can help correct some mistakes of the earlier stages.
-\remark{I wonder if this would work even better as a bulleted list...}
+% \remark{I wonder if this would work even better as a bulleted list...}
+\remark{Tie these claims into the paper results: state what the `downstream' tasks are that you actually do, and refer to the sections where they occur}
 
 
 \section{Related work}
@@ -234,7 +235,7 @@ Our image-to-execution-trace parsing architecture builds on prior work on contro
 We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the execution trace through the guide program as a symbolic parse of the target image.
 We then show how to synthesize higher-level programs from these execution traces.
 
-In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically learn a structured, programmatic representation of a sketch which captures higher-level visual patterns.
+In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
 Prior work has also applied sketch-based program synthesis to authoring graphics programs. In particular, Sketch-n-Sketch presents a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
 
@@ -257,11 +258,10 @@ to continue drawing, the predicted primitive is rendered to its
 
 Figure~\ref{architecture} illustrates this architecture.  We first
 pass a $256\times 256$ target image and a rendering of the trace so
-far to a convolutional network -- these two inputs are represented as
-separate channels for the convnet. Given the features extracted by the
+far (encoded as a two-channel image) to a convolutional network. Given the features extracted by the
 convnet, a multilayer perceptron then predicts a distribution over the
 next drawing command to add to the trace.  We predict the drawing
-command token-by-token, and condition each token both on the image
+command token-by-token, conditioning each token both on the image
 features and on the previously generated tokens.  For example, the
 network first decides to emit the \verb|circle| token conditioned on
 the image features, then it emits the $x$ coordinate of the circle
@@ -269,11 +269,11 @@ conditioned on the image features and the \verb|circle| token, and
 finally it predicts the $y$ coordinate of the circle conditioned on
 the image features, the \verb|circle| token, and the $x$ coordinate.
 \remark{There are some more details that are important to provide
-  about this architecture, though possibly in an Appendix: the
+  about this architecture in the supplement: the
   functional form(s) of the probability distributions over tokens, the
   network layer sizes, which MLPs share parameters, etc.}
 
-The distribution over the next drawing command factorizes:
+The distribution over the next drawing command factorizes as:
 \begin{equation}
   \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta [t_k | f_\theta(I,\text{render}(T)), \{t_j\}_{j = 1}^{k - 1}]
 \end{equation}
@@ -287,15 +287,16 @@ execution traces factorizes as:
 \end{equation}
 where $|T|$ is the length of execution trace $T$, and the \verb|STOP|
 token is emitted by the network to signal that the execution trace
-explains the image.
+explains the image.~\remark{Make explicit that a $T_n$ in Equation 2 is a concise way of referring to a sequence of tokens from Equation 1?}
 
 We train the network by sampling execution traces $T$ and target
-images $I$ for randomly generated scenes, and maximizing
-(\ref{objective}) wrt $\theta$ by gradient ascent.
+images $I$ for randomly generated scenes~\remark{this process ought to be explained, perhaps in supplement if it is at all detailed}, and maximizing
+(\ref{objective}) with respect to $\theta$ by gradient ascent.
 Training does not require backpropagation across the entire sequence of drawing commands:
 drawing to the canvas `blocks' the gradients,
 effectively offloading memory to an external visual store.
 In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603attend} without attention.
+~\remark{Somewhere (not necessarily here) you should probably cite the deep learning toolkit you used.}
 
 %% \remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
 %% \remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
@@ -384,7 +385,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 
 
 
-This network suffices to ``derender'' images like those shown in
+This network suffices to ``derender'' synthetic images like those shown in
 Figure~\ref{trainingData}.  We can perform a beam search decoding to
 recover what the network thinks is the most likely execution trace for
 images like these, recovering traces maximizing $\probability_\theta
@@ -394,8 +395,8 @@ to derender an image with $n$ objects, it must correctly predict $n$
 drawing commands -- so its probability of success will decrease
 exponentially in $n$, assuming it has any nonzero chance of making a
 mistake.  For added robustness as $n$ becomes large, we treat the
-neural network outputs as proposals for a SMC sampling scheme.  For
-the SMC sampler, we use pixel wise distance as a surrogate for a
+neural network outputs as proposals for a Sequential Monte Carlo (SMC) sampling scheme~\cite{SMCBook}.  For
+the SMC sampler, we use pixel-wise distance as a surrogate for a
 likelihood function. The SMC sampler is designed to produce samples
 from the distribution $\propto L(I|\text{render}(T))
 \probability_\theta[T|I]$, where $L(\cdot | \cdot):\text{image}^2\to
@@ -428,22 +429,22 @@ A practical application of our neural network is the automatic conversion of han
  We train the model
 to generalize to hand drawings by introducing noise into the
 renderings of the training target images.
-We designed this noise process to introduce the kinds of variations found in hand drawings (figure~\ref{handDrawingExamples}).
+We designed this noise process to introduce the kinds of variations found in hand drawings (Figure~\ref{handDrawingExamples}).~\remark{Process should be described (in supplement)}
 Our neurally-guided SMC procedure
 used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in section~\ref{neuralNetworkSection}).
 But pixel-wise distance fares poorly on hand drawings, which never exactly match
 the model's renders.
 So, for hand drawings,
-we \emph{learned} a surrogate likelihood function.
+we \emph{learn} a surrogate likelihood function.
 Our learned $L(\cdot|\cdot)$
 is a convolutional network that we train to predict
-the distance between two traces conditioned upon their renderings.
+the distance between two traces conditioned upon their renderings~\remark{The two $L$'s should have some kind of identifier e.g. a subscript to distinguish them}.
 Formally we train our likelihood surrogate to approximate:
 \begin{equation}
 -\log L(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|
   \end{equation}
 
-
+\remark{What distance metric is this? Some kind of edit distance?}
 We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
 These were drawn reasonably carefully but not perfectly.
 Because our model assumes that objects are snapped to a $16\times 16$ grid,
@@ -461,7 +462,7 @@ we made the drawings on graph paper.
   \begin{minipage}[t]{0.2\textwidth}\includegraphics[width = 2cm]{figures/60-2-reduced.png} 
     \subcaption{}
   \end{minipage}
-  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\ref{handDrawingExamples}
+  \caption{(a): a hand drawing. (b): Rendering of the parse our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) \& (d) for noisy renderings of (b).}\ref{handDrawingExamples}~\remark{This figure is never referenced? Is the ref here supposed to be a label?}
 \end{figure}
 
 \begin{figure}[H]
@@ -495,22 +496,22 @@ we made the drawings on graph paper.
     \includegraphics[width = 2cm]{figures/34-parse.png}     
     \subcaption{Illusory contours}
     \end{minipage}
-  \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}}\label{handDrawingExamples}
+  \caption{Example drawings above model outputs. See also Figure~\ref{firstPageExamples}}\label{handDrawingExamples}\remark{Showing `failure cases' (the last three above) out-of-context seems not great. Perhaps remind people in the caption that stochastic search can help correct some of these issues?}
   \end{figure}
 
 \section{Synthesizing graphics programs from execution traces}
 Although the execution trace of a graphics program describes the parts
 of a scene, it fails to encode higher-level features of the image,
-such as repeated motifs, symmetries or reflections.  A \emph{graphics
+such as repeated motifs or symmetries.  A \emph{graphics
   program} better describe structures like these,
 and we now take as our goal to synthesize simple graphics programs from
 their execution traces.
 
 We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
-to synthesize programs in a Turing-complete language like Lisp or
+to synthesize programs in a Turing-complete language such as Lisp or
 Python, a more tractable approach is to specify what in the program
-languages community is called a Domain Specific Language (DSL). Our DSL (Table~\ref{DSL})
+languages community is called a Domain Specific Language (DSL)~\remark{citation?}. Our DSL (Table~\ref{DSL})
 encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
@@ -542,8 +543,8 @@ and seek the minimum cost program consistent with $T$:
 We define the
 cost of a program to be the number of statements it contains, where a
 statement is a ``Command'' in Table~\ref{DSL}.
-We also penalize using more distant constants,
-which encourages reuse of coefficients.
+We also penalize using more distant constants~\remark{awkward},
+which encourages reuse of coefficients.~\remark{More detail on this in supplement}
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
 The constrained optimization problem in
@@ -564,13 +565,14 @@ globally optimal program.
 Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
+\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
+
 \subsection{Extrapolating figures}
 Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
 For example,
-we can change all of the circles to squares,
-were make all of the lines be dashed.
+we can change all of the circles to squares or make all of the lines be dashed.
 We can also \textbf{extrapolate} figures
-by increasing the number of times that loops are executed.
+by increasing the number of times that loops are executed.~\remark{Pick a few of these to show off and put the rest in supplement}
 
 \includegraphics[width = 8in]{figures/extrapolationMatrix.png}
 %\input{extrapolations.tex}
@@ -584,15 +586,15 @@ Similarity metric in program space:\\
 Similarity metric in image space:\\
 \includegraphics[width = 8in]{figures/imageSimilarity.png}
 
-\subsection{Correcting errors made by the neural network}
-The program synthesizer can help correct errors from  the neural network by favoring execution traces which lead to more concise or general programs.
-For example, one generally prefers figures with neatly aligned objects over figures whose parts are slightly misaligned -- and nice alignment lends itself to short programs.
+\subsection{Correcting errors made by the parsing network}
+The program synthesizer can help correct errors from the parse proposal network by favoring execution traces which lead to more concise or general programs.
+For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
 Similarly, figures often have repeated parts,
-which the program synthesizer might model as a reflection.
-So, if one is considering several candidate traces proposed by the neural network,
-we might prefer traces whose best programs have desirable features like being short or having iterated structures.
+which the program synthesizer might be able to model as a loop or reflectional symmetry.
+So, in considering several candidate traces proposed by the neural network,
+we might prefer traces whose best programs have desirable features such being short or having iterated structures.
 
-Concretely we implemented the following scheme: the neurally guided sampling scheme of section~\ref{neuralNetworkSection} for image $I$ produces (samples) candidate traces, $\mathcal{F}(I)$.
+Concretely, we implemented the following scheme: the neurally guided sampling scheme of section~\ref{neuralNetworkSection} for image $I$ samples candidate traces $\mathcal{F}(I)$.
 Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
 we can take into account the programs that best explain the traces. 
 Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
@@ -607,7 +609,7 @@ from $\probability_{\beta} [\cdot]$, then the program is executed deterministica
 and then we observe a noisy version of the program's output, where $L$
 is the noise model.
 
-Given a corpus of graphics program synthesis problems with annotated ground truth traces (so pairs of $(I,T)$),
+Given a corpus of graphics program synthesis problems with annotated ground truth traces (i.e. $(I,T)$ pairs),
 we find a maximum likelihood estimate of $\beta$:
 \begin{equation}
   \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L(I|\text{render}(T))}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L(I|\text{render}(T'))} \right]
@@ -616,14 +618,12 @@ where the expectation is taken both over the model predictions and the
 $(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
 [\cdot]$ to be a log linear distribution $\propto \exp
 (\beta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
-extractor for programs.  We can extract a few basic features of a
-program, like its size or how many loops it has, and use these
+extractor for programs.  We extract a few basic features of a
+program, such as its size and how many loops it has, and use these
 features to help predict whether a trace is the correct explanation
 for an image.
 
-
-
-\remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Equation 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
+% \remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Equation 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
 
 
 
