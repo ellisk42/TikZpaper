@@ -365,8 +365,8 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   
   \draw[->,ultra thick] (canvas.east) -- (tensorProduct.south);%[yshift = -0.5cm]CNN.west);
   \draw[->,ultra thick] (observation.east) -- (tensorProduct.north);%([yshift = 0.5cm]CNN.west);
-  \draw[->,ultra thick] (tensorProduct.east)  -- node[center,fill = white,rotate = 90] {{\tiny $256\times 256\times 2$}}  (CNN.west);
-  \draw[->,ultra thick] (CNN.east) -- node[center,fill = white,rotate = 90] {{\tiny $16\times 16\times 10$}} (features.south);
+  \draw[->,ultra thick] (tensorProduct.east)  -- node[fill = white,rotate = 90] {{\tiny $256\times 256\times 2$}}  (CNN.west);
+  \draw[->,ultra thick] (CNN.east) -- node[fill = white,rotate = 90] {{\tiny $16\times 16\times 10$}} (features.south);
 %  \draw[]
   
 %  \node at (canvas.x,canvas.y) {Canvas};
