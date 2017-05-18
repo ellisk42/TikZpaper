@@ -451,7 +451,7 @@ $L_{\text{learned}}(\cdot|\cdot)$.
 The density $L_{\text{learned}}(\cdot|\cdot)$ is predicted by a convolutional network that we train to predict
 the distance between two traces conditioned upon their renderings.
 We train our likelihood surrogate to approximate the symmetric difference,
-which is  the number of drawing commands by which to traces differ:
+which is  the number of drawing commands by which two traces differ:
 \begin{equation}
 -\log L_{\text{learned}}(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|\label{symmetricDistance}
 \end{equation}
