@@ -60,9 +60,9 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \DeclareMathOperator*{\argmin}{arg\,min} % thin space, limits underneath in displays
-\DeclareMathOperator{\argmin}{argmin} % no space, limits underneath in displays
+% \DeclareMathOperator{\argmin}{argmin} % no space, limits underneath in displays
 \DeclareMathOperator*{\argmax}{arg\,max} % thin space, limits underneath in displays
-\DeclareMathOperator{\argmax}{argmax} % no space, limits underneath in displays
+% \DeclareMathOperator{\argmax}{argmax} % no space, limits underneath in displays
 
 \newcommand{\expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
@@ -564,13 +564,13 @@ encodes prior knowledge of what graphics programs tend to look like.
   Command$\to$&\texttt{line}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
   Command$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ if }$(\text{Var} > 0)$\texttt{ \{ }Program\texttt{ \}; }Program\texttt{ \}}\\
   Command$\to$&\texttt{reflect}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
-  Expression$\to$&\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}\\
+  Expression$\to$&$\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$\\
   Var$\to$&A free (unused) variable\\
-  \mathcal{Z}$\to$&an integer\\
-  Axis$\to$&\texttt{X = }\mathcal{Z}\\
-  Axis$\to$&\texttt{Y = }\mathcal{Z}\\\bottomrule
+  $\mathcal{Z}$$\to$&an integer\\
+  Axis$\to$&\texttt{X = }$\mathcal{Z}$\\
+  Axis$\to$&\texttt{Y = }$\mathcal{Z}$\\\bottomrule
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations (\mathcal{Z}\texttt{ * }Var\texttt{ + }\mathcal{Z}).}\label{DSL}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$).}\label{DSL}
 \end{table}
 
 Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
