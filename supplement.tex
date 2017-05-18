@@ -110,6 +110,18 @@ MIT\\
 
 \maketitle
 
+\section{Simulating hand drawings}
+
+We introduce noise into the rendering process by:
+
+\begin{itemize}
+\item Rescaling the image intensity by a factor chosen uniformly at random from $[0.5,1.5]$
+\item Translating the image by $\pm 3$ pixels chosen uniformly random
+\item Rendering the \LaTeX~using the \verb|pencildraw| style,
+  which adds random perturbations to the paths drawn by \LaTeX in a way designed to resemble a pencil.
+\item Randomly perturbing the positions and sizes of primitive  \LaTeX drawing commands
+  \end{itemize}
+
 \section{Neural networks for guiding SMC}
 
 

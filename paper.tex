@@ -440,7 +440,7 @@ A practical application of our neural network is the automatic conversion of han
  We train the model
 to generalize to hand drawings by introducing noise into the
 renderings of the training target images.
-We designed this noise process to introduce the kinds of variations found in hand drawings (Figure~\ref{handDrawingExamples}).~\remark{Process should be described (in supplement)}
+We designed this noise process to introduce the kinds of variations found in hand drawings (Figure~\ref{handDrawingExamples}; see supplement for details).
 Our neurally-guided SMC procedure
 used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in section~\ref{neuralNetworkSection}).
 But pixel-wise distance fares poorly on hand drawings, which never exactly match
@@ -523,7 +523,7 @@ we made the drawings on graph paper.
 \end{figure}
 For each drawing we annotated a ground truth trace, and evaluated the
 model by asking it to sample many candidate traces for each drawing.
-For 55\% of the drawings the Top-1 most likely sample exactly matches the
+For 57\% of the drawings the Top-1 most likely sample exactly matches the
 ground truth; as we consider more samples the model encounters traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
 Because our current model sometimes makes mistakes on hand drawings,
@@ -623,11 +623,16 @@ see supplement for our full set of extrapolations.
 
 \subsection{Modeling similarity between figures}
 
-Similarity metric in program space:\\
-\includegraphics[width = 8in]{figures/similarity.png}
-
-Similarity metric in image space:\\
-\includegraphics[width = 8in]{figures/imageSimilarity.png}
+\begin{figure}
+  \begin{minipage}{0.4\textwidth}
+  \includegraphics[width = 3in]{figures/NMF.png}
+  \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    
+    \end{minipage}\hfill
+\begin{minipage}{0.4\textwidth}
+  \includegraphics[width = 3in]{figures/imageSimilarity.png} 
+  \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
+    \end{minipage}
+  \end{figure}
 
 \subsection{Correcting errors made by the parsing network}
 The program synthesizer can help correct errors from the parse proposal network by favoring execution traces which lead to more concise or general programs.
