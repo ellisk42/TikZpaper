@@ -128,7 +128,7 @@
   program synthesis techniques to recover a graphics
   program with constructs like variable bindings, iterative loops, or
   simple kinds of conditionals. With a graphics program in hand,
-  we can correct errors made by the deep network, extrapolate drawings, and cluster drawings by use of similar high-level geometric structures.
+  we can correct errors made by the deep network, cluster drawings by use of similar high-level geometric structures, and extrapolate drawings.
   Taken together these results are a step towards
   agents that induce useful, human-readable programs from perceptual input.  
 \end{abstract}
@@ -231,10 +231,6 @@ extrapolating figures, and correcting errors made by the deep network.
 
 \section{Related work}
 
-The CogSketch~\cite{forbus2011cogsketch} system also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling, whereas we are interested in building an automated AI application.
-
-%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
-
 Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on parsing and interpreting hand-drawn sketches.
 % attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
 % that they focus on learning the generative model jointly with the
@@ -250,7 +246,20 @@ In the computer graphics literature, there have been other systems which convert
 
 Prior work has also applied sketch-based program synthesis to authoring graphics programs. In particular, Sketch-n-Sketch presents a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
 
-\remark{Do you also want to cite your own work on ``Unsupverised Learning by Program Synthesis'' here?}
+The CogSketch~\cite{forbus2011cogsketch} system also aims to have a
+high-level understanding of hand-drawn figures. Their primary goal is
+cognitive modeling (eg, they apply their system to solving IQ-test
+style visual reasoning problems), whereas we are interested in
+building an automated AI application (eg, in our system the user need
+not annotate which strokes correspond to which shapes; our neural
+network produces something equivalent to the annotations).  A key
+similarity however is that both CogSketch and our system have as a
+goal to make it easier to produce nice-looking figures.
+Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
+and they applied their technique to synthetic scenes used in human behavioral studies.
+%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
+
+
 
 
 
@@ -336,10 +345,10 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
   \node(l1) at ([yshift = -2cm]c1.south) {\verb|circle(|};
   \node[draw,ultra thick,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east) {MLP};
   \draw[->,ultra thick,red] (c1.south) -- (l1.north);
-  \node(l2) at ([yshift = -2cm]c2.south) {\verb|X=3,|};
+  \node(l2) at ([yshift = -2cm]c2.south) {\verb|X=7,|};
   \draw[->,ultra thick,red] (c2.south) -- (l2.north);
   \node[draw,ultra thick,minimum size = 1cm](c3) at ([xshift = 1cm]c2.east) {MLP};
-  \node(l3) at ([yshift = -2cm]c3.south) {\verb|Y=14)|};
+  \node(l3) at ([yshift = -2cm]c3.south) {\verb|Y=12)|};
   \draw[->,ultra thick,red] (c3.south) -- (l3.north);
 
   
@@ -519,7 +528,7 @@ we made the drawings on graph paper.
     \includegraphics[width = 2cm]{figures/34-parse.png}     
     \subcaption{Illusory contours}
     \end{minipage}
-  \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}}\label{lotsOfHandDrawings}~\remark{Showing `failure cases' (the last three above) out-of-context seems not great. Perhaps remind people in the caption that stochastic search can help correct some of these issues?}
+  \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}. Stochastic search (SMC) can help correct for these errors, as can the program synthesizer (Section~\ref{synthesizerHelpsParsing})}\label{lotsOfHandDrawings}%~\remark{Showing `failure cases' (the last three above) out-of-context seems not great. Perhaps remind people in the caption that stochastic search can help correct some of these issues?}
 \end{figure}
 For each drawing we annotated a ground truth trace, and evaluated the
 model by asking it to sample many candidate traces for each drawing.
@@ -544,7 +553,7 @@ We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
 to synthesize programs in a Turing-complete language such as Lisp or
 Python, a more tractable approach is to specify what in the program
-languages community is called a Domain Specific Language (DSL)~\remark{citation?}. Our DSL (Table~\ref{DSL})
+languages community is called a Domain Specific Language (DSL)~\cite{polozov2015flashmeta}. Our DSL (Table~\ref{DSL})
 encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
@@ -586,7 +595,7 @@ program synthesis problems like these. We use the state-of-the-art Sketch
 tool~\cite{solar2008program}. Describing Sketch's program synthesis
 algorithm is beyond the scope of this paper; see supplement.  At a
 high level, Sketch takes as input a space of programs, along with a
-specification of the program 's behavior and optionally a cost
+specification of the program's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
 satisfaction problem, and then uses a SAT solver to find a
 minimum cost program satisfying the specification.  In exchange for
@@ -597,45 +606,10 @@ globally optimal program.
 Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
-\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
+%\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
 
-\subsection{Extrapolating figures}
-Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
-For example,
-we can change all of the circles to squares or make all of the lines be dashed.
-We can also \textbf{extrapolate} figures
-by increasing the number of times that loops are executed.~\remark{Pick a few of these to show off and put the rest in supplement?}
-Extrapolating repetitive visuals patterns comes naturally to humans,
-and building this ability into an application is practical:
-imagine hand drawing a repetitive graphical model structure
-and having our system automatically induce and extend the pattern.
-Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from ground truth traces;
-see supplement for our full set of extrapolations.
-
-\begin{figure}
-  \includegraphics[width = 8in]{figures/extrapolationMatrix.png}
-  \caption{Left: hand drawings. Right: extrapolations produced by
-    running different parts of different loops either forward or
-    backward an extra iteration.}\label{extrapolationFigure}
-  \end{figure}
-%\input{extrapolations.tex}
-
-
-\subsection{Modeling similarity between figures}
-
-\begin{figure}
-  \begin{minipage}{0.4\textwidth}
-  \includegraphics[width = 3in]{figures/NMF.png}
-  \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    
-    \end{minipage}\hfill
-\begin{minipage}{0.4\textwidth}
-  \includegraphics[width = 3in]{figures/imageSimilarity.png} 
-  \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
-    \end{minipage}
-  \end{figure}
-
-\subsection{Correcting errors made by the parsing network}
-The program synthesizer can help correct errors from the parse proposal network by favoring execution traces which lead to more concise or general programs.
+\subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
+The program synthesizer can help correct errors from the execution trace proposal network by favoring execution traces which lead to more concise or general programs.
 For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
 Similarly, figures often have repeated parts,
 which the program synthesizer might be able to model as a loop or reflectional symmetry.
@@ -670,6 +644,42 @@ extractor for programs.  We extract a few basic features of a
 program, such as its size and how many loops it has, and use these
 features to help predict whether a trace is the correct explanation
 for an image.
+
+\subsection{Modeling similarity between figures}
+
+\begin{figure}
+  \begin{minipage}{0.4\textwidth}
+  \includegraphics[width = 3in]{figures/NMF.png}
+  \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    
+    \end{minipage}\hfill
+\begin{minipage}{0.4\textwidth}
+  \includegraphics[width = 3in]{figures/imageSimilarity.png} 
+  \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
+    \end{minipage}
+  \end{figure}
+
+\subsection{Extrapolating figures}
+Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
+For example,
+we can change all of the circles to squares or make all of the lines be dashed.
+We can also \textbf{extrapolate} figures
+by increasing the number of times that loops are executed.~\remark{Pick a few of these to show off and put the rest in supplement?}
+Extrapolating repetitive visuals patterns comes naturally to humans,
+and building this ability into an application is practical:
+imagine hand drawing a repetitive graphical model structure
+and having our system automatically induce and extend the pattern.
+Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from ground truth traces;
+see supplement for our full set of extrapolations.
+
+\begin{figure}
+  \includegraphics[width = 8in]{figures/extrapolationMatrix.png}
+  \caption{Left: hand drawings. Right: extrapolations produced by
+    running different parts of different loops either forward or
+    backward an extra iteration.}\label{extrapolationFigure}
+  \end{figure}
+%\input{extrapolations.tex}
+
+
 
 % \remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Equation 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
 
