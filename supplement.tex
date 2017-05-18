@@ -65,7 +65,7 @@
 % this with the following command.
 
 \newcommand{\Expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
-\newcommand{\Probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
+\newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
 
 \newtheorem{proposition}{Proposition}
 
@@ -110,6 +110,52 @@ MIT\\
 
 \maketitle
 
+\section{Neural network architecture}
+
+\subsection{Convolutional network}
+The convolutional network takes as input 2 $256\times 256$ images
+represented as a $2\times 256\times 256\times$ volume. These are
+passed through two layers of convolutions separated by ReLU
+nonlinearities and max pooling:
+\begin{itemize}
+\item Layer 1: 20 $8\times 8$ convolutions, 2 $16\times 4$ convolutions, 2 $4\times 16$ convolutions. Followed by $8\times 8$ pooling with a stride size of 4.
+\item Layer 2: 10 $8\times 8$ convolutions. Followed by $4\times 4$ pooling with a stride size of 4.
+\end{itemize}
+Training takes a little bit less than a day on a Nvidia TitanX GPU.
+The network was trained on $10^5$ synthetic examples.
+
+\subsection{Autoregressive decoding of drawing commands}
+
+Given the image features $f$, we predict the first token using logistic regression:
+\begin{equation}
+  \probability [T_1]\propto W_{T_1}f
+\end{equation}
+where $W_{T_1}$ is a learned weight matrix.
+
+Subsequent tokens are predicted as:
+\begin{equation}
+  \probability [T_n|T_{1:(n - 1)}]\propto \text{MLP}_{T_1,n}(I \otimes \bigotimes_{j < n} \text{oneHot}(T_j))
+\end{equation}
+Thus each token of each drawing primitive has its own learned MLP.
+For predicting the coordinates of lines we found that using 32 hidden nodes with sigmoid activations worked well;
+for other tokens the MLP's are just logistic regression (no hidden nodes).
+
+\subsection{A learned likelihood surrogate}
+
+Our architecture for
+$L_{\text{learned}}(\text{render}(T_1)|\text{render}(T_2))$ has the
+same series of convolutions as the network that predicts the next
+drawing command. We train it to predict two scalars: $|T_1 - T_2|$ and
+$|T_2 - T_1|$.  These predictions are made using linear regression
+from the image features followed by a ReLU nonlinearity; this
+nonlinearity makes sense because the predictions can never be negative
+but could be arbitrarily large positive numbers.
+
+We train this network by sampling random synthetic scenes for $T_1$,
+and then perturbing them in small ways to produce $T_2$.
+We minimize the squared loss between the network's prediction and the ground truth symmetric differences.
+$T_1$ is rendered in a ``simulated hand drawing'' style which we describe next.
+
 \section{Simulating hand drawings}
 
 We introduce noise into the rendering process by:
@@ -122,87 +168,73 @@ We introduce noise into the rendering process by:
 \item Randomly perturbing the positions and sizes of primitive  \LaTeX drawing commands
   \end{itemize}
 
-\section{Neural networks for guiding SMC}
+%% \section{Neural networks for guiding SMC}
 
 
 
-Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
-function: it takes two images, an observed target image and a
-hypothesized program output, and gives the likelihood of the observed
-image conditioned on the program output. We want to sample from:
-\begin{equation}
-\probability [p|x]  \propto L(x | \text{render}(p)) \probability [p]
-\end{equation}
-where $\probability [p]$ is the prior probability of program $p$, and $x$ is the observed image.
+%% Let $L(\cdot | \cdot):\text{image}^2\to \mathcal{R}$ be our likelihood
+%% function: it takes two images, an observed target image and a
+%% hypothesized program output, and gives the likelihood of the observed
+%% image conditioned on the program output. We want to sample from:
+%% \begin{equation}
+%% \probability [p|x]  \propto L(x | \text{render}(p)) \probability [p]
+%% \end{equation}
+%% where $\probability [p]$ is the prior probability of program $p$, and $x$ is the observed image.
 
-Let $p$ be a program with $L$ lines, which we will write as $p = (p_1,p_2,\cdots,p_L)$. Assume the prior factors into:
-\begin{equation}
-  \probability [p]\propto \prod_{l\leq L}\probability [p_l]
-\end{equation}
-Define the distribution $q_L(\cdot)$, which happens to be proportional to the above posterior:
-\begin{equation}
-  q_L(p_1,p_2,\cdots,p_{L - 1},p_L)\propto q_{L - 1}(p_1,p_2,\cdots,p_{L - 1})\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]
-\end{equation}
-Now suppose we have some samples from $q_{L - 1}(\cdot)$, and that we
-then sample a $p_L$ from a distribution proportional to $\frac{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$.
-The resulting programs $p$ are distributed according to $q_L$, and so
-are also distributed according to $\probability [p|x]$.
+%% Let $p$ be a program with $L$ lines, which we will write as $p = (p_1,p_2,\cdots,p_L)$. Assume the prior factors into:
+%% \begin{equation}
+%%   \probability [p]\propto \prod_{l\leq L}\probability [p_l]
+%% \end{equation}
+%% Define the distribution $q_L(\cdot)$, which happens to be proportional to the above posterior:
+%% \begin{equation}
+%%   q_L(p_1,p_2,\cdots,p_{L - 1},p_L)\propto q_{L - 1}(p_1,p_2,\cdots,p_{L - 1})\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]
+%% \end{equation}
+%% Now suppose we have some samples from $q_{L - 1}(\cdot)$, and that we
+%% then sample a $p_L$ from a distribution proportional to $\frac{L(x |
+%%   \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
+%%   \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$.
+%% The resulting programs $p$ are distributed according to $q_L$, and so
+%% are also distributed according to $\probability [p|x]$.
 
-How do we sample $p_L$ from a distribution proportional to $\frac{L(x
-  | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
-  \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$?
-We have a neural network that takes as input the target image $x$ and
-the program so far, and produces a distribution over next lines of
-code ($p_L$).  We write $\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)$ for
-the distribution output by the neural network. So we can sample from NN and then weight the samples by:
-\begin{equation}
-  w(p_L) = \frac{\probability [p_L]}{\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)}\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}
-\end{equation}
-Then we can resample from these now weighted samples to get a new
-population of particles (here programs are particles), where each
-program now has $L$ lines instead of $L - 1$.
+%% How do we sample $p_L$ from a distribution proportional to $\frac{L(x
+%%   | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x |
+%%   \text{render}(p_1,p_2,\cdots,p_{L - 1}))}\times\probability [p_L]$?
+%% We have a neural network that takes as input the target image $x$ and
+%% the program so far, and produces a distribution over next lines of
+%% code ($p_L$).  We write $\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)$ for
+%% the distribution output by the neural network. So we can sample from NN and then weight the samples by:
+%% \begin{equation}
+%%   w(p_L) = \frac{\probability [p_L]}{\text{NN}(p_L | p_1,\cdots,p_{L - 1};x)}\times \frac{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1},p_L))}{L(x | \text{render}(p_1,p_2,\cdots,p_{L - 1}))}
+%% \end{equation}
+%% Then we can resample from these now weighted samples to get a new
+%% population of particles (here programs are particles), where each
+%% program now has $L$ lines instead of $L - 1$.
 
-This procedure can be seen as a particle filter, where each successive
-latent variable is another line of code, and the emission
-probabilities are successive ratios of likelihoods under $L(\cdot |
-\cdot)$.
-
-\textbf{Comments for Dan}. Right now I'm not actually sampling from
-the neural network - instead, I enumerate the top few hundred lines of
-code suggested by the network, and then weight them by their
-likelihoods.
-So actually the form of NN is:
-\begin{equation}
-  \text{NN}(p_L | p_1,\cdots,p_{L - 1};x)\propto \begin{cases}
-    1,&\text{ if }p_L \in \text{top hundred neural network proposals}\\
-0,&\text{otherwise}.    \end{cases}
-\end{equation}
-Do you think this is a problem? The neural network puts almost all of its mass on a few guesses.
-In order to get the correct line of code I sometimes need to get something like the 50th  top guess,
-so I don't want to literally just sample from the distribution suggested by the neural network.
+%% This procedure can be seen as a particle filter, where each successive
+%% latent variable is another line of code, and the emission
+%% probabilities are successive ratios of likelihoods under $L(\cdot |
+%% \cdot)$.
 
 
-  \begin{algorithm}[tb]
-   \caption{Neurally guided SMC}
-   \label{guideAlgorithm}
-\begin{algorithmic}
-  \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
-  \STATE {\bfseries Output:} Samples of the program trace
-  \STATE Set $B_0 = \{\text{empty program}\}$
-  \FOR{$1\leq l\leq L$}
-  \FOR{$1\leq n\leq N$}
-  \STATE{ $p_n\sim \text{Uniform}(B_{l - 1})$}
-  \STATE{ $p'_{n}\sim \text{NN}(\text{render}(p),x)$}
-  \STATE{ Define $r_n = p'_n\cdot p_n$}
-  \STATE{ Set $\tilde{w}(r_n) = \frac{L(x|r_n)}{L(x|p_n)}\times\frac{\probability [p'_n]}{\probability [p'_n = \text{NN}(\text{render}(p),x)]}$}
-  \ENDFOR
-  \STATE{ Define $w(p) = \frac{\tilde{w}(p)}{\sum_{p'}\tilde{w}(p')}$}
-  \STATE{ Set $B_l$ to be $N$ samples from $r_n$ distributed according to $w(\cdot)$}
-  \ENDFOR
-  \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
-\end{algorithmic}
-  \end{algorithm}
+%%   \begin{algorithm}[tb]
+%%    \caption{Neurally guided SMC}
+%%    \label{guideAlgorithm}
+%% \begin{algorithmic}
+%%   \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
+%%   \STATE {\bfseries Output:} Samples of the program trace
+%%   \STATE Set $B_0 = \{\text{empty program}\}$
+%%   \FOR{$1\leq l\leq L$}
+%%   \FOR{$1\leq n\leq N$}
+%%   \STATE{ $p_n\sim \text{Uniform}(B_{l - 1})$}
+%%   \STATE{ $p'_{n}\sim \text{NN}(\text{render}(p),x)$}
+%%   \STATE{ Define $r_n = p'_n\cdot p_n$}
+%%   \STATE{ Set $\tilde{w}(r_n) = \frac{L(x|r_n)}{L(x|p_n)}\times\frac{\probability [p'_n]}{\probability [p'_n = \text{NN}(\text{render}(p),x)]}$}
+%%   \ENDFOR
+%%   \STATE{ Define $w(p) = \frac{\tilde{w}(p)}{\sum_{p'}\tilde{w}(p')}$}
+%%   \STATE{ Set $B_l$ to be $N$ samples from $r_n$ distributed according to $w(\cdot)$}
+%%   \ENDFOR
+%%   \STATE {\bfseries return} $\{p : p\in B_{l\leq L}, p \text{ is finished}\}$
+%% \end{algorithmic}
+%%   \end{algorithm}
 
 \end{document}
