@@ -158,7 +158,7 @@ $T_1$ is rendered in a ``simulated hand drawing'' style which we describe next.
 
 \section{Simulating hand drawings}
 
-We introduce noise into the rendering process by:
+We introduce noise into the \LaTeX~rendering process by:
 
 \begin{itemize}
 \item Rescaling the image intensity by a factor chosen uniformly at random from $[0.5,1.5]$
@@ -167,6 +167,30 @@ We introduce noise into the rendering process by:
   which adds random perturbations to the paths drawn by \LaTeX in a way designed to resemble a pencil.
 \item Randomly perturbing the positions and sizes of primitive  \LaTeX drawing commands
   \end{itemize}
+
+\section{Generating synthetic training data}
+
+I need to describe the procedure that I used to sample the scenes. it's pretty involved
+
+\section{The cost function for programs}
+
+We seek the minimum cost program which evaluates to (produces the drawing primitives in) an execution trace $T$:
+\begin{equation}
+  \text{program}(T) = \argmin_{\substack{p\in \text{DSL}\\p \text{ evaluates to } T}} \text{cost}(p)\label{programObjective}
+\end{equation}
+
+Programs incur a cost of 1 for each command (primitive drawing action,
+loop, or reflection).  They incur a cost of $\frac{1}{3}$ for each
+unique coefficient they use in a linear transformation beyond the
+first coefficient. This encourages reuse of coefficients, which leads
+to code that has translational symmetry; rather than provide a
+translational symmetry operator as we did with reflection, we modify
+what is effectively a prior over the space of program so that it tends
+to produce programs that have this symmetry.
+
+Programs also incur a cost of 1 for having loops of constant length 2;
+otherwise there is often no pressure from the cost function to explain
+a repetition of length to as being a reflection rather a loop.
 
 %% \section{Neural networks for guiding SMC}
 

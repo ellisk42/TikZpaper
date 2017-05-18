@@ -171,10 +171,15 @@
       \node(picture) at (0,0) {\includegraphics[width = 2cm]{figures/expert-31.png}};
       \draw[very thick,->] (picture.south)  -- (0,-2);
     \end{tikzpicture}\\
-    \texttt{for} $0\leq i < 4$:\\
-    \texttt{rectangle} $(-3i + 9,2i - 2, -3i + 11,6)$\\
-    \texttt{for} $0\leq j < i$:\\
-    \texttt{circle} $(3i-2,-2j+5)$\\
+    \begin{minipage}[t]{0.3\linewidth}
+\begin{verbatim}
+for (i < 3)
+ rectangle(3*i,-2*i + 4,
+           3*i + 2,6)
+ for (j < i + 1)
+  circle(3*i + 1,-2*j + 5)
+\end{verbatim}      
+      \end{minipage}
     \subcaption{}
   \end{minipage}
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
@@ -210,8 +215,8 @@ geometric operations such as reflections and affine transformations.
 % \remark{This paragraph is all about making things a bit more
 Section~\ref{programSynthesisSection} describes how the architecture
 synthesizes programs from execution traces,
-and how those programs are used for measuring similarity between hand drawings,
-extrapolating figures, and correcting errors made by the deep network.
+and how those programs are used for  correcting errors made by the deep network, measuring similarity between hand drawings,
+and extrapolating figures.
 
 
 %   so you really need more specifics about program synth here.}
@@ -288,10 +293,12 @@ the image features, then it emits the $x$ coordinate of the circle
 conditioned on the image features and the \verb|circle| token, and
 finally it predicts the $y$ coordinate of the circle conditioned on
 the image features, the \verb|circle| token, and the $x$ coordinate.
-\remark{There are some more details that are important to provide
-  about this architecture in the supplement: the
-  functional form(s) of the probability distributions over tokens, the
-  network layer sizes, which MLPs share parameters, etc.}
+See supplement for the full details of the architecture,
+which we implemented in Tensorflow.
+%% \remark{There are some more details that are important to provide
+%%   about this architecture in the supplement: the
+%%   functional form(s) of the probability distributions over tokens, the
+%%   network layer sizes, which MLPs share parameters, etc.}
 
 The distribution over the next drawing command factorizes as:
 \begin{equation}
@@ -310,13 +317,14 @@ token is emitted by the network to signal that the execution trace
 explains the image.~\remark{Make explicit that a $T_n$ in Equation 2 is a concise way of referring to a sequence of tokens from Equation 1?}
 
 We train the network by sampling execution traces $T$ and target
-images $I$ for randomly generated scenes~\remark{this process ought to be explained, perhaps in supplement if it is at all detailed}, and maximizing
+images $I$ for randomly generated scenes
+%~\remark{this process ought to be explained, perhaps in supplement if it is at all detailed},
+and maximizing
 (\ref{objective}) with respect to $\theta$ by gradient ascent.
 Training does not require backpropagation across the entire sequence of drawing commands:
 drawing to the canvas `blocks' the gradients,
 effectively offloading memory to an external visual store.
 In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603attend} without attention.
-~\remark{Somewhere (not necessarily here) you should probably cite the deep learning toolkit you used.}
 
 %% \remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
 %% \remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
@@ -434,7 +442,7 @@ training data.
   \begin{minipage}{0.35\textwidth}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
-    \caption{Network is trained to infer execution traces for randomly generated figures like the two shown above.}\label{trainingData}
+    \caption{Network is trained to infer execution traces for randomly generated figures like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
   \end{minipage}\hfill
   \begin{minipage}{0.6\textwidth}
     \includegraphics[width = 4cm]{figures/editDistance.png}
@@ -644,6 +652,9 @@ extractor for programs.  We extract a few basic features of a
 program, such as its size and how many loops it has, and use these
 features to help predict whether a trace is the correct explanation
 for an image.
+Learning this prior over programs modestly improves our Top-1 accuracy from 57\% to \textbf{experiment is still running},
+but recall from Fig.~\ref{drawingIntersectionOverUnion}
+that the best improvement in accuracy we could possibly get is 65\%.
 
 \subsection{Modeling similarity between drawings}
 Modeling an image using a program opens up new ways of measuring similarity between drawings.
@@ -662,12 +673,12 @@ For example, we can use our learned distance metric between execution traces, $L
 Projecting these distances to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}) reveals similarities between the objects in the drawings,
 while missing similarities at the level of the program.
 \begin{figure}
-  \begin{minipage}{0.4\textwidth}
-    \includegraphics[width = 3in]{figures/NMF.png}
+  \begin{minipage}{0.45\textwidth}
+    \includegraphics[width = 2in]{figures/NMF.png}
     \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    \label{NMF}
   \end{minipage}\hfill
-  \begin{minipage}{0.4\textwidth}
-    \includegraphics[width = 3in]{figures/imageSimilarity.png} 
+  \begin{minipage}{0.45\textwidth}
+    \includegraphics[width = 2in]{figures/imageSimilarity.png} 
     \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
   \end{minipage}
 \end{figure}
