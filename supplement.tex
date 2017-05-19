@@ -72,7 +72,7 @@
 \newcommand\modt{\stackrel{\mathclap{\normalfont 2}}{\equiv}}
 
 
-\title{Supplement to: Inferring Graphics Programs from Images}
+\title{Supplement to: Learning to Infer Graphics Programs from Hand-Drawn Images}
 
 % The \author macro works with any number of authors. There are two
 % commands used to separate the names and addresses of multiple
@@ -109,6 +109,58 @@ MIT\\
 % \nipsfinalcopy is no longer used
 
 \maketitle
+
+\section{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
+The program synthesizer can help correct errors from the execution trace proposal network by favoring execution traces which lead to more concise or general programs.
+For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
+Similarly, figures often have repeated parts,
+which the program synthesizer might be able to model as a loop or reflectional symmetry.
+So, in considering several candidate traces proposed by the neural network,
+we might prefer traces whose best programs have desirable features such being short or having iterated structures.
+
+Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section~\ref{neuralNetworkSection} samples a set of candidate traces, written $\mathcal{F}(I)$.
+Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
+we can take into account the programs that best explain the traces. 
+Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
+\begin{equation}
+\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(T))\times \probability_\theta[T|I] \times\probability_{\beta} [ \text{program}(T)] 
+\end{equation}
+where $\probability_{\beta} [\cdot]$ is a prior probability
+distribution over programs parameterized by $\beta$.
+This is equivalent to doing
+MAP inference in a generative model where the program is first drawn
+from $\probability_{\beta} [\cdot]$, then the program is executed deterministically,
+and then we observe a noisy version of the program's output, where $L_\text{learned}(I|\text{render}(\cdot))\times\probability_\theta[\cdot|I]$
+is our observation model.
+
+Given a corpus of graphics program synthesis problems with annotated ground truth traces (i.e. $(I,T)$ pairs),
+we find a maximum likelihood estimate of $\beta$:
+\begin{equation}
+  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L_{\text{learned}}(I|\text{render}(T))\times \probability_\theta[T|I]}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L_{\text{learned}}(I|\text{render}(T'))\times \probability_\theta[T'|I]} \right]
+\end{equation}
+where the expectation is taken both over the model predictions and the
+$(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
+[\cdot]$ to be a log linear distribution $\propto \exp
+(\beta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
+extractor for programs.  We extract a few basic features of a
+program, such as its size and how many loops it has, and use these
+features to help predict whether a trace is the correct explanation
+for an image.
+
+We synthesized programs for the top 10 traces
+output by the deep network.  Learning this prior over programs can
+help correct mistakes made by the neural network, and also
+occasionally introduces mistakes of its own; see
+Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
+example of the kinds of corrections that it makes. On the whole
+it modestly improves our Top-1 accuracy from 58\% to 61\%.  Recall that
+from Fig. 6 of the main paper that the best improvement
+in accuracy we could possibly get is 65\% by looking at the top 10 traces. 
+\begin{wrapfigure}{R}{5.5cm}
+  \includegraphics[width = 5cm]{figures/programSuccess7.png}
+  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus continuing the pattern of not having an arrow is preferred.}\label{exampleOfProgramCorrectingMistake}
+\end{wrapfigure}
+
 
 \section{Neural network architecture}
 

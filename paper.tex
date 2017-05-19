@@ -141,7 +141,7 @@
  develop an approach for converting natural images, such as hand
  drawings, into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
- machine learning papers (see Figure~\ref{firstPageExamples}).
+ machine learning papers (see Figure~\ref{firstPageExamples}a).
  %% \remark{The use of `graphics programs / visual programs' in the paper
  %%   title, title of this section, and the body of this section feels
  %%   too broad. `Graphics program' could conjur a lot of different ideas
@@ -172,51 +172,62 @@
       \draw[very thick,->] (picture.south)  -- (0,-2);
     \end{tikzpicture}\\
     \begin{minipage}[t]{0.3\linewidth}
-\begin{verbatim}
+\begin{Verbatim}
 for (i < 3)
- rectangle(3*i,-2*i + 4,
-           3*i + 2,6)
+ rectangle(3*i,-2*i+4,
+           3*i+2,6)
  for (j < i + 1)
-  circle(3*i + 1,-2*j + 5)
-\end{verbatim}      
+  circle(3*i+1,-2*j+5)
+\end{Verbatim}      
       \end{minipage}
     \subcaption{}
   \end{minipage}
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
-  \end{figure}
+\end{figure}
 
-High dimensional perceptual input may seem ill matched to the abstract
-semantics of a programming language. But programs with constructs such as
-recursion or iteration produce a simpler \emph{execution trace} of
-primitive actions; for our domain, the primitive actions are drawing
-commands. Our hypothesis is that the execution trace of the program is
-better aligned with the perceptual input, and that the trace can act
-as a kind of bridge between perception and programs. We test this
-hypothesis by developing a model that learns to map from an image to
-the execution trace of the graphics program that drew it.  With the
-execution trace in hand, we can bring to bear techniques from the
-program synthesis community to recover the latent graphics program.
-This family of techniques, called \emph{constraint-based program synthesis}~\cite{solar2008program},
-work by modeling a set of possible programs inside of a constraint solver,
-such as a SAT or SMT solver~\cite{de2008z3}.
-These techniques excel at uncovering high-level symbolic structure,
-but are not well equipped to deal with real-valued perceptual inputs.
+The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
+
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep neural network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as a \emph{program trace}, since it corresponds to the sequence of primitive commands that the desired program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
+
+The second step involves generating a high-level program capable of producing the program trace identified by the first phase. In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended. This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
+
+%% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
+
+%% We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep neural network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as an \emph{execution trace}, since it corresponds to the sequence of primitive commands that the desired program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
 
 
-We develop a hybrid architecture for inferring graphics programs.  Our
-approach uses a deep neural network infer an execution trace from an
-image; this network recovers primitive drawing operations such as
-lines, circles, or arrows, along with their parameters. For added
-robustness, we use the deep network as a proposal distribution for a
-stochastic search over execution traces.  Section~\ref{neuralNetworkSection} describes this first stage of the architecture where we infer drawing commands from images, and explains how we handle noisy hand drawings.
-Finally, we use program synthesis techniques to recover the program from its
-trace.  The program synthesizer discovers constructs such as loops and
-geometric operations such as reflections and affine transformations.
-% \remark{This paragraph is all about making things a bit more
-Section~\ref{programSynthesisSection} describes how the architecture
-synthesizes programs from execution traces,
-and how those programs are used for  correcting errors made by the deep network, measuring similarity between hand drawings,
-and extrapolating figures.
+%% High dimensional perceptual input may seem ill matched to the abstract
+%% semantics of a programming language. But programs with constructs such as
+%% recursion or iteration produce a simpler \emph{execution trace} of
+%% primitive actions; for our domain, the primitive actions are drawing
+%% commands. Our hypothesis is that the execution trace of the program is
+%% better aligned with the perceptual input, and that the trace can act
+%% as a kind of bridge between perception and programs. We test this
+%% hypothesis by developing a model that learns to map from an image to
+%% the execution trace of the graphics program that drew it.  With the
+%% execution trace in hand, we can bring to bear techniques from the
+%% program synthesis community to recover the latent graphics program.
+%% This family of techniques, called \emph{constraint-based program synthesis}~\cite{solar2008program},
+%% work by modeling a set of possible programs inside of a constraint solver,
+%% such as a SAT or SMT solver~\cite{de2008z3}.
+%% These techniques excel at uncovering high-level symbolic structure,
+%% but are not well equipped to deal with real-valued perceptual inputs.
+
+
+%% We develop a hybrid architecture for inferring graphics programs.  Our
+%% approach uses a deep neural network infer an execution trace from an
+%% image; this network recovers primitive drawing operations such as
+%% lines, circles, or arrows, along with their parameters. For added
+%% robustness, we use the deep network as a proposal distribution for a
+%% stochastic search over execution traces.  Section~\ref{neuralNetworkSection} describes this first stage of the architecture where we infer drawing commands from images, and explains how we handle noisy hand drawings.
+%% Finally, we use program synthesis techniques to recover the program from its
+%% trace.  The program synthesizer discovers constructs such as loops and
+%% geometric operations such as reflections and affine transformations.
+%% % \remark{This paragraph is all about making things a bit more
+%% Section~\ref{programSynthesisSection} describes how the architecture
+%% synthesizes programs from execution traces,
+%% and how those programs are used for  correcting errors made by the deep network, measuring similarity between hand drawings,
+%% and extrapolating figures.
 
 
 %   so you really need more specifics about program synth here.}
@@ -285,7 +296,7 @@ Figure~\ref{architecture} illustrates this architecture.  We first
 pass a $256\times 256$ target image and a rendering of the trace so
 far (encoded as a two-channel image) to a convolutional network. Given the features extracted by the
 convnet, a multilayer perceptron then predicts a distribution over the
-next drawing command to add to the trace.  We predict the drawing
+next drawing command to add to the trace; see Table~\ref{drawingCommandTable}.  We predict the drawing
 command token-by-token, conditioning each token both on the image
 features and on the previously generated tokens.  For example, the
 network first decides to emit the \verb|circle| token conditioned on
@@ -312,7 +323,7 @@ execution traces factorizes as:
 \begin{equation}
   \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
 \end{equation}
-where $|T|$ is the length of execution trace $T$, and the subscripts
+where $|T|$ is the length of execution trace $T$, the subscripts
 on $T$ index drawing commands within the trace, and the \verb|STOP|
 token is emitted by the network to signal that the execution trace
 explains the image.
@@ -384,7 +395,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \end{tikzpicture}
 \caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}.}  \label{architecture}
 \end{figure}
-\begin{table}
+\begin{table}[h]
 \begin{tabular}{ll}\toprule
   \begin{tabular}{l}
     \verb|circle|$(x,y)$
@@ -414,7 +425,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \end{table}
 
 
-We trained the network on $10^5$ scenes, which takes a little less than a day on a Nvidia TitanX GPU.
+We trained the network on $10^5$ scenes, which takes a little less than a day on an Nvidia TitanX GPU.
 
 This network suffices to ``derender'' synthetic images like those shown in
 Figure~\ref{trainingData}.  We can perform a beam search decoding to
@@ -433,7 +444,7 @@ from the distribution $\propto L(I|\text{render}(T))
 \probability_\theta[T|I]$, where $L(\cdot | \cdot):\text{image}^2\to
 \mathcal{R}$ uses the distance between two images as a proxy for a
 likelihood.
-
+%
 Figure~\ref{syntheticResults}
 compares the neural network with SMC against the neural network by
 itself or SMC by itself.  Only the combination of the two passes a
@@ -502,8 +513,8 @@ we made the drawings on graph paper.
   \end{minipage}\hfill
   \begin{minipage}{0.45\textwidth}
   \includegraphics[width = 6cm]{figures/drawingAccuracy.png}
-  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 10, 100 samples)?
-  Distance to the ground truth trace is measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
+  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1,5,10,100)?
+  Distance to ground truth trace measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
     \end{minipage}
 \end{figure}
 
@@ -614,61 +625,124 @@ not having any guarantees on how long it will take to find a minimum
 cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
 
+\newcommand{\exampleProgramSize}{2.3cm} 
+\begin{figure}
+  \begin{tabular}{lllll}
+  \includegraphics[width = \exampleProgramSize]{figures/expert-29.png}&
+  \includegraphics[width = \exampleProgramSize]{figures/expert-52.png}&
+  \includegraphics[width = \exampleProgramSize]{figures/expert-38.png}&
+  \includegraphics[width = \exampleProgramSize]{figures/expert-72.png}&
+  \includegraphics[width = \exampleProgramSize]{figures/expert-75.png}\\
+    \begin{minipage}[t]{\exampleProgramSize}
+\begin{Verbatim}[fontsize = \small]
+for(i<3){
+line(i,-1*i+6,
+2*i+2,-1*i+6)
+line(i,-2*i+4,
+i,-1*i+6)
+\end{Verbatim}
+    \end{minipage}&
+    \begin{minipage}[t]{\exampleProgramSize}
+\begin{Verbatim}[fontsize = \small]
+circle(4,10)
+for(i<3){
+circle(-3*i+7,5)
+circle(-3*i+7,1)
+line(-3*i+7,4,
+-3*i+7,2,
+arrow=True)
+line(4,9,
+-3*i+7,6,
+arrow=True)
+\end{Verbatim}
+\end{minipage}&
+\begin{minipage}[t]{\exampleProgramSize}
+\begin{Verbatim}[fontsize=\small]
+for(i<3)
+for(j<3)
+if(j>0)
+line(-3*j+8,
+-3*i+7,-3*j+9,
+-3*i+7)
+line(-3*i+7,-3*j+8,
+-3*i+7,
+-3*j+9)
+circle(-3*j+7,-3*i+7)
+\end{Verbatim}
+\end{minipage}&
+\begin{minipage}[t]{\exampleProgramSize}
+\begin{Verbatim}[fontsize=\small]
+reflect(y=8){
+for(i<3){
+if(i>0){
+rectangle(3*i-1,
+2,3*i,3)}
+circle(3*i+1,
+       3*i+1)
+\end{Verbatim}
+\end{minipage}&
+ \begin{minipage}[t]{\exampleProgramSize}
+    \begin{Verbatim}[fontsize = \small]
+for(i<4){
+line(-4*i+13,4,
+-4*i+13,2,
+arrow=True)
+for(j<3){
+if(j>0){
+circle(-4*i+13,
+4*j+-3)}
+line(-4*j+10,5,
+-4*j+12,5,
+arrow=True)
+\end{Verbatim}
+  \end{minipage}
+  \end{tabular}
+  \caption{Example drawings (top row) and the programs we synthesize from their ground truth traces (bottom row). Notice the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle left, and affine transformation in the leftmost figure.}
+  \end{figure}
+
 Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 %\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
 
 \subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
-The program synthesizer can help correct errors from the execution trace proposal network by favoring execution traces which lead to more concise or general programs.
-For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
-Similarly, figures often have repeated parts,
-which the program synthesizer might be able to model as a loop or reflectional symmetry.
-So, in considering several candidate traces proposed by the neural network,
-we might prefer traces whose best programs have desirable features such being short or having iterated structures.
-
-Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section~\ref{neuralNetworkSection} samples a set of candidate traces, written $\mathcal{F}(I)$.
-Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
-we can take into account the programs that best explain the traces. 
-Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
-\begin{equation}
-\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(T))\times \probability_\theta[T|I] \times\probability_{\beta} [ \text{program}(T)] 
-\end{equation}
-where $\probability_{\beta} [\cdot]$ is a prior probability
-distribution over programs parameterized by $\beta$.
-This is equivalent to doing
-MAP inference in a generative model where the program is first drawn
-from $\probability_{\beta} [\cdot]$, then the program is executed deterministically,
-and then we observe a noisy version of the program's output, where $L_\text{learned}(I|\text{render}(\cdot))\times\probability_\theta[\cdot|I]$
-is our observation model.
-
-Given a corpus of graphics program synthesis problems with annotated ground truth traces (i.e. $(I,T)$ pairs),
-we find a maximum likelihood estimate of $\beta$:
-\begin{equation}
-  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L_{\text{learned}}(I|\text{render}(T))\times \probability_\theta[T|I]}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L_{\text{learned}}(I|\text{render}(T'))\times \probability_\theta[T'|I]} \right]
-\end{equation}
-where the expectation is taken both over the model predictions and the
-$(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
-[\cdot]$ to be a log linear distribution $\propto \exp
-(\beta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
-extractor for programs.  We extract a few basic features of a
-program, such as its size and how many loops it has, and use these
-features to help predict whether a trace is the correct explanation
-for an image.
-
-We synthesized programs for the top five traces
-output by the deep network.  Learning this prior over programs can
+The program synthesizer can help correct errors from the execution
+trace proposal network by favoring execution traces which lead to more
+concise or general programs.  For example, one generally prefers
+figures with perfectly aligned objects over figures whose parts are
+slightly misaligned -- and precise alignment lends itself to short
+programs.  Concretely, we estimated a prior over programs. Then,
+given the few most likely traces output by the neurally guided sampler,
+we reranked them according to the prior probability of their programs.
+Our neurally guided sampler could only do better on
+7 drawings by looking at the Top-100 sampled traces
+(see Fig.~\ref{drawingIntersectionOverUnion}),
+precluding a statistically significant analysis of how much
+learning a prior over programs could help correct errors.
+But,
+learning this prior does sometimes
 help correct mistakes made by the neural network, and also
 occasionally introduces mistakes of its own; see
 Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
-example of the kinds of corrections that it makes. On the whole
-it modestly improves our Top-1 accuracy from 58\% to 60\%.  Recall that
-from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
-in accuracy we could possibly get is 63\% by looking at the top 5 traces.
+example of the kinds of corrections that it makes.
+See supplement for details.
 \begin{wrapfigure}{R}{5.5cm}
   \includegraphics[width = 5cm]{figures/programSuccess7.png}
   \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus continuing the pattern of not having an arrow is preferred.}\label{exampleOfProgramCorrectingMistake}
   \end{wrapfigure}
+
+%% This is equivalent to doing
+%% MAP inference in a generative model where the program is first drawn
+%% from $\probability_{\beta} [\cdot]$, then the program is executed deterministically,
+%% and then we observe a noisy version of the program's output, where $L_\text{learned}(I|\text{render}(\cdot))\times\probability_\theta[\cdot|I]$
+%% is our observation model.
+
+%% Learning this prior over programs can
+%%  On the whole
+%% it modestly improves our Top-1 accuracy from 58\% to 61\%.  Recall that
+%% from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
+%% in accuracy we could possibly get is 65\% by looking at the top 10 traces. 
+
 
 \subsection{Modeling similarity between drawings}
 Modeling an image using a program opens up new ways of measuring similarity between drawings.
@@ -677,14 +751,12 @@ or if they share the same reflectional symmetry,
 or if they are both organized according to a grid-like structure.
 
 We measure the similarity between two drawings by extracting features
-of the best programs that describe them.  Here the features we use are
-just counts of the number of times that different components in the
+of the best programs that describe them. Our features are counts of the number of times that different components in the
 DSL were used (Table~\ref{DSL}).  We project these features down to a
 2-dimensional subspace using nonnegative matrix factorization
 (NMF:~\cite{lee1999learning}); see Fig.\ref{NMF}.  One could use many
-alternative similarity metrics between drawings which would capture pixel-level or object-level similarities while missing high-level geometric similarities.
-For example, we can use our learned distance metric between execution traces, $L_{\text{learned}}(\cdot|\cdot)$.
-Projecting these distances to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}) reveals similarities between the objects in the drawings,
+alternative similarity metrics between drawings which would capture pixel-level while missing high-level geometric similarities.
+We used our learned distance metric between execution traces, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
 while missing similarities at the level of the program.
 \begin{figure}
   \begin{minipage}{0.48\textwidth}
@@ -711,7 +783,7 @@ Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from
 see supplement for our full set of extrapolations.
 
 \begin{figure}
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix.png} 
+  \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}  
   \caption{Top: hand drawings. Bottom: extrapolations produced by
 running loops for extra iterations. Rightmost pair is an illustrative failure case.}\label{extrapolationFigure}
   \end{figure}
