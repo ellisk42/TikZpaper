@@ -126,7 +126,7 @@
   learn a convolutional neural network that proposes plausible drawing primitives
   that explain an image. This set of drawing primitives is like an execution trace for a graphics program. From this trace we use
   program synthesis techniques to recover a graphics
-  program with constructs like variable bindings, iterative loops, or
+  program with constructs such as variable bindings, iterative loops, or
   simple kinds of conditionals. With a graphics program in hand,
   we can correct errors made by the deep network, cluster drawings by use of similar high-level geometric structures, and extrapolate drawings.
   Taken together these results are a step towards
@@ -187,16 +187,17 @@ for (i < 3)
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as an \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
-This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace.
+This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
+symmetries, repetition, or conditional branches.
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
 %% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-%% We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep neural network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as an \emph{execution trace}, since it corresponds to the sequence of primitive commands that the desired program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
+%% We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep neural network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as an \emph{execution trace}, since it corresponds to the sequence of primitive commands that the desired program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs. 
 
 
 %% High dimensional perceptual input may seem ill matched to the abstract
@@ -267,9 +268,9 @@ Prior work has also applied sketch-based program synthesis to authoring graphics
 
 The CogSketch~\cite{forbus2011cogsketch} system also aims to have a
 high-level understanding of hand-drawn figures. Their primary goal is
-cognitive modeling (eg, they apply their system to solving IQ-test
+cognitive modeling (they apply their system to solving IQ-test
 style visual reasoning problems), whereas we are interested in
-building an automated AI application (eg, in our system the user need
+building an automated AI application (e.g. in our system the user need
 not annotate which strokes correspond to which shapes; our neural
 network produces something equivalent to the annotations).  A key
 similarity however is that both CogSketch and our system have as a
@@ -742,7 +743,7 @@ See supplement for details.
 
 
 \subsection{Modeling similarity between drawings}
-Modeling drawings using programs opens up new ways to measure similarity them.
+Modeling drawings using programs opens up new ways to measure similarity between them.
 For example, we might say that two drawings are similar if they both contain loops of length 4,
 or if they share a reflectional symmetry,
 or if they are both organized according to a grid-like structure.
@@ -796,7 +797,7 @@ running loops for extra iterations.}\label{extrapolationFigure}
 
 We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic execution traces; it then feeds these traces to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings and to organize them according to high-level geometric features.
 
-There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could help correct some of the errors the network makes.
+There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX~drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could help correct some of the errors the network makes.
 In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas program synthesizers which are custom-built for special problem domains can run much faster or even interactively~\cite{le2014flashextract}.
 
 In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
