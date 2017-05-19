@@ -187,7 +187,7 @@ for (i < 3)
 
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
@@ -487,7 +487,7 @@ which is  the number of drawing commands by which two traces differ:
 \begin{equation}
 -\log L_{\text{learned}}(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|\label{symmetricDistance}
 \end{equation}
-Intuitively, Eq.~\ref{symmetricDistance} says that
+Intuitively,
 $L_{\text{learned}}(\cdot|\cdot)$ approximates the distance between
 the trace we want and the trace we have so far.  Pixel-wise distance
 metrics are sensitive to the details of how
@@ -553,10 +553,10 @@ we made the drawings on graph paper.
     \end{minipage}
   \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}. Stochastic search (SMC) can help correct for these errors, as can the program synthesizer (Section~\ref{synthesizerHelpsParsing})}\label{lotsOfHandDrawings}%~\remark{Showing `failure cases' (the last three above) out-of-context seems not great. Perhaps remind people in the caption that stochastic search can help correct some of these issues?}
 \end{figure}
-For each drawing we annotated a ground truth trace, and evaluated the
-model by asking it to sample many candidate traces for each drawing.
-For 58\% of the drawings the Top-1 most likely sample exactly matches the
-ground truth; as we consider more samples the model encounters traces
+For each drawing we annotated a ground truth trace and asked the model
+to sample many candidate traces for each drawing.
+For 58\% of the drawings, the Top-1 most likely sample exactly matches the
+ground truth; with more samples, the model finds traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
 Because our current model sometimes makes mistakes, % on hand drawings,
 we envision it working as follows:
@@ -565,12 +565,11 @@ and the system responds by proposing a few candidate interpretations.
 The user could then select one and edit it if necessary.
 
 \section{Synthesizing graphics programs from execution traces}\label{programSynthesisSection}
-Although the execution trace of a graphics program describes the parts
-of a scene, it fails to encode higher-level features of the image,
+While the execution trace of a graphics program describes the contents
+of a scene, it does not encode higher-level features of the image,
 such as repeated motifs or symmetries.  A \emph{graphics
-  program} better describe structures like these,
-and we now take as our goal to synthesize simple graphics programs from
-their execution traces.
+  program} better describe such structures;
+we seek to synthesize simple graphics graphics from their execution traces.
 
 We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
@@ -611,17 +610,17 @@ We also penalize using many different numerical constants; see supplement.
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
 The constrained optimization problem in
-equation~\ref{programObjective} is intractable in general, but there
-exist efficient-in-practice tools for finding exact solutions to
-program synthesis problems like these. We use the state-of-the-art Sketch
+Equation~\ref{programObjective} is intractable in general, but there
+exist efficient-in-practice tools for finding exact solutions to such
+program synthesis problems. We use the state-of-the-art Sketch
 tool~\cite{solar2008program}. Describing Sketch's program synthesis
 algorithm is beyond the scope of this paper; see~\cite{solar2008program}.  At a
 high level, Sketch takes as input a space of programs, along with a
 specification of the program's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
-satisfaction problem, and then uses a SAT solver to find a
-minimum cost program satisfying the specification.  In exchange for
-not having any guarantees on how long it will take to find a minimum
+satisfaction problem and then uses a SAT solver to find a
+minimum-cost program satisfying the specification.  In exchange for
+having no guarantee on the time required to find a minimum
 cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
 
@@ -697,7 +696,7 @@ arrow=True)
 \end{Verbatim}
   \end{minipage}
   \end{tabular}
-  \caption{Example drawings (top row) and the programs we synthesize from their ground truth traces (bottom row). Notice the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle left, and affine transformation in the leftmost figure.}
+  \caption{Example drawings (top) and programs synthesized from their ground truth traces (bottom). Note the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle left, and affine transformation in the leftmost figure.}
   \end{figure}
 
 Why synthesize a graphics program,
@@ -706,15 +705,13 @@ Within our domain of hand-drawn figures, graphics program synthesis has several 
 %\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
 
 \subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
-The program synthesizer can help correct errors from the execution
-trace proposal network by favoring execution traces which lead to more
-concise or general programs.  For example, one generally prefers
-figures with perfectly aligned objects over figures whose parts are
-slightly misaligned -- and precise alignment lends itself to short
+The program synthesizer can correct errors from the execution
+trace proposal network by favoring traces which lead to more
+concise or general programs.  For example, figures with perfectly aligned objects are preferrale to figures whose parts are slightly misaligned, and precise alignment lends itself to short
 programs.  Concretely, we estimated a prior over programs. Then,
 given the few most likely traces output by the neurally guided sampler,
 we reranked them according to the prior probability of their programs.
-Our neurally guided sampler could only do better on
+Our sampler could only do better on
 7 drawings by looking at the Top-100 sampled traces
 (see Fig.~\ref{drawingIntersectionOverUnion}),
 precluding a statistically significant analysis of how much
@@ -745,9 +742,9 @@ See supplement for details.
 
 
 \subsection{Modeling similarity between drawings}
-Modeling an image using a program opens up new ways of measuring similarity between drawings.
-For example, we might say that two drawings are similar if they both contain repetitions of length 4,
-or if they share the same reflectional symmetry,
+Modeling drawings using programs opens up new ways to measure similarity them.
+For example, we might say that two drawings are similar if they both contain loops of length 4,
+or if they share a reflectional symmetry,
 or if they are both organized according to a grid-like structure.
 
 We measure the similarity between two drawings by extracting features
@@ -802,7 +799,7 @@ We have presented a system for inferring graphics programs which generate \LaTeX
 There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could help correct some of the errors the network makes.
 In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas program synthesizers which are custom-built for special problem domains can run much faster or even interactively~\cite{le2014flashextract}.
 
-In the not-too-distant future, we believe it should be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
+In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
 More generally, we believe that the two-phase system we have proposed---parsing into execution traces, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for domains in which agents must programmatically reason about noisy perceptual input.
 
 
