@@ -189,7 +189,10 @@ The key observation behind our work is that generating a programmatic representa
 
 We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
-The second step involves generating a high-level program capable of producing the program trace identified by the first phase. In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended. This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
+The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
+%In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
+This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace.
+%under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
 %% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
@@ -247,7 +250,7 @@ The second step involves generating a high-level program capable of producing th
 
 \section{Related work}
 
-Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on parsing and interpreting hand-drawn sketches.
+Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
 % attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
 % that they focus on learning the generative model jointly with the
 % inference network. Advantages of our system is that we learn symbolic
@@ -260,7 +263,7 @@ We then show how to synthesize higher-level programs from these execution traces
 
 In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
-Prior work has also applied sketch-based program synthesis to authoring graphics programs. In particular, Sketch-n-Sketch presents a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
+Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
 
 The CogSketch~\cite{forbus2011cogsketch} system also aims to have a
 high-level understanding of hand-drawn figures. Their primary goal is
@@ -310,7 +313,6 @@ which we implemented in Tensorflow~\cite{tensorflow2015-whitepaper}.
 %%   about this architecture in the supplement: the
 %%   functional form(s) of the probability distributions over tokens, the
 %%   network layer sizes, which MLPs share parameters, etc.}
-
 The distribution over the next drawing command factorizes as:
 \begin{equation}
   \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta [t_k | f_\theta(I,\text{render}(T)), \{t_j\}_{j = 1}^{k - 1}]
@@ -325,7 +327,7 @@ execution traces factorizes as:
 \end{equation}
 where $|T|$ is the length of execution trace $T$, the subscripts
 on $T$ index drawing commands within the trace, and the \verb|STOP|
-token is emitted by the network to signal that the execution trace
+token is emitted by the network to signal that the trace
 explains the image.
 %% ~\remark{Make explicit that a $T_n$ in Equation 2
 %%   is a concise way of referring to a sequence of tokens from Equation
@@ -339,6 +341,7 @@ Training does not require backpropagation across the entire sequence of drawing 
 drawing to the canvas `blocks' the gradients,
 effectively offloading memory to an external visual store.
 In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603attend} without attention.
+We trained the network on $10^5$ scenes, which takes a little less than a day on an Nvidia TitanX GPU.
 
 %% \remark{I like that you make this connection, but it could be made more precisely. Specifically, (1) the architecture isn't \emph{really} recurrent (it uses no hidden state cells), so it'd be good to use a different term or drop this part of the point: (2) training of recurrent nets is also typically fully-supervised (Most RNNs lack latent variables per timestep)---if you're thinking about AIR specifically, maybe just say that, and (3) it's like an autogressive AIR \emph{without attention}.}
 %% \remark{Something related to this that's also cool to point out: training this model doesn't require backpropagation across the entire sequence of drawing commands (drawing to the canvas `blocks' the gradients, effectively offloading memory to an external (visual) store, so in principle it might be scalable to much longer sequences.}
@@ -425,8 +428,6 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \end{table}
 
 
-We trained the network on $10^5$ scenes, which takes a little less than a day on an Nvidia TitanX GPU.
-
 This network suffices to ``derender'' synthetic images like those shown in
 Figure~\ref{trainingData}.  We can perform a beam search decoding to
 recover what the network thinks is the most likely execution trace for
@@ -489,14 +490,14 @@ which is  the number of drawing commands by which two traces differ:
 Intuitively,
 $L_{\text{learned}}(\cdot|\cdot)$ approximates the distance between
 the trace we want and the trace we have so far.  Pixel-wise distance
-metrics are sensitive to the fine details of how and exactly where
+metrics are sensitive to the details of how
 arrows, dashes, and corners are drawn -- but we wish to be invariant
 to these details. So, we learn a distance metric over images that
 approximates the distance metric in the search space over traces.
 
 We drew 100 figures by hand; see figure~\ref{lotsOfHandDrawings}.
-These were drawn reasonably carefully but not perfectly.
-Because our model assumes that objects lie on a $16\times 16$ grid,
+These were drawn carefully but not perfectly.
+Our model assumes that objects are snapped to a $16\times 16$ grid, so
 we made the drawings on graph paper.
 \begin{figure}\centering
   \begin{minipage}{0.45\textwidth}
@@ -557,11 +558,11 @@ to sample many candidate traces for each drawing.
 For 58\% of the drawings, the Top-1 most likely sample exactly matches the
 ground truth; with more samples, the model finds traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
-As the model sometimes makes mistakes on hand drawings,
-we envision the current system working as follows:
+Because our current model sometimes makes mistakes, % on hand drawings,
+we envision it working as follows:
 a user sketches a diagram,
 and the system responds by proposing a few candidate interpretations.
-The user could then select the one closest to their intention and edit it if necessary.
+The user could then select one and edit it if necessary.
 
 \section{Synthesizing graphics programs from execution traces}\label{programSynthesisSection}
 While the execution trace of a graphics program describes the contents
@@ -588,8 +589,7 @@ encodes prior knowledge of what graphics programs tend to look like.
   Expression$\to$&$\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$\\
   Var$\to$&A free (unused) variable\\
   $\mathcal{Z}$$\to$&an integer\\
-  Axis$\to$&\texttt{X = }$\mathcal{Z}$\\
-  Axis$\to$&\texttt{Y = }$\mathcal{Z}$\\\bottomrule
+  Axis$\to$&\texttt{X = }$\mathcal{Z}$ | \texttt{Y = }$\mathcal{Z}$\\\bottomrule
   \end{tabular}
   \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$).}\label{DSL}
 \end{table}
@@ -601,7 +601,7 @@ prefer shorter programs.
 We wrap these intuitions up into a cost function over programs,
 and seek the minimum cost program consistent with $T$:
 \begin{equation}
-  \text{program}(T) = \argmin_{\substack{p\in \text{DSL}\\p \text{ evaluates to } T}} \text{cost}(p)\label{programObjective}
+  \text{program}(T) = \argmin_{p\in \text{DSL, s.t. }p \text{ evaluates to } T} \text{cost}(p)\label{programObjective}
 \end{equation}
 We define the
 cost of a program to be the number of statements it contains, where a
@@ -783,7 +783,7 @@ see supplement for our full set of extrapolations.
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}
     \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}  
   \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by
-running loops for extra iterations..}\label{extrapolationFigure}
+running loops for extra iterations.}\label{extrapolationFigure}
   \end{figure}
 %\input{extrapolations.tex}
 
@@ -796,11 +796,11 @@ running loops for extra iterations..}\label{extrapolationFigure}
 
 We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic execution traces; it then feeds these traces to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings and to organize them according to high-level geometric features.
 
-There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could also help correct some of the errors the network makes.
+There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could help correct some of the errors the network makes.
 In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas program synthesizers which are custom-built for special problem domains can run much faster or even interactively~\cite{le2014flashextract}.
 
-In the near future, we believe it will be possible to produce professional-looking figures by drawing them and then letting an artificially-intelligent agent write the corresponding code.
-More generally, we believe that the two-phase system we have proposed---parsing into execution traces, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for other domains in which agents must programmatically reason about noisy perceptual input.
+In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
+More generally, we believe that the two-phase system we have proposed---parsing into execution traces, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for domains in which agents must programmatically reason about noisy perceptual input.
 
 
 
