@@ -312,9 +312,13 @@ execution traces factorizes as:
 \begin{equation}
   \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
 \end{equation}
-where $|T|$ is the length of execution trace $T$, and the \verb|STOP|
+where $|T|$ is the length of execution trace $T$, and the subscripts
+on $T$ index drawing commands within the trace, and the \verb|STOP|
 token is emitted by the network to signal that the execution trace
-explains the image.~\remark{Make explicit that a $T_n$ in Equation 2 is a concise way of referring to a sequence of tokens from Equation 1?}
+explains the image.
+%% ~\remark{Make explicit that a $T_n$ in Equation 2
+%%   is a concise way of referring to a sequence of tokens from Equation
+%%   1?}
 
 We train the network by sampling execution traces $T$ and target
 images $I$ for randomly generated scenes
@@ -623,25 +627,25 @@ which the program synthesizer might be able to model as a loop or reflectional s
 So, in considering several candidate traces proposed by the neural network,
 we might prefer traces whose best programs have desirable features such being short or having iterated structures.
 
-Concretely, we implemented the following scheme: the neurally guided sampling scheme of section~\ref{neuralNetworkSection} for image $I$ samples candidate traces $\mathcal{F}(I)$.
+Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section~\ref{neuralNetworkSection} samples a set of candidate traces, written $\mathcal{F}(I)$.
 Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
 we can take into account the programs that best explain the traces. 
 Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
 \begin{equation}
-\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(T)) \times\probability_{\beta} [ \text{program}(T)] 
+\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(T))\times \probability_\theta[T|I] \times\probability_{\beta} [ \text{program}(T)] 
 \end{equation}
 where $\probability_{\beta} [\cdot]$ is a prior probability
 distribution over programs parameterized by $\beta$.
 This is equivalent to doing
 MAP inference in a generative model where the program is first drawn
 from $\probability_{\beta} [\cdot]$, then the program is executed deterministically,
-and then we observe a noisy version of the program's output, where $L$
-is the noise model.
+and then we observe a noisy version of the program's output, where $L_\text{learned}(I|\text{render}(\cdot))\times\probability_\theta[\cdot|I]$
+is our observation model.
 
 Given a corpus of graphics program synthesis problems with annotated ground truth traces (i.e. $(I,T)$ pairs),
 we find a maximum likelihood estimate of $\beta$:
 \begin{equation}
-  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L_{\text{learned}}(I|\text{render}(T))}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L_{\text{learned}}(I|\text{render}(T'))} \right]
+  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L_{\text{learned}}(I|\text{render}(T))\times \probability_\theta[T|I]}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L_{\text{learned}}(I|\text{render}(T'))\times \probability_\theta[T'|I]} \right]
 \end{equation}
 where the expectation is taken both over the model predictions and the
 $(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
@@ -663,7 +667,7 @@ from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
 in accuracy we could possibly get is 63\% by looking at the top 5 traces.
 \begin{wrapfigure}{R}{5.5cm}
   \includegraphics[width = 5cm]{figures/programSuccess7.png}
-  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs.}\label{exampleOfProgramCorrectingMistake}
+  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus continuing the pattern of not having an arrow is preferred.}\label{exampleOfProgramCorrectingMistake}
   \end{wrapfigure}
 
 \subsection{Modeling similarity between drawings}
