@@ -166,11 +166,83 @@ We introduce noise into the \LaTeX~rendering process by:
 \item Rendering the \LaTeX~using the \verb|pencildraw| style,
   which adds random perturbations to the paths drawn by \LaTeX in a way designed to resemble a pencil.
 \item Randomly perturbing the positions and sizes of primitive  \LaTeX drawing commands
-  \end{itemize}
+\end{itemize}
 
+\section{Likelihood surrogate for synthetic data}
+For synthetic data (e.g., \LaTeX~output)
+it is relatively straightforward to engineer an adequate distance measure between images,
+because it is possible for the system to discover
+drawing commands that exactly match the pixels in the target image.
+We use:
+\begin{equation}
+  -\log L(I_1|I_2) = \sum_{1\leq x\leq 256} \sum_{1\leq y\leq 256} |I_1[x,y] - I_2[x,y]|\begin{cases}
+    \alpha\text{, if }$I_1[x,y] > I_2[x,y]$\\
+    \beta\text{, if }$I_1[x,y] <  I_2[x,y]$\\
+        0\text{, if }$I_1[x,y] = I_2[x,y]$\\
+    \end{cases}
+  \end{equation}
+where $\alpha$, $\beta$ are constants that control the trade-off
+between preferring to explain the pixels in the image (at the expense
+of having extraneous pixels) and not predicting pixels where they
+don't exist (at the expense of leaving some pixels unexplained). Because our sampling procedure incrementally constructs the scene part-by-part,
+we want $\alpha > \beta$.
+That is, it is preferable to leave some pixels unexplained;
+for once a particle in SMC adds a drawing primitive to its trace that is not actually in the latent scene,
+it can never recover from this error.
+In our experiments on synthetic data we used $\alpha = 0.8$ and $\beta = 0.04$. 
 \section{Generating synthetic training data}
 
-I need to describe the procedure that I used to sample the scenes. it's pretty involved
+We generated synthetic training data for the neural network by
+sampling \LaTeX~code according to the following generative process:
+First,
+the number of objects in the scene are sampled uniformly from 1 to 8.
+For each object we uniformly sample its identity (circle, rectangle, or line).
+Then we sample the parameters of the circles,
+than the parameters of the rectangles,
+and finally the parameters of the lines;
+this has the effect of teaching the network to first draw the circles in the scene,
+then the rectangles,
+and finally the lines.
+We furthermore put the circle (respectively, rectangle and line) drawing commands in order by
+left-to-right, bottom-to-top;
+thus the training data enforces a canonical order in which to draw any scene.
+
+To make the training data look more like naturally occurring figures,
+we put a Chinese restaurant process prior~\cite{gershman2012tutorial} over
+the values of the X and Y coordinates that occur in the execution trace.
+This encourages reuse of coordinate values,
+and so produces training data that tends to have parts that are nicely aligned.
+
+In the synthetic training data we excluded any sampled scenes that had
+overlapping drawing commands.  As shown in the main paper, the network
+is then able to generalize to scenes with, for example, intersecting
+lines or lines that penetrate a rectangle.
+
+When sampling the endpoints of a line,
+we biased the sampling process so that it would
+be more likely to start an endpoint
+along one of the sides of a rectangle or at the boundary of a circle.
+If $n$ is the number of points either along the side of a rectangle or at the boundary of a circle,
+we would sample an arbitrary endpoint with probability $\frac{2}{2 + n}$
+and sample one of the ``attaching'' endpoints with probability $\frac{1}{2 + n}$.
+
+See figure~\ref{exampleTrainingData} for examples of the kinds of scenes that the network is trained on.
+\begin{figure}
+  \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
+  \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
+  \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-4-4.png}}\end{minipage}
+  \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-26-7.png}}\end{minipage}
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-25-4.png}}\end{minipage}\\
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-22-3.png}}\end{minipage}
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-20-7.png}}\end{minipage}
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-19-3.png}}\end{minipage}
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-17-7.png}}\end{minipage}
+      \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-1-4.png}}\end{minipage}
+      \caption{Example synthetic training data}\label{exampleTrainingData}
+\end{figure}
+
+For readers wishing to generate their own synthetic training sets,
+we refer them to our source code at:~\url{http://www.redactedForAnonymousReview.com}.
 
 \section{The cost function for programs}
 
@@ -190,7 +262,7 @@ to produce programs that have this symmetry.
 
 Programs also incur a cost of 1 for having loops of constant length 2;
 otherwise there is often no pressure from the cost function to explain
-a repetition of length to as being a reflection rather a loop.
+a repetition of length 2 as being a reflection rather a loop.
 
 %% \section{Neural networks for guiding SMC}
 

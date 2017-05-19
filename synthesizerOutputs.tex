@@ -5,13 +5,16 @@
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(6,2,3,2,arrow = True,solid = True);
-line(6,2,6,3,arrow = False,solid = True);
+line(6,2,6,3,
+arrow = False,solid = True);
+line(6,2,3,2,
+arrow = True,solid = True);
+reflect(reflect(y = 9)){
+line(3,2,5,4,
+arrow = True,solid = True);
 rectangle(0,0,8,9);
 rectangle(5,3,7,6);
-reflect(reflect(y = 9)){
-line(3,2,5,4,arrow = True,solid = True);
-rectangle(1,6,3,8)
+rectangle(1,1,3,3)
 }
         \end{verbatim}
 \end{minipage}
@@ -40,8 +43,9 @@ Solver timeout
         \begin{verbatim}
 rectangle(4,2,6,5);
 reflect(reflect(y = 7)){
-line(2,6,4,4,arrow = True,solid = True);
-rectangle(0,5,2,7)
+line(2,6,4,4,
+arrow = True,solid = True);
+rectangle(0,0,2,2)
 }
         \end{verbatim}
 \end{minipage}
@@ -56,12 +60,14 @@ rectangle(0,5,2,7)
         \begin{minipage}{10cm}
         \begin{verbatim}
 circle(10,5);
-line(7,5,9,5,arrow = True,solid = True);
+line(7,5,9,5,
+arrow = True,solid = True);
+rectangle(5,3,7,7);
 rectangle(0,0,12,10);
 reflect(reflect(y = 10)){
-line(3,8,5,6,arrow = True,solid = True);
-rectangle(1,1,3,3);
-rectangle(5,3,7,7)
+line(3,8,5,6,
+arrow = True,solid = True);
+rectangle(1,7,3,9)
 }
         \end{verbatim}
 \end{minipage}
@@ -76,13 +82,17 @@ rectangle(5,3,7,7)
         \begin{minipage}{10cm}
         \begin{verbatim}
 circle(10,4);
-line(10,1,10,3,arrow = False,solid = False);
-line(10,1,2,1,arrow = True,solid = False);
-line(7,4,9,4,arrow = True,solid = True);
+line(10,1,2,1,
+arrow = True,solid = False);
+line(10,1,10,3,
+arrow = False,solid = False);
+line(7,4,9,4,
+arrow = True,solid = True);
 reflect(reflect(y = 8)){
-line(2,1,4,3,arrow = True,solid = True);
-rectangle(0,6,2,8);
-rectangle(4,2,7,6)
+line(2,7,4,5,
+arrow = True,solid = True);
+rectangle(4,2,7,6);
+rectangle(0,6,2,8)
 }
         \end{verbatim}
 \end{minipage}
@@ -109,12 +119,16 @@ Solver timeout
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-rectangle(2,0,5,3);
+line(0,1,2,0,
+arrow = False,solid = True);
 for (i < 3){
 if (i > 0){
-line(0,3*i + -2,3*i + -3,4,arrow = False,solid = True);
-line(3*i + -3,4,3*i + -1,3,arrow = False,solid = True)
-}line(0,1,2,0,arrow = False,solid = True)
+line(3*i + -3,4,3*i + -1,3,
+arrow = False,solid = True);
+line(0,3*i + -2,3*i + -3,4,
+arrow = False,solid = True)
+}
+rectangle(2,0,5,3)
 }
         \end{verbatim}
 \end{minipage}
@@ -129,9 +143,10 @@ line(3*i + -3,4,3*i + -1,3,arrow = False,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-circle(-3*i + 7,6);
 circle(-3*i + 7,1);
-line(-3*i + 7,-1*i + 4,-3*i + 7,5,arrow = False,solid = True)
+circle(-3*i + 7,6);
+line(-3*i + 7,-1*i + 4,-3*i + 7,5,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -145,7 +160,8 @@ line(-3*i + 7,-1*i + 4,-3*i + 7,5,arrow = False,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,0,0,4,arrow = False,solid = True)
+line(0,0,0,4,
+arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -158,7 +174,8 @@ line(0,0,0,4,arrow = False,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(6,0,0,0,arrow = True,solid = True)
+line(6,0,0,0,
+arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -197,12 +214,15 @@ circle(1,1)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(2,1,5,1,arrow = False,solid = True);
+line(2,6,5,6,
+arrow = False,solid = True);
 reflect(reflect(x = 7)){
-circle(1,1);
-line(2,6,5,6,arrow = False,solid = True);
-line(1,2,1,5,arrow = False,solid = True);
-rectangle(0,5,2,7)
+circle(6,1);
+line(2,1,5,1,
+arrow = False,solid = True);
+line(1,2,1,5,
+arrow = False,solid = True);
+rectangle(5,5,7,7)
 }
         \end{verbatim}
 \end{minipage}
@@ -216,10 +236,14 @@ rectangle(0,5,2,7)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(3,2,1,2,arrow = True,solid = True);
-line(5,0,3,0,arrow = True,solid = True);
-line(2,1,4,1,arrow = True,solid = True);
-line(0,3,2,3,arrow = True,solid = True)
+line(2,1,4,1,
+arrow = True,solid = True);
+line(3,2,1,2,
+arrow = True,solid = True);
+line(5,0,3,0,
+arrow = True,solid = True);
+line(0,3,2,3,
+arrow = True,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -234,8 +258,9 @@ line(0,3,2,3,arrow = True,solid = True)
         \begin{verbatim}
 for (i < 4){
 if (i > 0){
-rectangle(2*i + -2,-2*i + 6,2*i + -1,-2*i + 7)
-}rectangle(2*i,-2*i + 6,2*i + 1,-2*i + 7)
+rectangle(-2*i + 6,2*i + -2,-2*i + 7,2*i + -1)
+}
+rectangle(-2*i + 6,2*i,-2*i + 7,2*i + 1)
 }
         \end{verbatim}
 \end{minipage}
@@ -249,10 +274,14 @@ rectangle(2*i + -2,-2*i + 6,2*i + -1,-2*i + 7)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,3,2,3,arrow = False,solid = False);
-line(2,1,4,1,arrow = False,solid = False);
-line(1,2,3,2,arrow = False,solid = True);
-line(3,0,5,0,arrow = False,solid = True)
+line(0,3,2,3,
+arrow = False,solid = False);
+line(2,1,4,1,
+arrow = False,solid = False);
+line(1,2,3,2,
+arrow = False,solid = True);
+line(3,0,5,0,
+arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -265,7 +294,16 @@ line(3,0,5,0,arrow = False,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-Solver timeout
+for (i < 4){
+if (i > 0){
+circle(-2*i + 7,3*i + -2);
+line(-2*i + 9,3*i,-2*i + 10,3*i + -2,
+arrow = False,solid = True);
+line(-2*i + 8,3*i + -2,-2*i + 9,3*i,
+arrow = False,solid = True)
+}
+circle(-2*i + 9,3*i + 1)
+}
         \end{verbatim}
 \end{minipage}
 
@@ -280,10 +318,13 @@ Solver timeout
         \begin{verbatim}
 for (i < 4){
 if (i > 0){
-line(-2*i + 9,3*i,-2*i + 10,3*i + -2,arrow = True,solid = True);
-line(-2*i + 9,3*i,-2*i + 8,3*i + -2,arrow = True,solid = True);
-rectangle(-2*i + 6,3*i + -3,-2*i + 8,3*i + -1)
-}rectangle(-2*i + 8,3*i,-2*i + 10,3*i + 2)
+line(2*i + 1,-3*i + 12,2*i,-3*i + 10,
+arrow = True,solid = True);
+line(2*i + 1,-3*i + 12,2*i + 2,-3*i + 10,
+arrow = True,solid = True);
+rectangle(2*i + -2,-3*i + 9,2*i,-3*i + 11)
+}
+rectangle(2*i + 2,-3*i + 9,2*i + 4,-3*i + 11)
 }
         \end{verbatim}
 \end{minipage}
@@ -297,7 +338,14 @@ rectangle(-2*i + 6,3*i + -3,-2*i + 8,3*i + -1)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-Solver timeout
+circle(5,1);
+for (i < 3){
+if (i > 0){
+circle(7,2*i + -1);
+circle(i + 2,2*i + 1)
+}
+circle(1,6)
+}
         \end{verbatim}
 \end{minipage}
 
@@ -310,9 +358,10 @@ Solver timeout
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(4,4,2,2,arrow = True,solid = True);
-rectangle(0,0,2,2);
-rectangle(3,4,5,6)
+line(4,4,2,2,
+arrow = True,solid = True);
+rectangle(3,4,5,6);
+rectangle(0,0,2,2)
         \end{verbatim}
 \end{minipage}
 
@@ -325,7 +374,18 @@ rectangle(3,4,5,6)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-Solver timeout
+rectangle(0,4,2,6);
+for (i < 3){
+if (i > 0){
+line(-4*i + 12,5,-4*i + 10,5,
+arrow = True,solid = True);
+for (j < i + 1){
+circle(-4*j + 9,-4*i + 9)
+}
+}
+line(-4*i + 9,4,-4*i + 9,2,
+arrow = True,solid = True)
+}
         \end{verbatim}
 \end{minipage}
 
@@ -338,14 +398,7 @@ Solver timeout
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-circle(1,5);
-for (i < 3){
-if (i > 0){
-line(-4*i + 12,1,-4*i + 10,1,arrow = True,solid = True);
-rectangle(-4*i + 12,4,-4*i + 14,6)
-}line(-4*i + 9,2,-4*i + 9,4,arrow = True,solid = True);
-rectangle(-4*i + 8,0,-4*i + 10,2)
-}
+Solver timeout
         \end{verbatim}
 \end{minipage}
 
@@ -359,11 +412,13 @@ rectangle(-4*i + 8,0,-4*i + 10,2)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-if (i > 0){
-line(4*i,5,4*i + -2,5,arrow = True,solid = True)
-}line(4*i + 1,4,4*i + 1,2,arrow = True,solid = True);
-rectangle(4*i,0,4*i + 2,2);
-rectangle(4*i,4,4*i + 2,6)
+line(-4*i + 9,4,-4*i + 9,2,
+arrow = True,solid = True);
+for (j < 2){
+line(-4*j + 8,5,-4*j + 6,5,
+arrow = True,solid = True);
+rectangle(-4*i + 8,4*j,-4*i + 10,4*j + 2)
+}
 }
         \end{verbatim}
 \end{minipage}
@@ -378,11 +433,14 @@ rectangle(4*i,4,4*i + 2,6)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-line(-4*i + 9,2,-4*i + 9,4,arrow = True,solid = True);
-for (j < 2){
-circle(-4*i + 9,4*j + 1);
-line(-4*j + 8,1,-4*j + 6,1,arrow = True,solid = True)
+if (i > 0){
+line(-4*i + 12,1,-4*i + 10,1,
+arrow = True,solid = True)
 }
+circle(-4*i + 9,1);
+circle(-4*i + 9,5);
+line(-4*i + 9,2,-4*i + 9,4,
+arrow = True,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -399,9 +457,11 @@ line(-4*j + 8,1,-4*j + 6,1,arrow = True,solid = True)
 reflect(reflect(x = 6)){
 for (i < 3){
 if (i > 0){
-line(-2*i + 7,-4*i + 11,-2*i + 7,-4*i + 10,arrow = True,solid = True);
+line(-2*i + 7,-4*i + 11,-2*i + 7,-4*i + 10,
+arrow = True,solid = True);
 rectangle(0,-4*i + 11,6,-3*i + 12)
-}rectangle(2,0,4,2)
+}
+rectangle(2,0,4,2)
 }
 }
         \end{verbatim}
@@ -418,8 +478,10 @@ rectangle(0,-4*i + 11,6,-3*i + 12)
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-line(-3*i + 9,1,-3*i + 8,1,arrow = True,solid = True)
-}rectangle(-3*i + 6,0,-3*i + 8,2)
+line(3*i,1,3*i + -1,1,
+arrow = True,solid = True)
+}
+rectangle(3*i,0,3*i + 2,2)
 }
         \end{verbatim}
 \end{minipage}
@@ -433,11 +495,14 @@ line(-3*i + 9,1,-3*i + 8,1,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(1,3,1,4,arrow = False,solid = True);
+line(1,3,1,4,
+arrow = False,solid = True);
 for (i < 3){
 if (i > 0){
-line(1,-5*i + 13,1,-4*i + 10,arrow = True,solid = True)
-}circle(1,-4*i + 9)
+line(1,-5*i + 13,1,-4*i + 10,
+arrow = True,solid = True)
+}
+circle(1,-4*i + 9)
 }
         \end{verbatim}
 \end{minipage}
@@ -452,8 +517,10 @@ line(1,-5*i + 13,1,-4*i + 10,arrow = True,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 reflect(reflect(x = 2)){
-line(0,1,1,2,arrow = False,solid = True);
-line(1,0,2,1,arrow = False,solid = True)
+line(0,1,1,2,
+arrow = False,solid = True);
+line(1,0,2,1,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -467,8 +534,10 @@ line(1,0,2,1,arrow = False,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,2,2,2,arrow = False,solid = True);
-line(0,0,0,2,arrow = False,solid = True)
+line(0,0,0,2,
+arrow = False,solid = True);
+line(0,2,2,2,
+arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -482,8 +551,10 @@ line(0,0,0,2,arrow = False,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-line(-1*i + 2,i + 4,-2*i + 6,i + 4,arrow = False,solid = True);
-line(-1*i + 2,2*i,-1*i + 2,i + 4,arrow = False,solid = True)
+line(i,-1*i + 6,2*i + 2,-1*i + 6,
+arrow = False,solid = True);
+line(i,-2*i + 4,i,-1*i + 6,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -499,10 +570,11 @@ line(-1*i + 2,2*i,-1*i + 2,i + 4,arrow = False,solid = True)
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-circle(5,2*i);
 circle(1,-3*i + 7);
+circle(5,-2*i + 6);
 rectangle(0,-3*i + 6,2,-3*i + 8)
-}rectangle(4,1,6,5)
+}
+rectangle(4,1,6,5)
 }
         \end{verbatim}
 \end{minipage}
@@ -535,7 +607,8 @@ circle(3*i + 1,-2*j + 5)
         \begin{minipage}{10cm}
         \begin{verbatim}
 circle(5,5);
-line(2,5,4,5,arrow = False,solid = True);
+line(2,5,4,5,
+arrow = False,solid = True);
 rectangle(0,0,5,3);
 rectangle(0,4,2,6)
         \end{verbatim}
@@ -550,10 +623,14 @@ rectangle(0,4,2,6)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,0,6,0,arrow = False,solid = False);
-line(0,3,6,3,arrow = False,solid = False);
-line(6,0,6,3,arrow = False,solid = True);
-line(0,0,0,3,arrow = False,solid = True)
+line(0,0,6,0,
+arrow = False,solid = False);
+reflect(reflect(x = 6)){
+line(6,0,6,3,
+arrow = False,solid = True);
+line(0,3,6,3,
+arrow = False,solid = False)
+}
         \end{verbatim}
 \end{minipage}
 
@@ -581,9 +658,11 @@ Solver timeout
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-circle(5*i + -4,1);
-line(i,i + 4,5*i + -4,2,arrow = True,solid = True)
-}circle(1,6)
+circle(-5*i + 11,1);
+line(-1*i + 3,-1*i + 7,-5*i + 11,2,
+arrow = True,solid = True)
+}
+circle(1,6)
 }
         \end{verbatim}
 \end{minipage}
@@ -612,9 +691,11 @@ Solver timeout
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-line(-4*i + 9,5*i + -3,-2*i + 7,5,arrow = False,solid = True);
-rectangle(-4*i + 8,5*i + -5,6,7*i + -5)
-}circle(1,8)
+line(4*i + -3,-5*i + 12,2*i + 1,5,
+arrow = False,solid = True);
+rectangle(4*i + -4,-5*i + 10,6,-7*i + 16)
+}
+circle(1,8)
 }
         \end{verbatim}
 \end{minipage}
@@ -655,7 +736,7 @@ Solver timeout
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-circle(3*i + 1,1)
+circle(-3*i + 7,1)
 }
         \end{verbatim}
 \end{minipage}
@@ -670,7 +751,7 @@ circle(3*i + 1,1)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-rectangle(2*i,0,2*i + 1,6)
+rectangle(-2*i + 4,0,-2*i + 5,6)
 }
         \end{verbatim}
 \end{minipage}
@@ -684,9 +765,12 @@ rectangle(2*i,0,2*i + 1,6)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,0,0,5,arrow = False,solid = False);
-line(4,1,4,5,arrow = False,solid = False);
-line(4,0,4,1,arrow = False,solid = False)
+line(4,0,4,1,
+arrow = False,solid = False);
+line(0,0,0,5,
+arrow = False,solid = False);
+line(4,1,4,5,
+arrow = False,solid = False)
         \end{verbatim}
 \end{minipage}
 
@@ -699,8 +783,10 @@ line(4,0,4,1,arrow = False,solid = False)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,0,0,5,arrow = False,solid = True);
-line(4,0,4,5,arrow = False,solid = True)
+line(4,0,4,5,
+arrow = False,solid = True);
+line(0,0,0,5,
+arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -715,8 +801,9 @@ line(4,0,4,5,arrow = False,solid = True)
         \begin{verbatim}
 reflect(reflect(x = 12)){
 circle(4,1);
-line(9,1,10,1,arrow = False,solid = True);
-rectangle(10,0,12,2)
+line(9,1,10,1,
+arrow = False,solid = True);
+rectangle(0,0,2,2)
 }
         \end{verbatim}
 \end{minipage}
@@ -730,12 +817,14 @@ rectangle(10,0,12,2)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(4,6,6,6,arrow = True,solid = True);
 rectangle(0,4,4,8);
 reflect(reflect(y = 12)){
 circle(7,6);
-line(2,10,2,8,arrow = True,solid = True);
-rectangle(1,0,3,2)
+line(2,2,2,4,
+arrow = True,solid = True);
+line(4,6,6,6,
+arrow = True,solid = True);
+rectangle(1,10,3,12)
 }
         \end{verbatim}
 \end{minipage}
@@ -749,11 +838,13 @@ rectangle(1,0,3,2)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-reflect(reflect(x = 9)){
-line(1,3,1,6,arrow = False,solid = True);
 reflect(reflect(y = 9)){
+line(3,8,6,8,
+arrow = False,solid = True);
+reflect(reflect(x = 9)){
 circle(1,8);
-line(3,1,6,1,arrow = False,solid = True)
+line(1,3,1,6,
+arrow = False,solid = True)
 }
 }
         \end{verbatim}
@@ -769,10 +860,10 @@ line(3,1,6,1,arrow = False,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 reflect(reflect(y = 11)){
-rectangle(4,1,7,2);
+rectangle(4,9,7,10);
 reflect(reflect(x = 11)){
 rectangle(1,4,2,7);
-rectangle(0,8,3,11)
+rectangle(8,8,11,11)
 }
 }
         \end{verbatim}
@@ -787,9 +878,11 @@ rectangle(0,8,3,11)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-for (i < 3){
-line(-2*i + 5,2*i,-2*i + 7,2*i,arrow = False,solid = True);
-line(-2*i + 4,2*i + 1,-2*i + 6,2*i + 1,arrow = False,solid = True)
+for (i < 4){
+line(i,-1*i + 5,i + 2,-1*i + 5,
+arrow = False,solid = True);
+line(i + 2,-1*i + 3,i + 4,-1*i + 3,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -805,9 +898,10 @@ line(-2*i + 4,2*i + 1,-2*i + 6,2*i + 1,arrow = False,solid = True)
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-rectangle(-3*i + 10,i + -1,-3*i + 12,2);
-rectangle(0,-7*i + 14,3,-7*i + 17)
-}rectangle(1,4,2,6)
+rectangle(3*i + 1,-1*i + 2,3*i + 3,2);
+rectangle(0,7*i + -7,3,7*i + -4)
+}
+rectangle(1,4,2,6)
 }
         \end{verbatim}
 \end{minipage}
@@ -835,7 +929,7 @@ Solver timeout
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-rectangle(2*i,2*i,2*i + 3,2*i + 1)
+rectangle(-2*i + 4,-2*i + 4,-2*i + 7,-2*i + 5)
 }
         \end{verbatim}
 \end{minipage}
@@ -851,10 +945,12 @@ rectangle(2*i,2*i,2*i + 3,2*i + 1)
         \begin{verbatim}
 circle(4,10);
 for (i < 3){
-circle(3*i + 1,5);
-circle(3*i + 1,1);
-line(4,9,3*i + 1,6,arrow = True,solid = True);
-line(3*i + 1,4,3*i + 1,2,arrow = True,solid = True)
+circle(-3*i + 7,5);
+circle(-3*i + 7,1);
+line(-3*i + 7,4,-3*i + 7,2,
+arrow = True,solid = True);
+line(4,9,-3*i + 7,6,
+arrow = True,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -868,10 +964,14 @@ line(3*i + 1,4,3*i + 1,2,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(6,8,6,4,arrow = True,solid = True);
-line(0,8,8,8,arrow = False,solid = True);
-line(4,8,4,0,arrow = True,solid = True);
-line(2,8,2,6,arrow = True,solid = True)
+line(2,8,2,6,
+arrow = True,solid = True);
+line(6,8,6,4,
+arrow = True,solid = True);
+line(4,8,4,0,
+arrow = True,solid = True);
+line(0,8,8,8,
+arrow = False,solid = True)
         \end{verbatim}
 \end{minipage}
 
@@ -884,11 +984,11 @@ line(2,8,2,6,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(2,3,2,5,arrow = False,solid = True);
-rectangle(0,0,4,8);
-reflect(reflect(y = 8)){
-rectangle(1,5,3,7)
-}
+line(2,3,2,5,
+arrow = False,solid = True);
+rectangle(1,1,3,3);
+rectangle(1,5,3,7);
+rectangle(0,0,4,8)
         \end{verbatim}
 \end{minipage}
 
@@ -902,7 +1002,8 @@ rectangle(1,5,3,7)
         \begin{minipage}{10cm}
         \begin{verbatim}
 circle(1,5);
-line(1,4,1,2,arrow = True,solid = True);
+line(1,4,1,2,
+arrow = True,solid = True);
 rectangle(0,0,2,2)
         \end{verbatim}
 \end{minipage}
@@ -931,7 +1032,7 @@ Solver timeout
         \begin{verbatim}
 for (i < 3){
 for (j < 3){
-circle(-4*i + 9,-3*j + 7)
+circle(-4*j + 9,-3*i + 7)
 }
 }
         \end{verbatim}
@@ -948,8 +1049,10 @@ circle(-4*i + 9,-3*j + 7)
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-line(8,0,8*i + -8,7*i + -7,arrow = True,solid = True)
-}rectangle(-2*i + 6,0,-2*i + 7,-1*i + 5)
+line(8,0,8*i + -8,7*i + -7,
+arrow = True,solid = True)
+}
+rectangle(2*i + 2,0,2*i + 3,i + 3)
 }
         \end{verbatim}
 \end{minipage}
@@ -963,7 +1066,8 @@ line(8,0,8*i + -8,7*i + -7,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(4,0,0,0,arrow = False,solid = False)
+line(4,0,0,0,
+arrow = False,solid = False)
         \end{verbatim}
 \end{minipage}
 
@@ -991,7 +1095,8 @@ Solver timeout
         \begin{verbatim}
 circle(2,1);
 circle(6,1);
-line(5,1,3,1,arrow = True,solid = True);
+line(5,1,3,1,
+arrow = True,solid = True);
 rectangle(0,0,7,2)
         \end{verbatim}
 \end{minipage}
@@ -1006,8 +1111,8 @@ rectangle(0,0,7,2)
         \begin{minipage}{10cm}
         \begin{verbatim}
 rectangle(5,0,8,3);
-rectangle(0,2,1,3);
-rectangle(2,1,4,3)
+rectangle(2,1,4,3);
+rectangle(0,2,1,3)
         \end{verbatim}
 \end{minipage}
 
@@ -1021,7 +1126,7 @@ rectangle(2,1,4,3)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-rectangle(i,i,-1*i + 5,-1*i + 5)
+rectangle(-1*i + 2,-1*i + 2,i + 3,i + 3)
 }
         \end{verbatim}
 \end{minipage}
@@ -1036,9 +1141,11 @@ rectangle(i,i,-1*i + 5,-1*i + 5)
         \begin{minipage}{10cm}
         \begin{verbatim}
 reflect(reflect(x = 6)){
-line(5,2,5,4,arrow = False,solid = True);
+line(5,2,5,4,
+arrow = False,solid = True);
 reflect(reflect(y = 6)){
-line(2,1,4,1,arrow = False,solid = True);
+line(2,1,4,1,
+arrow = False,solid = True);
 rectangle(4,4,6,6)
 }
 }
@@ -1054,11 +1161,13 @@ rectangle(4,4,6,6)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-reflect(reflect(x = 6)){
-line(1,2,1,4,arrow = False,solid = True);
 reflect(reflect(y = 6)){
-circle(5,1);
-line(2,1,4,1,arrow = False,solid = True)
+line(2,5,4,5,
+arrow = False,solid = True);
+reflect(reflect(x = 6)){
+circle(5,5);
+line(1,2,1,4,
+arrow = False,solid = True)
 }
 }
         \end{verbatim}
@@ -1074,7 +1183,8 @@ line(2,1,4,1,arrow = False,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-line(i,-1*i + 2,-1*i + 7,-1*i + 2,arrow = False,solid = True)
+line(i,-1*i + 2,-1*i + 7,-1*i + 2,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -1088,10 +1198,12 @@ line(i,-1*i + 2,-1*i + 7,-1*i + 2,arrow = False,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(1,4,5,0,arrow = False,solid = True);
-line(1,5,5,1,arrow = False,solid = True);
-rectangle(0,4,1,5);
-rectangle(5,0,6,1)
+line(1,4,5,0,
+arrow = False,solid = True);
+line(1,5,5,1,
+arrow = False,solid = True);
+rectangle(5,0,6,1);
+rectangle(0,4,1,5)
         \end{verbatim}
 \end{minipage}
 
@@ -1120,10 +1232,11 @@ rectangle(4*i,0,4*i + 2,2)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-rectangle(0,4,5,6);
 reflect(reflect(x = 5)){
 circle(1,1);
-line(1,4,1,2,arrow = True,solid = True)
+line(4,4,4,2,
+arrow = True,solid = True);
+rectangle(0,4,5,6)
 }
         \end{verbatim}
 \end{minipage}
@@ -1137,15 +1250,7 @@ line(1,4,1,2,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-reflect(reflect(x = 6)){
-circle(1,9);
-for (i < 3){
-if (i > 0){
-circle(-2*i + 7,-4*i + 9);
-line(5,-4*i + 12,-2*i + 7,-4*i + 10,arrow = True,solid = True)
-}line(1,8,4,5,arrow = True,solid = True)
-}
-}
+Solver timeout
         \end{verbatim}
 \end{minipage}
 
@@ -1174,8 +1279,9 @@ Solver timeout
 reflect(reflect(y = 8)){
 for (i < 3){
 if (i > 0){
-rectangle(3*i + -1,-3*i + 8,3*i,-3*i + 9)
-}circle(3*i + 1,-3*i + 7)
+rectangle(3*i + -1,2,3*i,3)
+}
+circle(3*i + 1,3*i + 1)
 }
 }
         \end{verbatim}
@@ -1205,9 +1311,10 @@ Solver timeout
         \begin{verbatim}
 for (i < 3){
 if (i > 0){
-rectangle(2*i + -2,2*i + -2,-2*i + 8,-2*i + 8)
-}for (j < 3){
-circle(2*j + 1,2*i + 1)
+rectangle(-2*i + 4,-2*i + 4,2*i + 2,2*i + 2)
+}
+for (j < 3){
+circle(-2*i + 5,2*j + 1)
 }
 }
         \end{verbatim}
@@ -1223,11 +1330,14 @@ circle(2*j + 1,2*i + 1)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 4){
-line(-4*i + 13,4,-4*i + 13,2,arrow = True,solid = True);
+line(-4*i + 13,4,-4*i + 13,2,
+arrow = True,solid = True);
 for (j < 3){
 if (j > 0){
-circle(-4*i + 13,-4*j + 9)
-}line(-4*j + 10,5,-4*j + 12,5,arrow = True,solid = True)
+circle(-4*i + 13,4*j + -3)
+}
+line(-4*j + 10,5,-4*j + 12,5,
+arrow = True,solid = True)
 }
 }
         \end{verbatim}
@@ -1242,11 +1352,13 @@ circle(-4*i + 13,-4*j + 9)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(4,5,4,10,arrow = False,solid = True);
-reflect(reflect(x = 8)){
 circle(4,1);
+reflect(reflect(x = 8)){
 circle(1,8);
-line(4,5,8,2,arrow = False,solid = True)
+line(4,5,8,2,
+arrow = False,solid = True);
+line(4,5,4,10,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -1273,12 +1385,17 @@ Solver timeout
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,6,12,6,arrow = False,solid = True);
-line(8,3,7,4,arrow = True,solid = True);
-line(3,2,5,4,arrow = True,solid = True);
-line(6,6,6,5,arrow = True,solid = True);
+line(0,6,12,6,
+arrow = False,solid = True);
+line(6,6,6,5,
+arrow = True,solid = True);
+line(8,3,7,4,
+arrow = True,solid = True);
+line(3,2,5,4,
+arrow = True,solid = True);
 reflect(reflect(x = 12)){
-line(4,0,12,8,arrow = False,solid = True)
+line(4,0,12,8,
+arrow = False,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -1375,8 +1492,10 @@ Solver timeout
         \begin{verbatim}
 for (i < 4){
 if (i > 0){
-line(1,-3*i + 12,1,-3*i + 11,arrow = True,solid = True)
-}circle(1,-3*i + 10)
+line(1,-3*i + 12,1,-3*i + 11,
+arrow = True,solid = True)
+}
+circle(1,-3*i + 10)
 }
         \end{verbatim}
 \end{minipage}
@@ -1404,9 +1523,9 @@ Solver timeout
         \begin{minipage}{10cm}
         \begin{verbatim}
 reflect(reflect(x = 8)){
-rectangle(0,0,1,1);
 rectangle(0,5,3,8);
-rectangle(0,2,2,4)
+rectangle(0,2,2,4);
+rectangle(0,0,1,1)
 }
         \end{verbatim}
 \end{minipage}
@@ -1421,7 +1540,7 @@ rectangle(0,2,2,4)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 3){
-rectangle(2*i,i,-1*i + 8,-2*i + 7)
+rectangle(-2*i + 4,-1*i + 2,i + 6,2*i + 3)
 }
         \end{verbatim}
 \end{minipage}
@@ -1448,13 +1567,16 @@ Solver timeout
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-circle(6,2);
-line(6,6,6,3,arrow = True,solid = True);
-rectangle(4,0,8,9);
+line(6,6,6,3,
+arrow = True,solid = True);
 for (i < 3){
 if (i > 0){
-line(-5*i + 15,7,-5*i + 12,7,arrow = True,solid = True)
-}circle(-5*i + 11,7)
+circle(-5*i + 16,7);
+circle(-5*i + 11,5*i + -3);
+line(-5*i + 15,7,-5*i + 12,7,
+arrow = True,solid = True)
+}
+rectangle(4,0,8,9)
 }
         \end{verbatim}
 \end{minipage}
@@ -1468,10 +1590,12 @@ line(-5*i + 15,7,-5*i + 12,7,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-reflect(reflect(y = 5)){
 reflect(reflect(x = 5)){
-line(0,0,2,0,arrow = False,solid = True);
-line(0,0,0,2,arrow = False,solid = True)
+reflect(reflect(y = 5)){
+line(5,3,5,5,
+arrow = False,solid = True);
+line(3,5,5,5,
+arrow = False,solid = True)
 }
 }
         \end{verbatim}
@@ -1488,9 +1612,10 @@ line(0,0,0,2,arrow = False,solid = True)
         \begin{verbatim}
 reflect(reflect(x = 14)){
 for (i < 3){
-circle(5,-4*i + 9);
-line(10,-4*i + 9,12,-4*i + 9,arrow = False,solid = True);
-rectangle(12,-4*i + 8,14,-4*i + 10)
+circle(9,-4*i + 9);
+line(10,-4*i + 9,12,-4*i + 9,
+arrow = False,solid = True);
+rectangle(0,-4*i + 8,2,-4*i + 10)
 }
 }
         \end{verbatim}
@@ -1508,8 +1633,10 @@ rectangle(12,-4*i + 8,14,-4*i + 10)
 reflect(reflect(x = 10)){
 for (i < 3){
 if (i > 0){
-line(-4*i + 13,4*i + -2,-4*i + 9,4*i,arrow = True,solid = True)
-}circle(-4*i + 9,4*i + 1)
+line(4*i + -3,4*i + -2,4*i + 1,4*i,
+arrow = True,solid = True)
+}
+circle(4*i + 1,4*i + 1)
 }
 }
         \end{verbatim}
@@ -1524,11 +1651,15 @@ line(-4*i + 13,4*i + -2,-4*i + 9,4*i,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-line(0,2,12,2,arrow = False,solid = True);
-line(6,2,6,3,arrow = True,solid = True);
+line(0,2,12,2,
+arrow = False,solid = True);
+line(6,2,6,3,
+arrow = True,solid = True);
 reflect(reflect(x = 12)){
-line(0,0,9,9,arrow = False,solid = True);
-line(10,7,7,4,arrow = True,solid = True)
+line(0,0,9,9,
+arrow = False,solid = True);
+line(10,7,7,4,
+arrow = True,solid = True)
 }
         \end{verbatim}
 \end{minipage}
@@ -1542,13 +1673,16 @@ line(10,7,7,4,arrow = True,solid = True)
     
         \begin{minipage}{10cm}
         \begin{verbatim}
-circle(4,1);
 reflect(reflect(x = 8)){
+circle(4,1);
 for (i < 3){
 if (i > 0){
-circle(1,-5*i + 16);
-line(1,10,6*i + -5,7,arrow = True,solid = True)
-}line(7,5,4,2,arrow = True,solid = True)
+circle(7,-5*i + 16);
+line(-6*i + 13,10,7,7,
+arrow = True,solid = True)
+}
+line(1,5,4,2,
+arrow = True,solid = True)
 }
 }
         \end{verbatim}
@@ -1564,7 +1698,7 @@ line(1,10,6*i + -5,7,arrow = True,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 reflect(reflect(x = 10)){
-circle(9,1);
+circle(1,1);
 for (i < 4){
 circle(-2*i + 7,2*i + 3)
 }
@@ -1584,9 +1718,12 @@ circle(-2*i + 7,2*i + 3)
 reflect(reflect(x = 6)){
 for (i < 3){
 if (i > 0){
-line(1,-4*i + 10,1,-4*i + 12,arrow = False,solid = True)
-}circle(1,-4*i + 9);
-line(2,-4*i + 9,4,-4*i + 9,arrow = False,solid = True)
+line(1,-4*i + 10,1,-4*i + 12,
+arrow = False,solid = True)
+}
+circle(5,-4*i + 9);
+line(2,-4*i + 9,4,-4*i + 9,
+arrow = False,solid = True)
 }
 }
         \end{verbatim}
@@ -1605,8 +1742,10 @@ rectangle(0,0,4,9);
 for (i < 3){
 if (i > 0){
 circle(2,-4*i + 10);
-line(2,-5*i + 15,2,-4*i + 11,arrow = True,solid = True)
-}circle(2,11)
+line(2,-5*i + 15,2,-4*i + 11,
+arrow = True,solid = True)
+}
+circle(2,11)
 }
         \end{verbatim}
 \end{minipage}
@@ -1621,10 +1760,10 @@ line(2,-5*i + 15,2,-4*i + 11,arrow = True,solid = True)
         \begin{minipage}{10cm}
         \begin{verbatim}
 for (i < 2){
-circle(4,6*i + 1);
-circle(1,6*i + 4);
-rectangle(3,6*i + 3,5,6*i + 5);
-rectangle(0,6*i,2,6*i + 2)
+circle(4,-6*i + 7);
+circle(1,-6*i + 10);
+rectangle(0,-6*i + 6,2,-6*i + 8);
+rectangle(3,-6*i + 9,5,-6*i + 11)
 }
         \end{verbatim}
 \end{minipage}

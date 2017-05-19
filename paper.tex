@@ -294,7 +294,7 @@ conditioned on the image features and the \verb|circle| token, and
 finally it predicts the $y$ coordinate of the circle conditioned on
 the image features, the \verb|circle| token, and the $x$ coordinate.
 See supplement for the full details of the architecture,
-which we implemented in Tensorflow.
+which we implemented in Tensorflow~\cite{tensorflow2015-whitepaper}.
 %% \remark{There are some more details that are important to provide
 %%   about this architecture in the supplement: the
 %%   functional form(s) of the probability distributions over tokens, the
@@ -318,7 +318,6 @@ explains the image.~\remark{Make explicit that a $T_n$ in Equation 2 is a concis
 
 We train the network by sampling execution traces $T$ and target
 images $I$ for randomly generated scenes
-%~\remark{this process ought to be explained, perhaps in supplement if it is at all detailed},
 and maximizing
 (\ref{objective}) with respect to $\theta$ by gradient ascent.
 Training does not require backpropagation across the entire sequence of drawing commands:
@@ -411,7 +410,7 @@ In a sense, this model is like an autoregressive variant of AIR~\cite{eslami1603
 \end{table}
 
 
-
+We trained the network on $10^5$ scenes, which takes a little less than a day on a Nvidia TitanX GPU.
 
 This network suffices to ``derender'' synthetic images like those shown in
 Figure~\ref{trainingData}.  We can perform a beam search decoding to
@@ -442,7 +441,7 @@ training data.
   \begin{minipage}{0.35\textwidth}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
     \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
-    \caption{Network is trained to infer execution traces for randomly generated figures like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
+    \caption{Network is trained to infer execution traces for randomly generated scenes like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
   \end{minipage}\hfill
   \begin{minipage}{0.6\textwidth}
     \includegraphics[width = 4cm]{figures/editDistance.png}
@@ -601,7 +600,7 @@ equation~\ref{programObjective} is intractable in general, but there
 exist efficient-in-practice tools for finding exact solutions to
 program synthesis problems like these. We use the state-of-the-art Sketch
 tool~\cite{solar2008program}. Describing Sketch's program synthesis
-algorithm is beyond the scope of this paper; see supplement.  At a
+algorithm is beyond the scope of this paper; see~\cite{solar2008program}.  At a
 high level, Sketch takes as input a space of programs, along with a
 specification of the program's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
@@ -659,7 +658,7 @@ help correct mistakes made by the neural network, and also
 occasionally introduces mistakes of its own; see
 Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
 example of the kinds of corrections that it makes. On the whole
-modestly improves our Top-1 accuracy from 58\% to 60\%.  Recall that
+it modestly improves our Top-1 accuracy from 58\% to 60\%.  Recall that
 from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
 in accuracy we could possibly get is 63\% by looking at the top 5 traces.
 \begin{wrapfigure}{R}{5.5cm}
@@ -684,12 +683,12 @@ For example, we can use our learned distance metric between execution traces, $L
 Projecting these distances to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}) reveals similarities between the objects in the drawings,
 while missing similarities at the level of the program.
 \begin{figure}
-  \begin{minipage}{0.45\textwidth}
-    \includegraphics[width = 2in]{figures/NMF.png}
+  \begin{minipage}{0.48\textwidth}
+    \includegraphics[width = \textwidth]{figures/NMF.png}
     \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    \label{NMF}
   \end{minipage}\hfill
-  \begin{minipage}{0.45\textwidth}
-    \includegraphics[width = 2in]{figures/imageSimilarity.png} 
+  \begin{minipage}{0.48\textwidth}
+    \includegraphics[width = \textwidth]{figures/imageSimilarity.png} 
     \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
   \end{minipage}
 \end{figure}
@@ -723,7 +722,7 @@ running loops for extra iterations. Rightmost pair is an illustrative failure ca
 
 We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic execution traces; it then feeds these traces to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings and to organize them according to high-level geometric features.
 
-There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention, could also help correct some of the errors the network makes.
+There are many directions for future work. In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}. The proposal network also currently handles only a very small subset of \LaTeX drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network. Exploring more sophisticated network architectures, including ones that utilize attention~\cite{mnih2014recurrent}, could also help correct some of the errors the network makes.
 In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas program synthesizers which are custom-built for special problem domains can run much faster or even interactively~\cite{le2014flashextract}.
 
 In the not-too-distant future, we believe it should be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the corresponding code.
