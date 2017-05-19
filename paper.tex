@@ -540,7 +540,7 @@ we made the drawings on graph paper.
 \end{figure}
 For each drawing we annotated a ground truth trace, and evaluated the
 model by asking it to sample many candidate traces for each drawing.
-For 57\% of the drawings the Top-1 most likely sample exactly matches the
+For 58\% of the drawings the Top-1 most likely sample exactly matches the
 ground truth; as we consider more samples the model encounters traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
 Because our current model sometimes makes mistakes on hand drawings,
@@ -652,9 +652,20 @@ extractor for programs.  We extract a few basic features of a
 program, such as its size and how many loops it has, and use these
 features to help predict whether a trace is the correct explanation
 for an image.
-Learning this prior over programs modestly improves our Top-1 accuracy from 57\% to \textbf{experiment is still running},
-but recall from Fig.~\ref{drawingIntersectionOverUnion}
-that the best improvement in accuracy we could possibly get is 65\%.
+
+We synthesized programs for the top five traces
+output by the deep network.  Learning this prior over programs can
+help correct mistakes made by the neural network, and also
+occasionally introduces mistakes of its own; see
+Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
+example of the kinds of corrections that it makes. On the whole
+modestly improves our Top-1 accuracy from 58\% to 60\%.  Recall that
+from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
+in accuracy we could possibly get is 63\% by looking at the top 5 traces.
+\begin{wrapfigure}{R}{5.5cm}
+  \includegraphics[width = 5cm]{figures/programSuccess7.png}
+  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs.}\label{exampleOfProgramCorrectingMistake}
+  \end{wrapfigure}
 
 \subsection{Modeling similarity between drawings}
 Modeling an image using a program opens up new ways of measuring similarity between drawings.
