@@ -185,9 +185,9 @@ for (i < 3)
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
 \end{figure}
 
-The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
+The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep neural network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as a \emph{program trace}, since it corresponds to the sequence of primitive commands that the desired program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that can generate an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued, but it lacks the high-level structure that determines how the program decided to issue those commands. For added robustness, we train the network to produce a proposal distribution of the most likely traces, and use stochastic search to find the trace that best matches the input. The network is trained from an automatically generated corpus of synthetic image generating programs.
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase. In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended. This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
@@ -781,11 +781,12 @@ imagine hand drawing a repetitive graphical model structure
 and having our system automatically induce and extend the pattern.
 Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from ground truth traces;
 see supplement for our full set of extrapolations.
-
+ 
 \begin{figure}
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}  
-  \caption{Top: hand drawings. Bottom: extrapolations produced by
-running loops for extra iterations. Rightmost pair is an illustrative failure case.}\label{extrapolationFigure}
+  \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}
+    \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}  
+  \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by
+running loops for extra iterations..}\label{extrapolationFigure}
   \end{figure}
 %\input{extrapolations.tex}
 
