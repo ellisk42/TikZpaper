@@ -750,15 +750,15 @@ or if they are both organized according to a grid-like structure.
 We measure the similarity between two drawings by extracting features
 of the best programs that describe them. Our features are counts of the number of times that different components in the
 DSL were used (Table~\ref{DSL}).  We project these features down to a
-2-dimensional subspace using nonnegative matrix factorization
-(NMF:~\cite{lee1999learning}); see Fig.\ref{NMF}.  One could use many
+2-dimensional subspace using primary component analysis
+(PCA); see Fig.\ref{NMF}.  One could use many
 alternative similarity metrics between drawings which would capture pixel-level while missing high-level geometric similarities.
 We used our learned distance metric between execution traces, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
 while missing similarities at the level of the program.
 \begin{figure}
   \begin{minipage}{0.48\textwidth}
-    \includegraphics[width = \textwidth]{figures/NMF.png}
-    \caption{NMF on features of the programs that were synthesized for each image. Horizontal component roughly corresponds to ``symmetry'' while vertical component roughly corresponds to ``loopyness'', with images on the diagonal having both of these.}    \label{NMF}
+    \includegraphics[width = \textwidth]{figures/PCA.png}
+    \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left.}    \label{NMF}
   \end{minipage}\hfill
   \begin{minipage}{0.48\textwidth}
     \includegraphics[width = \textwidth]{figures/imageSimilarity.png} 
