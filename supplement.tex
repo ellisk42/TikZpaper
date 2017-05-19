@@ -119,7 +119,7 @@ which the program synthesizer might be able to model as a loop or reflectional s
 So, in considering several candidate traces proposed by the neural network,
 we might prefer traces whose best programs have desirable features such being short or having iterated structures.
 
-Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section~\ref{neuralNetworkSection} samples a set of candidate traces, written $\mathcal{F}(I)$.
+Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section 3 of the main paper samples a set of candidate traces, written $\mathcal{F}(I)$.
 Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
 we can take into account the programs that best explain the traces. 
 Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,

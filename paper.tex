@@ -184,7 +184,7 @@ for (i < 3)
   \end{minipage}
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
 \end{figure}
-
+ 
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
 We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as a \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
@@ -537,13 +537,13 @@ we made the drawings on graph paper.
     \subcaption{A figure from a deep learning textbook}
     \end{minipage}
   \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-0.png}
-    \includegraphics[width = 2cm]{figures/0-parse.png}    
+    \includegraphics[width = 2cm]{figures/expert-1.png}
+    \includegraphics[width = 2cm]{figures/expert-1-parse.png}    
     \subcaption{Near miss}
   \end{minipage}
   \begin{minipage}[t]{2.25cm}
     \includegraphics[width = 2cm]{figures/expert-38.png}
-    \includegraphics[width = 2cm]{figures/38-parse.png}    
+    \includegraphics[width = 2cm]{figures/38-parse.png}     
     \subcaption{Failing on a Ising model}
   \end{minipage}
   \begin{minipage}[t]{2.25cm}
@@ -553,8 +553,8 @@ we made the drawings on graph paper.
     \end{minipage}
   \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}. Stochastic search (SMC) can help correct for these errors, as can the program synthesizer (Section~\ref{synthesizerHelpsParsing})}\label{lotsOfHandDrawings}%~\remark{Showing `failure cases' (the last three above) out-of-context seems not great. Perhaps remind people in the caption that stochastic search can help correct some of these issues?}
 \end{figure}
-For each drawing we annotated a ground truth trace and asked the model
-to sample many candidate traces for each drawing.
+For each drawing we annotated a ground truth trace and asked the neurally guided SMC sampler
+to produce many candidate traces for each drawing.
 For 58\% of the drawings, the Top-1 most likely sample exactly matches the
 ground truth; with more samples, the model finds traces
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
@@ -562,7 +562,7 @@ Because our current model sometimes makes mistakes, % on hand drawings,
 we envision it working as follows:
 a user sketches a diagram,
 and the system responds by proposing a few candidate interpretations.
-The user could then select one and edit it if necessary.
+The user could then select the one closest to their intention and edit it if necessary.
 
 \section{Synthesizing graphics programs from execution traces}\label{programSynthesisSection}
 While the execution trace of a graphics program describes the contents
