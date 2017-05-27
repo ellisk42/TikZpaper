@@ -142,7 +142,7 @@ MIT\\
  drawings, into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
  machine learning papers (see Figure~\ref{firstPageExamples}a).
-\begin{figure}[H]
+ \begin{figure}[H]\vspace{-0.7cm}
   \begin{minipage}[t]{0.7\linewidth}  
 \begin{tabular}{llll}
   \includegraphics[width = \exampleImageSize]{figures/expert-60.png}&
@@ -173,7 +173,6 @@ for (i < 3)
     \subcaption{}
   \end{minipage}
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
-  \vspace{-1cm}
 \end{figure}
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
