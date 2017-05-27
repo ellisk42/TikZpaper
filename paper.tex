@@ -7,10 +7,10 @@
 % to avoid loading the natbib package, add option nonatbib:
 % \usepackage[nonatbib]{nips_2017}
 
-\usepackage{nips_2017}
+%\usepackage{nips_2017}
 \usepackage{dsfont}
 % to compile a camera-ready version, add the [final] option, e.g.:
-% \usepackage[final]{nips_2017}
+\usepackage[final]{nips_2017}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -68,7 +68,7 @@
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
 
 \newcommand{\remark}[1]{\textcolor{red}{[#1]}}
-
+\newcommand{\exampleImageSize}{2cm}
 
 % \title{Inferring Graphics Programs from Images}
 \title{Learning to Infer Graphics Programs from Hand-Drawn Images}
@@ -84,21 +84,21 @@
 % author name.
 
 \author{
-  David S.~Hippocampus\thanks{Use footnote for providing further
-    information about author (webpage, alternative
-    address)---\emph{not} for acknowledging funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
-  %% examples of more authors
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \AND
-  %% Coauthor \\
+Kevin Ellis\\
+  MIT\\
+  \texttt{ellisk@mit.edu} \\
+  \And
+  Daniel Ritchie\\
+Stanford University\\
+ \texttt{dritchie@stanford.edu} \\
+ \And
+ Armando Solar-Lezama\\
+ MIT\\
+\texttt{asolar@csail.mit.edu} \\
+\And
+Joshua B. Tenenbaum \\
+MIT\\
+\texttt{jbt@mit.edu}
   %% Affiliation \\
   %% Address \\
   %% \texttt{email} \\
@@ -142,17 +142,7 @@
  drawings, into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
  machine learning papers (see Figure~\ref{firstPageExamples}a).
- %% \remark{The use of `graphics programs / visual programs' in the paper
- %%   title, title of this section, and the body of this section feels
- %%   too broad. `Graphics program' could conjur a lot of different ideas
- %%   (esp. 3D graphics); don't want to set the reader up to expect one
- %%   thing and then be disappointed that what you've done isn't
- %%   that. You bring up diagram-drawing later in the intro; I think it
- %%   should be made clear sooner (and certainly mentioned explicitly in
- %%   the abstract, when you get around to writing that).}
-
-\newcommand{\exampleImageSize}{2cm}
-\begin{figure}[h]
+\begin{figure}[H]
   \begin{minipage}[t]{0.7\linewidth}  
 \begin{tabular}{llll}
   \includegraphics[width = \exampleImageSize]{figures/expert-60.png}&
@@ -183,6 +173,7 @@ for (i < 3)
     \subcaption{}
   \end{minipage}
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(bottom). (b) Synthesizes high-level \emph{graphics program} from hand drawing.}\label{firstPageExamples}
+  \vspace{-1cm}
 \end{figure}
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
@@ -624,6 +615,7 @@ minimum-cost program satisfying the specification.  In exchange for
 having no guarantee on the time required to find a minimum
 cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
+See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
 
 \newcommand{\exampleProgramSize}{2.3cm} 
 \begin{figure}
@@ -697,7 +689,7 @@ arrow=True)
 \end{Verbatim}
   \end{minipage}
   \end{tabular}
-  \caption{Example drawings (top) and programs synthesized from their ground truth traces (bottom). Note the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle left, and affine transformation in the leftmost figure.}
+  \caption{Example drawings (top) and programs synthesized from their ground truth traces (bottom). Note the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle right, and affine transformation in the leftmost figure.}\label{exampleSynthesisResults}
   \end{figure}
 
 Why synthesize a graphics program,
@@ -804,12 +796,15 @@ In the near future, we believe it will be possible to produce professional-looki
 More generally, we believe that the two-phase system we have proposed---parsing into execution traces, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for other domains in which agents must programmatically reason about noisy perceptual input.
 
 
+\subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl on the design of the neural architecture.
+
+\subsubsection*{Supplemental information.} The supplement may be found at:~\url{http://web.mit.edu/ellisk/www/graphicsProgramSupplement.pdf}
+
 
 %\input{synthesizerOutputs.tex}
 
 
-\bibliographystyle{unsrt}
-{\small \bibliography{main}}
+\bibliographystyle{unsrt} {\small \bibliography{main}}
 
 
 \end{document}
