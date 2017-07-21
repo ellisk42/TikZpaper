@@ -288,30 +288,35 @@ to continue drawing, the predicted primitive is rendered to its
 
 Figure~\ref{architecture} illustrates this architecture.  We first
 pass a $256\times 256$ target image and a rendering of the trace so
-far (encoded as a two-channel image) to a convolutional network. Given the features extracted by the
-convnet, a multilayer perceptron then predicts a distribution over the
-next drawing command to add to the trace; see Table~\ref{drawingCommandTable}.  We predict the drawing
+far (encoded as a two-channel image) to a convolutional network. Given
+the features extracted by the convnet, a multilayer perceptron then
+predicts a distribution over the next drawing command to add to the
+trace; see Table~\ref{drawingCommandTable}.  We predict the drawing
 command token-by-token, conditioning each token both on the image
-features and on the previously generated tokens.  For example, the
-network first decides to emit the \verb|circle| token conditioned on
-the image features, then it emits the $x$ coordinate of the circle
-conditioned on the image features and the \verb|circle| token, and
-finally it predicts the $y$ coordinate of the circle conditioned on
-the image features, the \verb|circle| token, and the $x$ coordinate.
-See supplement for the full details of the architecture,
-which we implemented in Tensorflow~\cite{tensorflow2015-whitepaper}.
+features and on the previously generated tokens. We also use a
+differentiable attention mechanism (Spatial Transformer
+Networks:~\cite{jaderberg2015spatial}) to let the model attend to
+different regions of the image while predicting each token. For
+example, the network first decides to emit the \verb|circle| token
+conditioned on the image features, then it emits the $x$ coordinate of
+the circle conditioned on the image features and the \verb|circle|
+token, and finally it predicts the $y$ coordinate of the circle
+conditioned on the image features, the \verb|circle| token, and the
+$x$ coordinate.  See supplement for the full details of the
+architecture, which we implemented in
+Tensorflow~\cite{tensorflow2015-whitepaper}.
 %% \remark{There are some more details that are important to provide
 %%   about this architecture in the supplement: the
 %%   functional form(s) of the probability distributions over tokens, the
 %%   network layer sizes, which MLPs share parameters, etc.}
 The distribution over the next drawing command factorizes as:
 \begin{equation}
-  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta [t_k | f_\theta(I,\text{render}(T)), \{t_j\}_{j = 1}^{k - 1}]
+  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(T)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
 \end{equation}
 where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
 the target image, $T$ is an execution trace, $\theta$ are the
-parameters of the neural network, and $f_\theta(\cdot,\cdot)$ is the
-image feature extractor (convolutional network). The distribution over
+parameters of the neural network, $f_\theta(\cdot,\cdot)$ is the
+image feature extractor (convolutional network), and $a_\theta(\cdot|\cdot)$ is an attention mechanism. The distribution over
 execution traces factorizes as:
 \begin{equation}
   \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
@@ -359,18 +364,23 @@ We trained the network on $10^5$ scenes, which takes a little less than a day on
 
   \node[draw,ultra thick,minimum size = 1cm](c1) at ([xshift = 1.5cm]features.north) {MLP};
   \node(l1) at ([yshift = -2cm]c1.south) {\verb|circle(|};
+  \node[draw,ultra thick,minimum size = 1cm](a2) at ([xshift = 1cm,yshift = 1.5cm]c1.east) {STN};
   \node[draw,ultra thick,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east) {MLP};
+  \draw[->,ultra thick] (a2.south) -- (c2.north);
   \draw[->,ultra thick,red] (c1.south) -- (l1.north);
   \node(l2) at ([yshift = -2cm]c2.south) {\verb|X=7,|};
   \draw[->,ultra thick,red] (c2.south) -- (l2.north);
+  \node[draw,ultra thick,minimum size = 1cm](a3) at ([xshift = 1cm,yshift = 1.5cm]c2.east) {STN};
   \node[draw,ultra thick,minimum size = 1cm](c3) at ([xshift = 1cm]c2.east) {MLP};
+  
+  \draw[->,ultra thick] (a3.south) -- (c3.north);
   \node(l3) at ([yshift = -2cm]c3.south) {\verb|Y=12)|};
   \draw[->,ultra thick,red] (c3.south) -- (l3.north);
 
   
   \draw[->,ultra thick] (features.north) -- (c1.west);
-  \draw[->,ultra thick] (features.north) to[out = 45,in = 90] (c2.north);
-  \draw[->,ultra thick] (features.north) to[out = 70,in = 90] (c3.north);
+  \draw[->,ultra thick] (features.north) to[out = 45,in = 160] (a2.north);
+  \draw[->,ultra thick] (features.north) to[out = 70,in = 140] (a3.north);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c2.west);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c3.west);
   \draw[->,ultra thick] ([xshift = 0.25cm]l2.north) -- ([yshift = -0.2cm]c3.west);
@@ -387,7 +397,7 @@ We trained the network on $10^5$ scenes, which takes a little less than a day on
   
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
-\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}.}  \label{architecture}
+\caption{Our neural architecture for inferring the execution trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\cite{jaderberg2015spatial}.}  \label{architecture}
 \end{figure}
 \begin{table}[h]
 \begin{tabular}{ll}\toprule
@@ -440,20 +450,20 @@ likelihood.
 Figure~\ref{syntheticResults}
 compares the neural network with SMC against the neural network by
 itself or SMC by itself.  Only the combination of the two passes a
-critical test of generalization: when trained on images with $\leq 8$
+critical test of generalization: when trained on images with $\leq 12$
 objects, it successfully parses scenes with many more objects than the
 training data.
 
 \begin{figure}\centering
-  \begin{minipage}{0.35\textwidth}
-    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-58-7.png}}\end{minipage}
-    \begin{minipage}[t]{2.2cm}\fbox{\includegraphics[width=2cm]{figures/randomScene-33-5.png}}\end{minipage}
+  \begin{minipage}{6cm}
+    \begin{minipage}[t]{2.9cm}\fbox{\includegraphics[width=2.75cm]{figures/randomScene-58-7.png}}\end{minipage}
+    \begin{minipage}[t]{2.9cm}\fbox{\includegraphics[width=2.75cm]{figures/randomScene-33-5.png}}\end{minipage}
     \caption{Network is trained to infer execution traces for randomly generated scenes like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
-  \end{minipage}\hfill
-  \begin{minipage}{0.6\textwidth}
-    \includegraphics[width = 4cm]{figures/editDistance.png}
-    \includegraphics[width = 4cm]{figures/accuracy.png}
-      \caption{Using the model to parse latex output. The model is trained on diagrams with up to 8 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
+  \end{minipage}\hfill%
+  \begin{minipage}{7.5cm}\centering
+    \includegraphics[width = 7cm]{figures/editDistanceRecurrent.png} 
+%    \includegraphics[width = 4cm]{figures/accuracy.png}
+      \caption{Using the model to parse latex output. The model is trained on diagrams with up to 12 objects. As shown above it generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
     \end{minipage}
   
   \end{figure}
@@ -491,22 +501,22 @@ These were drawn carefully but not perfectly.
 Our model assumes that objects are snapped to a $16\times 16$ grid, so
 we made the drawings on graph paper.
 \begin{figure}\centering
-  \begin{minipage}{0.45\textwidth}
-  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/expert-60-reduced.png}
+  \begin{minipage}{0.35\textwidth}
+  \begin{minipage}[t]{\textwidth}\centering\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
+    \subcaption{}
+  \end{minipage}\\
+   \begin{minipage}[t]{0.5\textwidth}\includegraphics[width = 2cm]{figures/60-groundTruth-reduced.png}
     \subcaption{}
   \end{minipage}%
-   \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/60-groundTruth-reduced.png}
-    \subcaption{}
-  \end{minipage}%
-  \begin{minipage}[t]{0.3\textwidth}\includegraphics[width = 1.5cm]{figures/60-1-reduced.png}
+  \begin{minipage}[t]{0.5\textwidth}\includegraphics[width = 2cm]{figures/60-1-reduced.png}
     \subcaption{}
   \end{minipage}%
     \caption{(a): a hand drawing. (b): Rendering of the trace our model infers for (a). We can generalize to hand drawings like these because we train the model on images corrupted by a noise process designed to resemble the kind of noise introduced by hand drawings - see (c) for a noisy rendering of (b).}\label{handDrawingExamples}
   \end{minipage}\hfill
-  \begin{minipage}{0.45\textwidth}
-  \includegraphics[width = 6cm]{figures/drawingAccuracy.png}
-  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1,5,10,100)?
-  Distance to ground truth trace measured by the intersection over union of predicted vs. ground truth traces (sets of drawing commands).}\label{drawingIntersectionOverUnion}
+  \begin{minipage}{0.6\textwidth} 
+  \includegraphics[width = 7.5cm]{figures/drawingAccuracy.png}
+  \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1,10,100)?
+    Distance to ground truth trace measured by the intersection over union of predicted vs. ground truth traces. (a) for 62\% of drawings the model's top prediction is exactly correct; (b) for 69\% of drawings the ground truth is in the top 10 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth trace.}\label{drawingIntersectionOverUnion}
     \end{minipage}
 \end{figure}
 
@@ -616,79 +626,130 @@ cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
 
-\newcommand{\exampleProgramSize}{2.3cm} 
+\newcommand{\exampleProgramSize}{4.5cm} 
+\newcommand{\exampleDrawingSize}{2cm}
+
 \begin{figure}
-  \begin{tabular}{lllll}
-  \includegraphics[width = \exampleProgramSize]{figures/expert-29.png}&
-  \includegraphics[width = \exampleProgramSize]{figures/expert-52.png}&
-  \includegraphics[width = \exampleProgramSize]{figures/expert-38.png}&
-  \includegraphics[width = \exampleProgramSize]{figures/expert-72.png}&
-  \includegraphics[width = \exampleProgramSize]{figures/expert-75.png}\\
-    \begin{minipage}[t]{\exampleProgramSize}
-\begin{Verbatim}[fontsize = \small]
-for(i<3){
-line(i,-1*i+6,
-2*i+2,-1*i+6)
-line(i,-2*i+4,
-i,-1*i+6)
-\end{Verbatim}
-    \end{minipage}&
-    \begin{minipage}[t]{\exampleProgramSize}
-\begin{Verbatim}[fontsize = \small]
-circle(4,10)
-for(i<3){
-circle(-3*i+7,5)
-circle(-3*i+7,1)
-line(-3*i+7,4,
--3*i+7,2,
-arrow=True)
-line(4,9,
--3*i+7,6,
-arrow=True)
-\end{Verbatim}
-\end{minipage}&
-\begin{minipage}[t]{\exampleProgramSize}
-\begin{Verbatim}[fontsize=\small]
+  \begin{tabular}{m{4cm}ll}
+    \toprule
+    Drawing&Trace&Program\\
+    \midrule
+    \includegraphics[width = \exampleDrawingSize]{figures/expert-29-trim.png}&
+\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+Line(2,15, 4,15)
+Line(4,9, 4,13)
+Line(3,11, 3,14)
+Line(2,13, 2,15)
+Line(3,14, 6,14)
+Line(4,13, 8,13)
+\end{verbatim}
+\end{minipage}&     \begin{minipage}{\exampleProgramSize} \begin{verbatim}
 for(i<3)
-for(j<3)
-if(j>0)
-line(-3*j+8,
--3*i+7,-3*j+9,
--3*i+7)
-line(-3*i+7,-3*j+8,
--3*i+7,
--3*j+9)
-circle(-3*j+7,-3*i+7)
-\end{Verbatim}
+ line(i,-1*i+6, 2*i+2,-1*i+6)
+ line(i,-2*i+4,i,-1*i+6)
+       \end{verbatim}
+     \end{minipage}&\\\midrule
+     \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
+\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+Line(5,13, 2,10),
+  arrow = True)
+Circle(center = (5,9)
+Circle(center = (8,5)
+Line(2,8, 2,6), 
+  arrow = True)
+Circle(center = (2,5)
+Circle(center = (5,14)
+Circle(center = (2,9)
+Line(5,13, 8,10), 
+  arrow = True)
+\end{verbatim}
+\emph{... etc. ...}\\
+\end{minipage}&
+             \begin{minipage}{\exampleProgramSize}\begin{verbatim}
+circle(4,10)
+for(i<3)
+ circle(-3*i+7,5)
+ circle(-3*i+7,1)
+ line(-3*i+7,4,-3*i+7,2,arrow=True)
+ line(4,9,-3*i+7,6,arrow=True)
+\end{verbatim}
+\end{minipage}\\\midrule
+    \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
+\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+Circle(center = (5,8)
+Circle(center = (2,8)
+Circle(center = (8,11)
+Line(2,9, 2,10)
+Circle(center = (8,8)
+Line(3,8, 4,8)
+Line(3,11, 4,11)
+Line(8,9, 8,10)
+Circle(center = (5,14)
+Line(5,9, 5,10)
+Circle(center = (2,14)
+\end{verbatim}
+  \emph{... etc. ...}\\
+\end{minipage}&\begin{minipage}[t]{\exampleProgramSize}
+\begin{verbatim}
+for(i<3)
+ for(j<3)
+  if(j>0)
+   line(-3*j+8,-3*i+7,-3*j+9,-3*i+7)
+  line(-3*i+7,-3*j+8,-3*i+7,-3*j+9)
+  circle(-3*j+7,-3*i+7)
+\end{verbatim}
+\end{minipage}\\\midrule
+\includegraphics[width = \exampleDrawingSize]{figures/expert-75-trim.png}&
+\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+Line(11,14, 13,14), 
+  arrow = True)
+Circle(center = (10,10)
+Line(10,13, 10,11), 
+  arrow = True)
+Line(7,14, 9,14), 
+  arrow = True)
+Circle(center = (6,10)
+Circle(center = (2,10)
+Line(3,14, 5,14), 
+  arrow = True)
+\end{verbatim}
+    \emph{... etc. ...}\\
 \end{minipage}&
 \begin{minipage}[t]{\exampleProgramSize}
-\begin{Verbatim}[fontsize=\small]
-reflect(y=8){
-for(i<3){
-if(i>0){
-rectangle(3*i-1,
-2,3*i,3)}
-circle(3*i+1,
-       3*i+1)
-\end{Verbatim}
-\end{minipage}&
- \begin{minipage}[t]{\exampleProgramSize}
-    \begin{Verbatim}[fontsize = \small]
-for(i<4){
-line(-4*i+13,4,
--4*i+13,2,
-arrow=True)
-for(j<3){
-if(j>0){
-circle(-4*i+13,
-4*j+-3)}
-line(-4*j+10,5,
--4*j+12,5,
-arrow=True)
-\end{Verbatim}
-  \end{minipage}
+    \begin{verbatim}
+for(i<4)
+ line(-4*i+13,4,-4*i+13,2,arrow=True)
+ for(j<3)
+  if(j>0)
+   circle(-4*i+13,4*j+-3)
+  line(-4*j+10,5,-4*j+12,5,arrow=True)
+\end{verbatim}
+  \end{minipage}\\\midrule    
+
+  \includegraphics[width = \exampleDrawingSize]{figures/expert-72-trim.png}&
+
+\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+Circle(center = (2,8)
+Rectangle(6,9, 7,10)
+Circle(center = (8,8)
+Rectangle(6,12, 7,13)
+Rectangle(3,9, 4,10)
+Circle(center = (2,14)
+Circle(center = (8,14)
+Circle(center = (5,11)
+Rectangle(3,12, 4,13)
+\end{verbatim}
+  \end{minipage}&\begin{minipage}[t]{\exampleProgramSize}
+\begin{verbatim}
+reflect(y=8)
+ for(i<3)
+  if(i>0)
+   rectangle(3*i-1,2,3*i,3)
+  circle(3*i+1,3*i+1)
+\end{verbatim}
+\end{minipage}\\\bottomrule
   \end{tabular}
-  \caption{Example drawings (top) and programs synthesized from their ground truth traces (bottom). Note the nested loops in the Ising model (middle), special case conditionals for the HMM (rightmost), combination of symmetry and iteration in middle right, and affine transformation in the leftmost figure.}\label{exampleSynthesisResults}
+  \caption{Example drawings (left), their ground truth traces (middle), and programs synthesized from these traces (right). Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
 Why synthesize a graphics program,
