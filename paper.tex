@@ -626,16 +626,17 @@ cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
 
-\newcommand{\exampleProgramSize}{4.5cm} 
+\newcommand{\exampleProgramSize}{6cm}
+\newcommand{\exampleTraceSize}{4.5cm}
 \newcommand{\exampleDrawingSize}{2cm}
 
 \begin{figure}
-  \begin{tabular}{m{4cm}ll}
+  \begin{tabular}{m{2.5cm}ll}
     \toprule
     Drawing&Trace&Program\\
     \midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-29-trim.png}&
-\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(2,15, 4,15)
 Line(4,9, 4,13)
 Line(3,11, 3,14)
@@ -650,7 +651,7 @@ for(i<3)
        \end{verbatim}
      \end{minipage}&\\\midrule
      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
-\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(5,13, 2,10),
   arrow = True)
 Circle(center = (5,9)
@@ -660,8 +661,6 @@ Line(2,8, 2,6),
 Circle(center = (2,5)
 Circle(center = (5,14)
 Circle(center = (2,9)
-Line(5,13, 8,10), 
-  arrow = True)
 \end{verbatim}
 \emph{... etc. ...}\\
 \end{minipage}&
@@ -670,12 +669,14 @@ circle(4,10)
 for(i<3)
  circle(-3*i+7,5)
  circle(-3*i+7,1)
- line(-3*i+7,4,-3*i+7,2,arrow=True)
- line(4,9,-3*i+7,6,arrow=True)
+ line(-3*i+7,4,-3*i+7,2,
+      arrow=True)
+ line(4,9,-3*i+7,6,
+      arrow=True)
 \end{verbatim}
 \end{minipage}\\\midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
-\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Circle(center = (5,8)
 Circle(center = (2,8)
 Circle(center = (8,11)
@@ -685,11 +686,9 @@ Line(3,8, 4,8)
 Line(3,11, 4,11)
 Line(8,9, 8,10)
 Circle(center = (5,14)
-Line(5,9, 5,10)
-Circle(center = (2,14)
 \end{verbatim}
   \emph{... etc. ...}\\
-\end{minipage}&\begin{minipage}[t]{\exampleProgramSize}
+\end{minipage}&\begin{minipage}{\exampleProgramSize}
 \begin{verbatim}
 for(i<3)
  for(j<3)
@@ -700,7 +699,7 @@ for(i<3)
 \end{verbatim}
 \end{minipage}\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-75-trim.png}&
-\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(11,14, 13,14), 
   arrow = True)
 Circle(center = (10,10)
@@ -710,25 +709,25 @@ Line(7,14, 9,14),
   arrow = True)
 Circle(center = (6,10)
 Circle(center = (2,10)
-Line(3,14, 5,14), 
-  arrow = True)
 \end{verbatim}
     \emph{... etc. ...}\\
 \end{minipage}&
-\begin{minipage}[t]{\exampleProgramSize}
+\begin{minipage}{\exampleProgramSize}
     \begin{verbatim}
 for(i<4)
- line(-4*i+13,4,-4*i+13,2,arrow=True)
+ line(-4*i+13,4,-4*i+13,2,
+      arrow=True)
  for(j<3)
   if(j>0)
    circle(-4*i+13,4*j+-3)
-  line(-4*j+10,5,-4*j+12,5,arrow=True)
+  line(-4*j+10,5,-4*j+12,5,
+       arrow=True)
 \end{verbatim}
   \end{minipage}\\\midrule    
 
   \includegraphics[width = \exampleDrawingSize]{figures/expert-72-trim.png}&
 
-\begin{minipage}{\exampleProgramSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Circle(center = (2,8)
 Rectangle(6,9, 7,10)
 Circle(center = (8,8)
@@ -739,7 +738,7 @@ Circle(center = (8,14)
 Circle(center = (5,11)
 Rectangle(3,12, 4,13)
 \end{verbatim}
-  \end{minipage}&\begin{minipage}[t]{\exampleProgramSize}
+  \end{minipage}&\begin{minipage}{\exampleProgramSize}
 \begin{verbatim}
 reflect(y=8)
  for(i<3)
@@ -749,7 +748,7 @@ reflect(y=8)
 \end{verbatim}
 \end{minipage}\\\bottomrule
   \end{tabular}
-  \caption{Example drawings (left), their ground truth traces (middle), and programs synthesized from these traces (right). Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
+  \caption{Example drawings (left), their ground truth traces (middle), and programs synthesized from these traces (right). Compared to the trace the programs are more compressive and automatically group together related drawing commands. are Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
 Why synthesize a graphics program,
