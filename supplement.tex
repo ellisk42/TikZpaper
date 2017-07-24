@@ -164,9 +164,9 @@ help correct mistakes made by the neural network, and also
 occasionally introduces mistakes of its own; see
 Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
 example of the kinds of corrections that it makes. On the whole
-it modestly improves our Top-1 accuracy from 58\% to 61\%.  Recall that
+it modestly improves our Top-1 accuracy from 63\% to 67\%.  Recall that
 from Fig. 6 of the main paper that the best improvement
-in accuracy we could possibly get is 65\% by looking at the top 10 traces. 
+in accuracy we could possibly get is 70\% by looking at the top 10 traces. 
 \begin{wrapfigure}{R}{5.5cm}
   \includegraphics[width = 5cm]{figures/programSuccess7.png}
   \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus continuing the pattern of not having an arrow is preferred.}\label{exampleOfProgramCorrectingMistake}
@@ -177,31 +177,48 @@ in accuracy we could possibly get is 65\% by looking at the top 10 traces.
 
 \subsection{Convolutional network}
 The convolutional network takes as input 2 $256\times 256$ images
-represented as a $2\times 256\times 256\times$ volume. These are
+represented as a $2\times 256\times 256$ volume. These are
 passed through two layers of convolutions separated by ReLU
 nonlinearities and max pooling:
 \begin{itemize}
 \item Layer 1: 20 $8\times 8$ convolutions, 2 $16\times 4$ convolutions, 2 $4\times 16$ convolutions. Followed by $8\times 8$ pooling with a stride size of 4.
 \item Layer 2: 10 $8\times 8$ convolutions. Followed by $4\times 4$ pooling with a stride size of 4.
 \end{itemize}
-Training takes a little bit less than a day on a Nvidia TitanX GPU.
-The network was trained on $10^5$ synthetic examples.
+
 
 \subsection{Autoregressive decoding of drawing commands}
 
-Given the image features $f$, we predict the first token using logistic regression:
+Given the image features $f$, we predict the first token (i.e., the name of the drawing command: \verb|circle|, \verb|rectangle|, \verb|line|, or \verb|STOP|) using logistic regression:
 \begin{equation}
-  \probability [T_1]\propto W_{T_1}f
+  \probability [T_1]\propto \exp\left( W_{T_1}f + b_{T_1}\right)
 \end{equation}
-where $W_{T_1}$ is a learned weight matrix.
+where $W_{T_1}$ is a learned weight matrix and  $b_{T_1}$ is a learned bias vector.
 
-Subsequent tokens are predicted as:
+Given an attention mechanism $a(\cdot | \cdot)$, subsequent tokens are predicted as:
 \begin{equation}
-  \probability [T_n|T_{1:(n - 1)}]\propto \text{MLP}_{T_1,n}(I \otimes \bigotimes_{j < n} \text{oneHot}(T_j))
+  \probability [T_n|T_{1:(n - 1)}]\propto \text{MLP}_{T_1,n}(a(f|T_{1:(n - 1)}) \otimes \bigotimes_{j < n} \text{oneHot}(T_j))
 \end{equation}
 Thus each token of each drawing primitive has its own learned MLP.
 For predicting the coordinates of lines we found that using 32 hidden nodes with sigmoid activations worked well;
 for other tokens the MLP's are just logistic regression (no hidden nodes).
+
+We use Spatial Transformer Networks~\cite{jaderberg2015spatial}
+as our attention mechanism.
+The parameters of the spatial transform are predicted on the basis of previously predicted tokens.
+For example, in order to decide where to focus our attention when predicting the $y$ coordinate of a circle,
+we condition upon both the identity of the drawing command (\verb|circle|) and upon the value of the previously predicted $x$ coordinate:
+\begin{equation}
+  a(f|T_{1:(n - 1)}) = \text{AffineTransform}(f, \text{MLP}_{T_1,n}(\bigotimes_{j < n}\text{oneHot}(T_j)))
+  \label{spatialTransformEquation}
+\end{equation}
+So, we learn a different network for predicting special transforms
+\emph{for each drawing command} (value of $T_1$) and also \emph{for each token of the drawing command}.
+These networks ($\text{MLP}_{T_1,n}$ in equation~\ref{spatialTransformEquation}) have no hidden layers and
+output the 6 entries of an affine transformation matrix; see~\cite{jaderberg2015spatial}
+for more details.
+
+Training takes a little bit less than a day on a Nvidia TitanX GPU.
+The network was trained on $10^5$ synthetic examples.
 
 \subsection{A learned likelihood surrogate}
 
@@ -305,7 +322,7 @@ See figure~\ref{exampleTrainingData} for examples of the kinds of scenes that th
 \end{figure}
 
 For readers wishing to generate their own synthetic training sets,
-we refer them to our source code at:~\url{http://www.redactedForAnonymousReview.com}.
+we refer them to our source code at:~\url{https://github.com/ellisk42/TikZ}.
 
 \section{The cost function for programs}
 
