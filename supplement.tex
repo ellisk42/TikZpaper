@@ -169,9 +169,9 @@ from Fig. 6 of the main paper that the best improvement
 in accuracy we could possibly get is 70\% by looking at the top 10 traces. 
 \begin{wrapfigure}{R}{5.5cm}
   \includegraphics[width = 5cm]{figures/programSuccess7.png}
-  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus continuing the pattern of not having an arrow is preferred.}\label{exampleOfProgramCorrectingMistake}
+  \includegraphics[width = 5cm]{figures/programSuccess16.png}
+  \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus (top example) continuing the pattern of not having an arrow is preferred, or (bottom example) continuing the binary search tree is preferred.}\label{exampleOfProgramCorrectingMistake}
 \end{wrapfigure}
-
 
 \section{Neural network architecture}
 
@@ -190,13 +190,13 @@ nonlinearities and max pooling:
 
 Given the image features $f$, we predict the first token (i.e., the name of the drawing command: \verb|circle|, \verb|rectangle|, \verb|line|, or \verb|STOP|) using logistic regression:
 \begin{equation}
-  \probability [T_1]\propto \exp\left( W_{T_1}f + b_{T_1}\right)
+  \probability [t_1]\propto \exp\left( W_{t_1}f + b_{t_1}\right)
 \end{equation}
-where $W_{T_1}$ is a learned weight matrix and  $b_{T_1}$ is a learned bias vector.
+where $W_{t_1}$ is a learned weight matrix and  $b_{t_1}$ is a learned bias vector.
 
 Given an attention mechanism $a(\cdot | \cdot)$, subsequent tokens are predicted as:
 \begin{equation}
-  \probability [T_n|T_{1:(n - 1)}]\propto \text{MLP}_{T_1,n}(a(f|T_{1:(n - 1)}) \otimes \bigotimes_{j < n} \text{oneHot}(T_j))
+  \probability [t_n|t_{1:(n - 1)}]\propto \text{MLP}_{t_1,n}(a(f|t_{1:(n - 1)}) \oplus \bigoplus_{j < n} \text{oneHot}(t_j))\label{discreteTokenPrediction}
 \end{equation}
 Thus each token of each drawing primitive has its own learned MLP.
 For predicting the coordinates of lines we found that using 32 hidden nodes with sigmoid activations worked well;
@@ -208,17 +208,81 @@ The parameters of the spatial transform are predicted on the basis of previously
 For example, in order to decide where to focus our attention when predicting the $y$ coordinate of a circle,
 we condition upon both the identity of the drawing command (\verb|circle|) and upon the value of the previously predicted $x$ coordinate:
 \begin{equation}
-  a(f|T_{1:(n - 1)}) = \text{AffineTransform}(f, \text{MLP}_{T_1,n}(\bigotimes_{j < n}\text{oneHot}(T_j)))
+  a(f|t_{1:(n - 1)}) = \text{AffineTransform}(f, \text{MLP}_{t_1,n}(\bigoplus_{j < n}\text{oneHot}(t_j)))
   \label{spatialTransformEquation}
 \end{equation}
 So, we learn a different network for predicting special transforms
-\emph{for each drawing command} (value of $T_1$) and also \emph{for each token of the drawing command}.
-These networks ($\text{MLP}_{T_1,n}$ in equation~\ref{spatialTransformEquation}) have no hidden layers and
+\emph{for each drawing command} (value of $t_1$) and also \emph{for each token of the drawing command}.
+These networks ($\text{MLP}_{t_1,n}$ in equation~\ref{spatialTransformEquation}) have no hidden layers and
 output the 6 entries of an affine transformation matrix; see~\cite{jaderberg2015spatial}
 for more details.
 
 Training takes a little bit less than a day on a Nvidia TitanX GPU.
 The network was trained on $10^5$ synthetic examples.
+
+\section{Predicting continuous coordinates using Mixture Density Networks}
+
+Our main paper describes a neural model for parsing hand drawings
+into~\LaTeX, but comes with the restriction that all of the
+coordinates of all the drawing commands are snapped to a $16\times 16$
+grid. Now we describe a variant of our model that
+can predict continuous real valued coordinates.
+
+The key obstacle to overcome is \emph{multimodality}: if the network
+is unsure whether it should predict a coordinate value of $a$ or $b$,
+we wish to predict a distribution that splits its mass between $a$ and
+$b$, rather than predicting the single value $\frac{a + b}{2}$.  In
+the model where everything is snapped to a discrete grid, supporting
+this multimodality falls out naturally from our parameterization of
+the network predictions (i.e., the network predicts the parameters of
+a multinomial distribution). To predict continuous real valued
+coordinates we turn to Mixture Density Networks (MDN:~\cite{MDN}).  In
+an MDN, a distribution over a real-valued random variable is
+parameterized using a mixture of Gaussians, and the deep network
+predicts the parameters of the Gaussian mixture.
+
+Concretely,
+we modify our autoregressive drawing command decoder to
+predict distributions over real-valued coordinates
+as:
+\begin{equation}
+  p(t_n|t_{1:(n - 1)}) = \text{MDN}_{t_1,n} (a(f|t_{1:(n - 1)}) \oplus \bigoplus_{j < n} t_j)\text{, if }n^{\text{th}}\text{ token is continuous}
+\end{equation}
+Compare this equation with Equation~\ref{discreteTokenPrediction} to see that we have only
+replaced a draw from a multinomial (whose parameters are predicted by an MLP)
+with a draw from a mixture of Gaussians (whose parameters are predicted by an MDN).
+Otherwise the two models are identical.
+
+For an MDN $i$ with $K$ mixture components that takes as input $x$, we parameterize it's output distribution as:
+\begin{eqnarray}
+  \text{MDN}_i(x) &=& \sum_{1\leq k\leq K} \pi_{i,k}(x)\times \mathcal{N}(\mu_{i,k}(x),\sigma^2_{i,k}(x))\\
+  \mu_{i,k}(x)& = &\text{sigmoid} (W^{\mu_{i,k}}x + b^{\mu_{i,k}}x)\label{mixtureMean}
+  \\\sigma^2_{i,k}(x)& = &\log \left(1 + \exp\left(W^{\sigma^2_{i,k}}x + b^{\sigma^2_{i,k}}x\right) \right)
+  \\\pi_{i,k}(x)& = &\frac{\exp\left(W^{\pi_{i,k}}x + b^{\pi_{i,k}}x \right)}{\sum_{k'} \exp\left(W^{\pi_{i,k'}}x + b^{\pi_{i,k'}}x \right)}
+  \end{eqnarray}
+where $W$ with a superscript is a learned weight matrix and $b$ is a
+learned bias vector. Notice that Equation~\ref{mixtureMean} normalizes
+the predicted means to be within $[0,1]$: this is because we wish to
+constrain the predicted coordinates to lie within the plane
+$[0,1]^2$. We used $K = 16$ mixture components.
+
+
+\subsection{LSTM Baseline}
+
+We  compared our deep network with a baseline that models the problem as a kind of image captioning.
+Given the target image, this baseline produces the program trace in one shot by
+using a CNN to extract features of the input which are passed to an LSTM which finally predicts
+the trace token-by-token.
+This general architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}).
+
+Concretely, we kept the image feature extractor architecture (a CNN) as in our model,
+but only passed it one image as input (the target image to explain).
+Then, instead of using an autoregressive decoder to predict a single drawing command,
+we used an LSTM to predict a sequence of drawing commands token-by-token.
+This LSTM had 128 memory cells,
+and at each time step produced as output the next token in the sequence of drawing commands.
+It took as input both the image representation and its previously predicted token.
+
 
 \subsection{A learned likelihood surrogate}
 
