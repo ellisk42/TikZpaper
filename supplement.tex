@@ -220,7 +220,7 @@ for more details.
 Training takes a little bit less than a day on a Nvidia TitanX GPU.
 The network was trained on $10^5$ synthetic examples.
 
-\section{Predicting continuous coordinates using Mixture Density Networks}
+\subsection{Predicting continuous coordinates using Mixture Density Networks}
 
 Our main paper describes a neural model for parsing hand drawings
 into~\LaTeX, but comes with the restriction that all of the
@@ -246,7 +246,7 @@ we modify our autoregressive drawing command decoder to
 predict distributions over real-valued coordinates
 as:
 \begin{equation}
-  p(t_n|t_{1:(n - 1)}) = \text{MDN}_{t_1,n} (a(f|t_{1:(n - 1)}) \oplus \bigoplus_{j < n} t_j)\text{, if }n^{\text{th}}\text{ token is continuous}
+  p(t_n|t_{1:(n - 1)}) = \text{MDN}_{t_1,n} (a(f|t_{1:(n - 1)}) \oplus \bigoplus_{j < n} t_j)\text{, if }n^{\text{th}}\text{ token is continuous}\label{continuousDensityEquation}
 \end{equation}
 Compare this equation with Equation~\ref{discreteTokenPrediction} to see that we have only
 replaced a draw from a multinomial (whose parameters are predicted by an MLP)
@@ -266,7 +266,34 @@ the predicted means to be within $[0,1]$: this is because we wish to
 constrain the predicted coordinates to lie within the plane
 $[0,1]^2$. We used $K = 16$ mixture components.
 
+Figure~\ref{syntheticContinuous}  shows the behavior of the MDN variant of our model on noisy synthetic drawings.
+Contrast these mediocre results with Figure~4 of the main paper to see that although
+our main model is essentially at ceiling for parsing scenes like these,
+the MDN variant fares poorly in comparison.
+\begin{figure}
+  \includegraphics[width = \textwidth]{figures/syntheticContinuous.png}
+  \caption{Left column: \LaTeX~output corrupted by noise process designed to resemble the variability is introduced by hand drawings. Right columns: samples from the MDN variant of the model.}\label{syntheticContinuous}
+\end{figure}
 
+We evaluated the MDN version of our model on hand drawings by (1)
+performing a beam search in order to find the trace maximizing
+$\probability [T|I]$, and (2) constraining the predicted coordinates
+to lie on the $16\times 16$ grid. We constrain the predicted coordinates
+to lie on the grid by integrating the predicted densities about each grid location.
+So, using the probability density $p(t_n|t_{1:(n - 1)})$ in Eq.~\ref{continuousDensityEquation},
+we compute a probability mass function $\probability [t_n|t_{1:(n - 1)}]$ as:
+\begin{equation}
+  \probability [t_n = t|t_{1:(n - 1)}] = \int_{t - \frac{1}{2}}^{t + \frac{1}{2}} \mathrm{d}t_n \; p(t_n|t_{1:(n - 1)})\label{constrainingEquation}
+\end{equation}
+Even after using Eq.~\ref{constrainingEquation} to constrain the predicted coordinates to lie on the $16\times 16$ grid, the MDN variant of the model only produces finished traces for 48/100 of the drawings.
+See Figure~\ref{continuousParses} to see the traces recovered by the beam search.
+
+\begin{figure}
+  \includegraphics[width = \textwidth]{figures/continuousParses.png}
+  \caption{Parsing hand drawings using the MDN variant of our
+    model. Black-on-white: hand drawings. White-on-black, below each
+    hand drawing: the parse inferred by the model.}\label{continuousParses} 
+  \end{figure}
 \subsection{LSTM Baseline}
 
 We  compared our deep network with a baseline that models the problem as a kind of image captioning.

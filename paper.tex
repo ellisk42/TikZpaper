@@ -353,7 +353,7 @@ Tensorflow~\cite{tensorflow2015-whitepaper}.
 
   \node(next)[draw,very thick,fit = (l1) (l2) (l3), dashed, label = below:{Next line of code}] {};
 
-  \draw[-{>[scale = 1.5]},very thick,dashed] (next.west) -- ([yshift = -0.2cm]canvas.east) node [midway, below, sloped] (TextNode) {Renderer: \LaTeX~Ti\emph{k}Z};
+  \draw[-{>[scale = 1.5]},very thick,dashed] (next.west) -- ([yshift = -0.2cm]canvas.east) node [midway, below, sloped] (TextNode) {Renderer}; %: \LaTeX~Ti\emph{k}Z};
   
   \draw[->,ultra thick] (canvas.east) -- (tensorProduct.south);%[yshift = -0.5cm]CNN.west);
   \draw[->,ultra thick] (observation.east) -- (tensorProduct.north);%([yshift = 0.5cm]CNN.west);
@@ -884,13 +884,14 @@ running loops for extra iterations.}\label{extrapolationFigure}
 There are many directions for future work. The proposal network  currently handles only a very small subset of \LaTeX~drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network.
 In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas program synthesizers which are custom-built for special problem domains can run much faster or even interactively~\cite{le2014flashextract}.
 
-In the parsing phase, the proposal network currently samples positional variables on a discrete $16\times 16$ grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks~\cite{MDN}.
+In the parsing phase, the proposal network currently samples positional variables on a discrete $16\times 16$ grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks (MDN)~\cite{MDN}.
 Implementing a variant of our model that predicts continuous coordinates
 using Mixture Density Networks is straightforward;
 we have prototyped such a system and
-show examples of it working in the supplement.
-But, for our collection of hand drawings, discrete positional variables suffice.
-
+show examples of it both working and failing in the supplement.
+But, for our collection of hand drawings, discrete positional variables suffice,
+and currently work much better in practice.
+Engineering better handling of the MDN variant of our model is a prime target for future research.
 
 \subsection{Contributions}
 
