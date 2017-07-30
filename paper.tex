@@ -1,7 +1,7 @@
 \documentclass{article}
 
 % if you need to pass options to natbib, use, e.g.:
-% \PassOptionsToPackage{numbers, compress}{natbib}
+\PassOptionsToPackage{numbers, compress}{natbib}
 % before loading nips_2017
 %
 % to avoid loading the natbib package, add option nonatbib:
@@ -89,8 +89,8 @@ Kevin Ellis\\
   \texttt{ellisk@mit.edu} \\
   \And
   Daniel Ritchie\\
-Stanford University\\
- \texttt{dritchie@stanford.edu} \\
+Brown University\\
+ \texttt{daniel\_ritchie@stanford.edu} \\
  \And
  Armando Solar-Lezama\\
  MIT\\
@@ -581,7 +581,7 @@ The user could then select the one closest to their intention and edit it if nec
 \end{figure}
 
 \begin{figure}[h]\centering
-  \begin{minipage}{0.8\textwidth} 
+\vspace{-0.25cm}  \begin{minipage}{0.8\textwidth} 
 \centering  \includegraphics[width = 8cm]{figures/drawingAccuracy.png} 
   \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1,10,100)?
     Distance to ground truth trace measured by the intersection over union of predicted vs. ground truth traces. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 10 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth trace.}\label{drawingIntersectionOverUnion}
@@ -678,7 +678,7 @@ for(i<3)
  line(i,-1*i+6, 2*i+2,-1*i+6)
  line(i,-2*i+4,i,-1*i+6)
        \end{verbatim}
-     \end{minipage}&\\\midrule
+     \end{minipage}\\\midrule
      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(5,13, 2,10),
@@ -891,7 +891,6 @@ we have prototyped such a system and
 show examples of it both working and failing in the supplement.
 But, for our collection of hand drawings, discrete positional variables suffice,
 and currently work much better in practice.
-Engineering better handling of the MDN variant of our model is a prime target for future research.
 
 \subsection{Contributions}
 
