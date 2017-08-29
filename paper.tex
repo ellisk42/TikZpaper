@@ -90,7 +90,7 @@ Kevin Ellis\\
   \And
   Daniel Ritchie\\
 Brown University\\
- \texttt{daniel\_ritchie@stanford.edu} \\
+ \texttt{daniel\_ritchie@brown.edu} \\
  \And
  Armando Solar-Lezama\\
  MIT\\
@@ -597,7 +597,7 @@ While the execution trace of a graphics program describes the contents
 of a scene, it does not encode higher-level features of the image,
 such as repeated motifs or symmetries.  A \emph{graphics
   program} better describe such structures;
-we seek to synthesize simple graphics graphics from their execution traces.
+we seek to synthesize simple graphics from their execution traces.
 
 We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
@@ -655,14 +655,16 @@ In practice, synthesis times vary from a few minutes to a few hours,
 with 16\% of the diagrams timing out the synthesizer after 3 hours.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
 
-\newcommand{\exampleProgramSize}{6cm}
-\newcommand{\exampleTraceSize}{4.5cm}
+\newcommand{\exampleProgramSize}{4.5cm}
+\newcommand{\exampleTraceSize}{4cm}
 \newcommand{\exampleDrawingSize}{2cm}
 
 \begin{figure}
-  \begin{tabular}{m{2.5cm}ll}
+\hspace{-0.7cm}  \begin{tabular}{m{2.5cm}llc}
     \toprule
-    \textbf{Drawing}&\textbf{Trace}&\textbf{Program}\\
+    \textbf{Drawing}&\textbf{Trace}&\textbf{Program}&\begin{tabular}{c}
+      \textbf{Compression}\\\textbf{factor}
+      \end{tabular}\\
     \midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-29-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
@@ -678,20 +680,20 @@ for(i<3)
  line(i,-1*i+6, 2*i+2,-1*i+6)
  line(i,-2*i+4,i,-1*i+6)
        \end{verbatim}
-     \end{minipage}\\\midrule
+     \end{minipage}&$\frac{6}{3} = 2\text{x}$\\\midrule
      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(5,13, 2,10),
   arrow = True)
-Circle(center = (5,9)
-Circle(center = (8,5)
+Circle(5,9)
+Circle(8,5)
 Line(2,8, 2,6), 
   arrow = True)
-Circle(center = (2,5)
-Circle(center = (5,14)
-Circle(center = (2,9)
+Circle(2,5)
+Circle(5,14)
+Circle(2,9)
 \end{verbatim}
-\emph{... etc. ...}\\
+\emph{... etc. ...; 13 lines}\\
 \end{minipage}&
              \begin{minipage}{\exampleProgramSize}\begin{verbatim}
 circle(4,10)
@@ -703,43 +705,45 @@ for(i<3)
  line(4,9,-3*i+7,6,
       arrow=True)
 \end{verbatim}
-\end{minipage}\\\midrule
+\end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
-Circle(center = (5,8)
-Circle(center = (2,8)
-Circle(center = (8,11)
+Circle(5,8)
+Circle(2,8)
+Circle(8,11)
 Line(2,9, 2,10)
-Circle(center = (8,8)
+Circle(8,8)
 Line(3,8, 4,8)
 Line(3,11, 4,11)
 Line(8,9, 8,10)
-Circle(center = (5,14)
+Circle(5,14)
 \end{verbatim}
-  \emph{... etc. ...}\\
+  \emph{... etc. ...; 21 lines}\\
 \end{minipage}&\begin{minipage}{\exampleProgramSize}
 \begin{verbatim}
 for(i<3)
  for(j<3)
   if(j>0)
-   line(-3*j+8,-3*i+7,-3*j+9,-3*i+7)
-  line(-3*i+7,-3*j+8,-3*i+7,-3*j+9)
+   line(-3*j+8,-3*i+7,
+        -3*j+9,-3*i+7)
+  line(-3*i+7,-3*j+8,
+       -3*i+7,-3*j+9)
   circle(-3*j+7,-3*i+7)
 \end{verbatim}
-\end{minipage}\\\midrule
+\end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-75-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
 Line(11,14, 13,14), 
   arrow = True)
-Circle(center = (10,10)
+Circle(10,10)
 Line(10,13, 10,11), 
   arrow = True)
 Line(7,14, 9,14), 
   arrow = True)
-Circle(center = (6,10)
-Circle(center = (2,10)
+Circle(6,10)
+Circle(2,10)
 \end{verbatim}
-    \emph{... etc. ...}\\
+    \emph{... etc. ...; 15 lines}\\
 \end{minipage}&
 \begin{minipage}{\exampleProgramSize}
     \begin{verbatim}
@@ -752,19 +756,19 @@ for(i<4)
   line(-4*j+10,5,-4*j+12,5,
        arrow=True)
 \end{verbatim}
-  \end{minipage}\\\midrule    
+  \end{minipage}&$\frac{15}{6} = 2.5\text{x}$\\\midrule    
 
   \includegraphics[width = \exampleDrawingSize]{figures/expert-72-trim.png}&
 
 \begin{minipage}{\exampleTraceSize}\begin{verbatim}
-Circle(center = (2,8)
+Circle(2,8)
 Rectangle(6,9, 7,10)
-Circle(center = (8,8)
+Circle(8,8)
 Rectangle(6,12, 7,13)
 Rectangle(3,9, 4,10)
-Circle(center = (2,14)
-Circle(center = (8,14)
-Circle(center = (5,11)
+Circle(2,14)
+Circle(8,14)
+Circle(5,11)
 Rectangle(3,12, 4,13)
 \end{verbatim}
   \end{minipage}&\begin{minipage}{\exampleProgramSize}
@@ -775,9 +779,9 @@ reflect(y=8)
    rectangle(3*i-1,2,3*i,3)
   circle(3*i+1,3*i+1)
 \end{verbatim}
-\end{minipage}\\\bottomrule
+\end{minipage}&$\frac{9}{5} = 1.8\text{x}$\\\bottomrule
   \end{tabular}
-  \caption{Example drawings (left), their ground truth traces (middle), and programs synthesized from these traces (right). Compared to the trace the programs are more compressive and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
+  \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
 Why synthesize a graphics program,
