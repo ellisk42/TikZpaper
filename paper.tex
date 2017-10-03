@@ -10,7 +10,10 @@
 %\usepackage{nips_2017}
 \usepackage{dsfont}
 % to compile a camera-ready version, add the [final] option, e.g.:
-\usepackage[final]{nips_2017}
+%\usepackage[final]{nips_2017}
+%ICLR packages:
+\usepackage{iclr2018_conference,times}
+
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -262,14 +265,20 @@ cognitive modeling (they apply their system to solving IQ-test
 style visual reasoning problems), whereas we are interested in
 building an automated AI application (e.g. in our system the user need
 not annotate which strokes correspond to which shapes; our neural
-network produces something equivalent to the annotations).  A key
-similarity however is that both CogSketch and our system have as a
-goal to make it easier to produce nice-looking figures.
+network produces something equivalent to the annotations).
+%A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
 Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
 and they applied their technique to synthetic scenes used in human behavioral studies.
 %% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
 
-
+Synthesizing programs from their execution traces is an old
+idea~\cite{Summers:1977:MLP:321992.322002}.  This previous work
+departs from our approach in the nature of the problem (synthesizing
+recursive algorithms in Lisp vs. graphics programs in~\LaTeX) and the
+specifics of the solution (hand-coded source-to-source transformations vs. neural networks
+combined with general-purpose program synthesis techniques).
+What they share is the use of an execution trace as a
+stepping stone toward a full program.
 
 
 
