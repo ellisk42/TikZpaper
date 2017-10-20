@@ -186,6 +186,10 @@ The second step involves generating a high-level program capable of producing th
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
 This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
 symmetries, repetition, or conditional branches.
+Although these program synthesizers do not \emph{need} any training data,
+we show how to combine conventional machine learning with bias optimal search~\cite{schmidhuber2004optimal},
+learning to improve the wall clock speed of these synthesis algorithms by two orders of magnitude.
+
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
 %% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
@@ -660,9 +664,124 @@ minimum-cost program satisfying the specification.  In exchange for
 having no guarantee on the time required to find a minimum
 cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
-In practice, synthesis times vary from a few minutes to a few hours,
+In practice, synthesis times vary from a few minutes to a a few hours,
 with 16\% of the diagrams timing out the synthesizer after 3 hours.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
+A main impediment here to our use of these general techniques is
+the prohibitively high cost of searching for programs.
+
+\subsection{Learning a search policy for synthesizing programs}
+
+We want to leverage powerful, domain-general techniques from the program synthesis community,
+but make them much faster by
+learning a domain-specific \emph{search policy}.
+A search policy proposes search problems
+like those in Equation~\ref{programObjective},
+but can also offer additional constraints on the structure of the program (Table~\ref{policyOutput}).
+For example, a policy might decide to first try searching over small programs before searching over large programs,
+or decide to prioritize searching over programs that have loops.
+
+A search policy $\pi_\theta(\sigma  | T )$ takes as input a trace $T$ and predicts a distribution over synthesis problems, each of which is written $\sigma $ and corresponds to a set of possible programs to search over (so $\sigma \subset \text{DSL}$).
+Good policies will prefer tractable program spaces,
+so that the search procedure will terminate early.
+Good policies will also prefer program spaces that are likely to contain
+programs that can explain the data.
+In general these two desiderata are in tension:
+tractable synthesis problems involve searching over smaller spaces,
+but smaller spaces are less likely to contain a minimum cost program
+for explaining the trace.
+Our goal now is to find the parameters of the policy, written $\theta$, which best navigate this trade-off.
+
+\begin{table}[h]\centering
+  \begin{tabular}{lll}\toprule
+  Parameter&Description&Range\\\midrule
+  Loops?&Is the program allowed to loop?&$\{\text{True},\text{False}\}$\\
+  Reflects?&Is the program allowed to have reflections?&$\{\text{True},\text{False}\}$\\
+  Incremental?&Solve the problem piece-by-piece or all at once?&$\{\text{True},\text{False}\}$\\
+  Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
+  \\\bottomrule
+  \end{tabular}
+  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. In our notation, we write $\sigma $ to mean an assignment to each of these parameters.}\label{policyOutput}
+  \end{table}
+
+
+Given a search policy, what is the best way of using it to quickly find minimum cost programs?
+We use a \emph{bias-optimal search algorithm} (see Schmidhuber 2004:~\cite{schmidhuber2004optimal}):
+
+\textbf{Definition: Bias optimality.} A search algorithm is $n$-\emph{bias optimal}
+with respect to a distribution $\probability_{\text{bias}}[\cdot ]$ if it is
+guaranteed to find a solution $\sigma $ after searching for at least time
+$n\times\frac{t(\sigma )}{\probability_{\text{bias}}[\sigma ]}$, where $t(\sigma )$ is the time it
+takes to verify that $\sigma $ is a solution to the
+search problem.
+
+An example of a $1$-bias optimal search algorithm is a time-sharing system
+that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to testing $\sigma $.
+We construct a $1$-bias optimal search algorithm for our domain by
+identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$
+and $t(\sigma )  $ with how long the program synthesizer takes to search through the programs in $\sigma $.
+
+In theory any $\pi_\theta(\cdot |\cdot ) $ is a bias-optimal searcher.
+But the real world runtime of the algorithm depends strongly upon
+the bias $\probability_{\text{bias}}[\cdot ]$.
+Our approach is to learn $\probability_{\text{bias}}[\cdot ]$
+by picking the policy that minimizes the
+expected bias-optimal time to solve a training corpus of graphics program synthesis problems,
+which is:
+\begin{align}
+\textsc{Loss}(\theta ; \text{training corpus})& =  \expect_{T\in \text{training corpus}}\left[ \min_{\sigma\in \text{\textsc{Best}}(T)}\frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}\right]\label{policyLoss}\\
+\text{where }  \sigma \in\text{\textsc{Best}}(T) &\text{ iff:  } \text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }T} \text{cost}(p) \nonumber
+\end{align}
+This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
+We locally minimize it using gradient descent while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}. See supplement for details.
+
+Because we want to learn a policy from only $100$ hand-drawn sketches,
+we chose a simple low-capacity, bilinear model for a policy:
+\begin{equation}
+  \pi_{\theta}(\sigma |T)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{trace}}(T)\right)
+\end{equation}
+where $\phi_{\text{params}}(\sigma  )$ is a one-hot encoding of
+the parameter settings of $\sigma $ (see Table~\ref{policyOutput})
+and $\phi_{\text{trace}}(T)$ extracts a few simple features of the trace $T$;
+see supplement for details.
+
+We contrast our learned search policy
+with two alternatives (see Figure~\ref{policyEvaluation}):
+(1) \emph{Sketch}, which poses the
+entire problem wholesale to the Sketch program synthesizer;
+and (2) an \emph{Oracle},
+a policy which always picks the quickest to search $\sigma $
+ also containing a minimum cost program.
+Our approach improves upon Sketch by itself,
+and comes close to the Oracle's performance.
+Of course one could never construct such an Oracle,
+because the agent does not know ahead of time which
+$\sigma $'s contain minimum cost programs nor does it know how long each
+$\sigma $ will take to search.
+
+
+This generalizes and strengthens previous work: Levin
+search~\cite{levin1973universal,solomonoff1984optimum} \&
+OOPS~\cite{schmidhuber2004optimal}: theoretically appealing but
+impractical; fails to leverage either techniques from machine learning
+or from program synthesis. More of a mathematical framing and less of
+an algorithm.  DeepCoder~\cite{BalGauBroetal16}: in addition to
+picking what sort of primitives can go into a program, we are picking
+the details of the search algorithm as well as how deep the algorithms
+should search.  Main difference is that we identify this interesting
+trade-off between tractability and probability of getting a solution.
+TerpreT~\cite{gaunt2016terpret}: suggests that constraint solvers outperform gradient-based search techniques like those used in differentiable neural computers.
+
+
+Two intuitions: want a model that prefers sketches that are likely to
+contain a valid solution, but at the same time prefers sketches that
+are easy to search.  In general these two preferences are at odds with
+one another.  For example, a sketch which allows very long programs
+and allows lots of primitives is extremely likely to contain a
+shortest program -- but might also take hours for the synthesizer to
+search through.
+
+
 
 \newcommand{\exampleProgramSize}{4.5cm}
 \newcommand{\exampleTraceSize}{4cm}
@@ -793,7 +912,7 @@ reflect(y=8)
   \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
-Why synthesize a graphics program,
+With this policy in hand we can now synthesize most programs in under a minute. But why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 %\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
@@ -855,8 +974,9 @@ We used our learned distance metric between execution traces, $L_{\text{learned}
 while missing similarities at the level of the program.
 \begin{figure}[h]
 \centering  \begin{minipage}{\textwidth}\centering
-    \includegraphics[width = 0.69\textwidth]{figures/PCA.png}
-    \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left.}    \label{NMF}
+  \includegraphics[width = 0.69\textwidth]{figures/PCA.png}
+  \includegraphics[width = 0.69\textwidth]{figures/PCA_improved.png}
+    \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left; complicated programs are at the top and simple programs are at the bottom.}    \label{NMF}
   \end{minipage} %\hfill
   \begin{minipage}{\textwidth}\centering
     \includegraphics[width = 0.69\textwidth]{figures/imageSimilarity.png} 
