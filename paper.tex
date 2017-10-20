@@ -23,7 +23,8 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
-
+\usepackage{listings}
+\lstset{basicstyle = \small\ttfamily}
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
 %\usepackage{subfig} 
@@ -53,7 +54,7 @@
 \usetikzlibrary{fit}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
-\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.text,decorations.pathreplacing}
 \usetikzlibrary{decorations.pathmorphing}
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
@@ -141,8 +142,8 @@ MIT\\
  How can an agent convert noisy, high-dimensional perceptual input
  to a symbolic, abstract object, such as a computer program?  Here we
  consider this problem within a graphics program synthesis domain.  We
- develop an approach for converting natural images, such as hand
- drawings, into executable source code for drawing the original image.
+ develop an approach for converting  hand
+ drawings into executable source code for drawing the original image.
  The graphics programs in our domain draw simple figures like those found in
  machine learning papers (see Figure~\ref{firstPageExamples}a).
  \begin{figure}[H]\vspace{-0.7cm}
@@ -180,15 +181,58 @@ for (i < 3)
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands that generates an image similar to the observed image. We refer to this sequence as an \emph{execution trace}, since it corresponds to the sequence of primitive commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands. We refer to this sequence as an \emph{execution trace}, since it corresponds to the: commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
 This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
 symmetries, repetition, or conditional branches.
 Although these program synthesizers do not \emph{need} any training data,
-we show how to combine conventional machine learning with bias optimal search~\cite{schmidhuber2004optimal},
-learning to improve the wall clock speed of these synthesis algorithms by two orders of magnitude.
+we show how to combine conventional machine learning with bias optimal search~\cite{schmidhuber2004optimal}
+in order to synthesize complicated programs in only a few minutes.
+
+Images are high-dimensional and unstructured while programs are high-level
+and symbolic. We resolve this mismatch by advancing a new model of
+collaboration between these two representations, which we call The Trace Hypothesis:
+
+\noindent \textbf{The Trace Hypothesis.} The execution trace of a program
+is the correct liaison between high-level structured symbolic representations
+and high-dimensional unstructured perceptual input.
+
+The roadmap of our paper is structured around the trace hypothesis, as outlined in Figure~\ref{roadmap}.
+\begin{figure}
+  \begin{tikzpicture}
+    \node[ thick,anchor = west,inner sep=0pt,label=below:{\small Perceptual input}](observation) at (0,0) {\includegraphics[width = 1.5cm]{figures/expert-39-trimmed.png}};
+    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Trace}](trace) at (3,0) {\includegraphics[width = 1.5cm]{../TikZ/drawings/expert-39-parses/0.png}};
+    
+    \node[draw, thick,anchor = west,inner sep=0pt,label=below:{\small Program}](program) at (6,0) {
+      \begin{lstlisting}
+for (j < 3)
+for (i < 3)
+if (...)
+ line(...)
+ line(...)
+rectangle(...)
+    \end{lstlisting}};
+    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Extrapolation}](extrapolate) at (9.5,-0.4) {\includegraphics[width = 1.3cm]{figures/39-extrapolated.png}};
+    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Similarity}](similarity) at (11.3,0) {\includegraphics[width = 1cm]{figures/expert-38-trim.png}};
+    \node[ultra thick,anchor = west,text width = 1.3cm,inner sep=0pt](errors) at (10,1) {\small Error correction};
+
+    \draw[->, thick] (observation.east) -- node[draw,fill = white,rotate = -90] {{\small Neural network}} (trace.west);
+    \draw[->, thick] (trace.east) -- node[draw,fill = white,rotate = -90] {{\small Program synthesis}} (program.west);
+    \draw[->, thick] (program.east) to[out = 80,in = 180] (errors.west);
+    \draw[->, thick] (program.east) to[out = 40,in = -230] (similarity.west);
+        \draw[->, thick] (program.east) to[out = -90,in = 180] (extrapolate.west);
+
+    \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
+    ([yshift = -15,xshift = -30]observation.south) -- node[below = 6pt] {Section~\ref{neuralNetworkSection}: Perception$\to$Trace} ([yshift = -15,xshift = -5]trace.south);
+    \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
+    ([xshift = 5,yshift = -15]trace.south) -- node[below = 6pt] {Section~\ref{programSynthesisSection}: Trace$\to$Program} ([xshift = 140,yshift = -15]trace.south);
+    \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
+([xshift = 150,yshift = -15]trace.south) -- node[below = 6pt] {Section~\ref{applicationsSection}: Applications} ([xshift = 250,yshift = -15]trace.south);
+  \end{tikzpicture}
+  \caption{Paper roadmap: Structured around the \emph{trace hypothesis}}\label{roadmap}
+\end{figure}
 
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
@@ -690,7 +734,7 @@ In general these two desiderata are in tension:
 tractable synthesis problems involve searching over smaller spaces,
 but smaller spaces are less likely to contain a minimum cost program
 for explaining the trace.
-Our goal now is to find the parameters of the policy, written $\theta$, which best navigate this trade-off.
+Our goal now is to find the parameters of the policy, written $\theta$, which best navigates this trade-off.
 
 \begin{table}[h]\centering
   \begin{tabular}{lll}\toprule
@@ -701,7 +745,7 @@ Our goal now is to find the parameters of the policy, written $\theta$, which be
   Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
   \\\bottomrule
   \end{tabular}
-  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. In our notation, we write $\sigma $ to mean an assignment to each of these parameters.}\label{policyOutput}
+  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. In our notation, we write $\sigma $ to mean an assignment to each of these parameters, so $\sigma $ can assume one of 24 different values.}\label{policyOutput}
   \end{table}
 
 
@@ -730,10 +774,15 @@ expected bias-optimal time to solve a training corpus of graphics program synthe
 which is:
 \begin{align}
 \textsc{Loss}(\theta ; \text{training corpus})& =  \expect_{T\in \text{training corpus}}\left[ \min_{\sigma\in \text{\textsc{Best}}(T)}\frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}\right]\label{policyLoss}\\
-\text{where }  \sigma \in\text{\textsc{Best}}(T) &\text{ iff:  } \text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }T} \text{cost}(p) \nonumber
+\text{where }  \sigma \in\text{\textsc{Best}}(T) &\text{ if  a minimum cost program for }T \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }T} \text{cost}(p) \nonumber
 \end{align}
-This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
-We locally minimize it using gradient descent while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}. See supplement for details.
+To generate a training corpus for learning a policy which minimizes this loss,
+we synthesized minimum cost programs for each trace of our hand drawings
+and for each $\sigma $.
+Solving these 2400\footnote{There are 100 the drawings and $2\times 2\times 2\times 3 = 24$ different values of $\sigma $} synthesis problems takes a little over a day on a 20-CPU machine.
+With the training set in hand we  %This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
+ locally minimize this loss using gradient descent.% while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
+See supplement for details.
 
 Because we want to learn a policy from only $100$ hand-drawn sketches,
 we chose a simple low-capacity, bilinear model for a policy:
@@ -759,6 +808,10 @@ because the agent does not know ahead of time which
 $\sigma $'s contain minimum cost programs nor does it know how long each
 $\sigma $ will take to search.
 
+\begin{figure}
+  \includegraphics[width = 12cm]{figures/policyComparison.png}
+  \caption{$\infty = $ timeout}\label{policyEvaluation}
+  \end{figure}
 
 This generalizes and strengthens previous work: Levin
 search~\cite{levin1973universal,solomonoff1984optimum} \&
@@ -912,7 +965,10 @@ reflect(y=8)
   \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
-With this policy in hand we can now synthesize most programs in under a minute. But why synthesize a graphics program,
+With this policy in hand we can now synthesize most programs in under a minute.
+
+\section{Applications of graphics program synthesis}\label{applicationsSection}
+Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 %\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
