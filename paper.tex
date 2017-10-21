@@ -185,22 +185,21 @@ We present a hybrid architecture for inferring graphics programs that is structu
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
-This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. Without the need for training, the program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
+This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. The program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
 symmetries, repetition, or conditional branches.
 Although these program synthesizers do not \emph{need} any training data,
 we show how to combine conventional machine learning with bias optimal search~\cite{schmidhuber2004optimal}
-in order to synthesize complicated programs in only a few minutes.
+in order to synthesize programs over an order of magnitude faster than constraint-based synthesis techniques alone.
 
 Images are high-dimensional and unstructured while programs are high-level
 and symbolic. We resolve this mismatch by advancing a new model of
 collaboration between these two representations, which we call The Trace Hypothesis:
 
 \noindent \textbf{The Trace Hypothesis.} The execution trace of a program
-is the correct liaison between high-level structured symbolic representations
-and high-dimensional unstructured perceptual input.
+is the correct liaison between high-dimensional unstructured perceptual input and high-level structured symbolic representations.
 
 The roadmap of our paper is structured around the trace hypothesis, as outlined in Figure~\ref{roadmap}.
-\begin{figure}
+\begin{figure}[h]
   \begin{tikzpicture}
     \node[ thick,anchor = west,inner sep=0pt,label=below:{\small Perceptual input}](observation) at (0,0) {\includegraphics[width = 1.5cm]{figures/expert-39-trimmed.png}};
     \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Trace}](trace) at (3,0) {\includegraphics[width = 1.5cm]{../TikZ/drawings/expert-39-parses/0.png}};
@@ -231,9 +230,12 @@ rectangle(...)
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
 ([xshift = 150,yshift = -15]trace.south) -- node[below = 6pt] {Section~\ref{applicationsSection}: Applications} ([xshift = 250,yshift = -15]trace.south);
   \end{tikzpicture}
-  \caption{Paper roadmap: Structured around the \emph{trace hypothesis}}\label{roadmap}
+  \caption{Paper roadmap. Both the paper and the system pipeline are structured around the \emph{trace hypothesis}}\label{roadmap}
 \end{figure}
 
+Prior work addresses converting hand drawings to vectors~\cite{huang2017shape,Nishida:2016:ISU:2897824.2925951} and converting synthetic images to symbolic parses~\cite{nsd,DBLP:journals/corr/Beltramelli17}.
+Our new contribution is an approach for
+converting perceptual input to high-level programs.
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
 %% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
@@ -290,44 +292,6 @@ rectangle(...)
 %% \remark{Tie these claims into the paper results: state what the `downstream' tasks are that you actually do, and refer to the sections where they occur}
 
 
-\section{Related work}
-
-Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
-% attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
-% that they focus on learning the generative model jointly with the
-% inference network. Advantages of our system is that we learn symbolic
-% programs, and that we do it from hand sketches rather than synthetic
-% renderings.
-
-Our image-to-execution-trace parsing architecture builds on prior work on controlling procedural graphics programs~\cite{ritchie2016neurally}. Given a program which generates random 2D recursive structures such as vines, that system learns a structurally-identical ``guide program'' whose output can be directed, via neural networks, to resemble a given target image. 
-We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the execution trace through the guide program as a symbolic parse of the target image.
-We then show how to synthesize higher-level programs from these execution traces.
-
-In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
-
-Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
-
-The CogSketch~\cite{forbus2011cogsketch} system also aims to have a
-high-level understanding of hand-drawn figures. Their primary goal is
-cognitive modeling (they apply their system to solving IQ-test
-style visual reasoning problems), whereas we are interested in
-building an automated AI application (e.g. in our system the user need
-not annotate which strokes correspond to which shapes; our neural
-network produces something equivalent to the annotations).
-%A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
-Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
-and they applied their technique to synthetic scenes used in human behavioral studies.
-%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
-
-Synthesizing programs from their execution traces is an old
-idea~\cite{Summers:1977:MLP:321992.322002}.  This previous work
-departs from our approach in the nature of the problem (synthesizing
-recursive algorithms in Lisp vs. graphics programs in~\LaTeX) and the
-specifics of the solution (hand-coded source-to-source transformations vs. neural networks
-combined with general-purpose program synthesis techniques).
-What they share is the use of an execution trace as a
-stepping stone toward a full program.
-
 
 
 \section{Neural architecture for inferring drawing execution traces}\label{neuralNetworkSection}
@@ -348,8 +312,8 @@ pass a $256\times 256$ target image and a rendering of the trace so
 far (encoded as a two-channel image) to a convolutional network. Given
 the features extracted by the convnet, a multilayer perceptron then
 predicts a distribution over the next drawing command to add to the
-trace; see Table~\ref{drawingCommandTable}.  We predict the drawing
-command token-by-token, conditioning each token both on the image
+trace; see Table~\ref{drawingCommandTable} for the drawing commands we currently model.  We predict the drawing
+command token-by-token,\footnote{A token is an atomic symbol  -- so the model is \emph{not} predicting lines of code character-by-character, but instead knows about the syntactic structure of primitive commands} conditioning each token both on the image
 features and on the previously generated tokens. We also use a
 differentiable attention mechanism (Spatial Transformer
 Networks:~\cite{jaderberg2015spatial}) to let the model attend to
@@ -447,7 +411,7 @@ Tensorflow~\cite{tensorflow2015-whitepaper}.
     \end{tabular}
 \\  \bottomrule
 \end{tabular}
-\caption{The deep network in Fig.~\ref{architecture} predicts drawing commands, shown above.}
+\caption{Primitive drawing commands currently supported by our model.}
 \label{drawingCommandTable}
 \end{table}
 
@@ -465,7 +429,7 @@ execution traces factorizes as:
   \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
 \end{equation}
 where $|T|$ is the length of execution trace $T$, the subscripts
-on $T$ index drawing commands within the trace, and the \verb|STOP|
+on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
 token is emitted by the network to signal that the trace
 explains the image.
 
@@ -708,13 +672,14 @@ minimum-cost program satisfying the specification.  In exchange for
 having no guarantee on the time required to find a minimum
 cost solution, it comes with the guarantee that it will always find a
 globally optimal program.
-In practice, synthesis times vary from a few minutes to a a few hours,
+In practice, synthesis times vary from minutes to hours,
 with 16\% of the diagrams timing out the synthesizer after 3 hours.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
-A main impediment here to our use of these general techniques is
+A main impediment to our use of these general techniques is
 the prohibitively high cost of searching for programs.
+We next describe how to learn to synthesize programs much faster (Section~\ref{learningASearchPolicy}).
 
-\subsection{Learning a search policy for synthesizing programs}
+\subsection{Learning a search policy for synthesizing programs}\label{learningASearchPolicy}
 
 We want to leverage powerful, domain-general techniques from the program synthesis community,
 but make them much faster by
@@ -760,7 +725,7 @@ takes to verify that $\sigma $ is a solution to the
 search problem.
 
 An example of a $1$-bias optimal search algorithm is a time-sharing system
-that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to testing $\sigma $.
+that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.
 We construct a $1$-bias optimal search algorithm for our domain by
 identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$
 and $t(\sigma )  $ with how long the program synthesizer takes to search through the programs in $\sigma $.
@@ -803,37 +768,18 @@ a policy which always picks the quickest to search $\sigma $
  also containing a minimum cost program.
 Our approach improves upon Sketch by itself,
 and comes close to the Oracle's performance.
-Of course one could never construct such an Oracle,
+Of course one could never construct this Oracle,
 because the agent does not know ahead of time which
 $\sigma $'s contain minimum cost programs nor does it know how long each
 $\sigma $ will take to search.
 
 \begin{figure}
-  \includegraphics[width = 12cm]{figures/policyComparison.png}
-  \caption{$\infty = $ timeout}\label{policyEvaluation}
+\centering  \includegraphics[width = 14cm]{figures/policyComparison.png}
+  \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\cite{solar2008program} program synthesizer. Oracle: baseline that always picks the easiest synthesis problem containing a minimum cost program. Learned policy: a bias-optimal learned search policy. Oracle is impossible to implement and is an upper bound on the performance of any search policy. $\infty = $ timeout. Red dashed line is median time.}\label{policyEvaluation}
   \end{figure}
 
-This generalizes and strengthens previous work: Levin
-search~\cite{levin1973universal,solomonoff1984optimum} \&
-OOPS~\cite{schmidhuber2004optimal}: theoretically appealing but
-impractical; fails to leverage either techniques from machine learning
-or from program synthesis. More of a mathematical framing and less of
-an algorithm.  DeepCoder~\cite{BalGauBroetal16}: in addition to
-picking what sort of primitives can go into a program, we are picking
-the details of the search algorithm as well as how deep the algorithms
-should search.  Main difference is that we identify this interesting
-trade-off between tractability and probability of getting a solution.
-TerpreT~\cite{gaunt2016terpret}: suggests that constraint solvers outperform gradient-based search techniques like those used in differentiable neural computers.
 
-
-Two intuitions: want a model that prefers sketches that are likely to
-contain a valid solution, but at the same time prefers sketches that
-are easy to search.  In general these two preferences are at odds with
-one another.  For example, a sketch which allows very long programs
-and allows lots of primitives is extremely likely to contain a
-shortest program -- but might also take hours for the synthesizer to
-search through.
-
+With this policy in hand we can now synthesize most programs in under a minute.
 
 
 \newcommand{\exampleProgramSize}{4.5cm}
@@ -965,7 +911,7 @@ reflect(y=8)
   \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
   \end{figure}
 
-With this policy in hand we can now synthesize most programs in under a minute.
+
 
 \section{Applications of graphics program synthesis}\label{applicationsSection}
 Why synthesize a graphics program,
@@ -1030,7 +976,7 @@ We used our learned distance metric between execution traces, $L_{\text{learned}
 while missing similarities at the level of the program.
 \begin{figure}[h]
 \centering  \begin{minipage}{\textwidth}\centering
-  \includegraphics[width = 0.69\textwidth]{figures/PCA.png}
+  %\includegraphics[width = 0.69\textwidth]{figures/PCA.png}
   \includegraphics[width = 0.69\textwidth]{figures/PCA_improved.png}
     \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left; complicated programs are at the top and simple programs are at the bottom.}    \label{NMF}
   \end{minipage} %\hfill
@@ -1068,6 +1014,62 @@ running loops for extra iterations.}\label{extrapolationFigure}
 
 
 \section{Discussion}
+
+\section{Related work}
+
+
+Our approach to learning to search for programs draws theoretical
+underpinnings from Levin
+search~\cite{levin1973universal,solomonoff1984optimum} and
+Schmidhuber's OOPS model~\cite{schmidhuber2004optimal}.
+DeepCoder~\cite{BalGauBroetal16} and~\cite{menon2013machine} are
+recent models which, like ours, learn to predict which program
+components are likely to be useful given a program synthesis problem.
+Our work is different from their approaches because we treat the
+problem as a variety of \emph{metareasoning}, identifying and modeling
+the trade-off between tractable search and probability of successful
+search.  TerpreT~\cite{gaunt2016terpret} was the first work to
+systematically compare constraint-based program synthesis techniques
+against gradient-based search techniques (e.g., a
+DNC~\cite{graves2016hybrid}).  The TerpreT experiments help motivate
+our use of constraint-based techniques.
+
+
+
+Our work bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\cite{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference; this is similar to our approach's first stage, which parses images into program execution traces. Our approach further produces interpretable, symbolic programs which generate those execution traces. The two approaches also differ in their architectures and training regimes: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (execution trace, image) pairs. Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
+% attend infer repeat:~\cite{eslami1603attend}. Crucial distinction is
+% that they focus on learning the generative model jointly with the
+% inference network. Advantages of our system is that we learn symbolic
+% programs, and that we do it from hand sketches rather than synthetic
+% renderings.
+
+Our image-to-execution-trace parsing architecture builds on prior work on controlling procedural graphics programs~\cite{ritchie2016neurally}. Given a program which generates random 2D recursive structures such as vines, that system learns a structurally-identical ``guide program'' whose output can be directed, via neural networks, to resemble a given target image. 
+We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the execution trace through the guide program as a symbolic parse of the target image.
+We then show how to synthesize higher-level programs from these execution traces.
+
+In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\cite{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\cite{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
+
+Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\cite{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
+
+The CogSketch~\cite{forbus2011cogsketch} system also aims to have a
+high-level understanding of hand-drawn figures. Their primary goal is
+cognitive modeling (they apply their system to solving IQ-test
+style visual reasoning problems), whereas we are interested in
+building an automated AI application (e.g. in our system the user need
+not annotate which strokes correspond to which shapes; our neural
+network produces something equivalent to the annotations).
+%A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
+Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
+and they applied their technique to synthetic scenes used in human behavioral studies.
+%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
+
+The idea that an execution trace could assist in program learning goes back to the 1970's~\cite{Summers:1977:MLP:321992.322002} and has also been applied in neural models of program induction, like Neural Program Interpreters~\cite{DBLP:journals/corr/ReedF15}.
+Our contribution to this idea is the trace hypothesis:
+that execution traces can be inferred from perceptual data,
+and that the trace is the correct bridge between perception and symbolic representation.
+Our work is the first to articulate and explore this hypothesis
+by demonstrating how a trace could be inferred and how it can be used to synthesize a high-level program.
+
 
 \subsection{Future work}
 There are many directions for future work. The proposal network  currently handles only a very small subset of \LaTeX~drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network.
