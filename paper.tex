@@ -181,21 +181,21 @@ for (i < 3)
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a sequence of primitive shape-drawing commands. We refer to this sequence as an \emph{execution trace}, since it corresponds to the: commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a set of primitive shape-drawing commands. We refer to this set as an \emph{execution trace}, since it corresponds to the commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them. For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
 The second step involves generating a high-level program capable of producing the program trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
 This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. The program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
 symmetries, repetition, or conditional branches.
-Although these program synthesizers do not \emph{need} any training data,
-we show how to combine conventional machine learning with bias optimal search~\cite{schmidhuber2004optimal}
-in order to synthesize programs over an order of magnitude faster than constraint-based synthesis techniques alone.
+Although these program synthesizers do not need any training data,
+we show how to learn a \emph{search policy} 
+in order to synthesize programs an order of magnitude faster than constraint-based synthesis techniques alone.
 
 Images are high-dimensional and unstructured while programs are high-level
 and symbolic. We resolve this mismatch by advancing a new model of
 collaboration between these two representations, which we call The Trace Hypothesis:
 
-\noindent \textbf{The Trace Hypothesis.} The execution trace of a program
+\noindent \textbf{The Trace Hypothesis.} The set of commands issued by a program
 is the correct liaison between high-dimensional unstructured perceptual input and high-level structured symbolic representations.
 
 The roadmap of our paper is structured around the trace hypothesis, as outlined in Figure~\ref{roadmap}.
@@ -234,8 +234,13 @@ rectangle(...)
 \end{figure}
 
 Prior work addresses converting hand drawings to vectors~\cite{huang2017shape,Nishida:2016:ISU:2897824.2925951} and converting synthetic images to symbolic parses~\cite{nsd,DBLP:journals/corr/Beltramelli17}.
-Our new contribution is an approach for
-converting perceptual input to high-level programs.
+Our new contributions are:
+\begin{itemize}
+\item [-] A model that converts sketches to high-level programs
+\item [-] An algorithm for learning a policy for efficiently searching for programs
+\item [-] The trace hypothesis: a framework for going from perception to programs
+  \end{itemize}
+
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
 
 %% The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as boxes, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn; for example, in Figure 1(b), it means identifying that there is a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
@@ -294,7 +299,7 @@ converting perceptual input to high-level programs.
 
 
 
-\section{Neural architecture for inferring drawing execution traces}\label{neuralNetworkSection}
+\section{Neural architecture for inferring drawing drawing commands}\label{neuralNetworkSection}
 
 We developed a deep network architecture for efficiently inferring a
 execution trace, $T$, from an image, $I$.  Our model constructs the
@@ -500,9 +505,9 @@ but, for this domain, does not suffice to parse cluttered scenes with many objec
     \caption{Network is trained to infer execution traces for randomly generated scenes like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
   \end{minipage}\hfill%
   \begin{minipage}{7.5cm}\centering
-    \includegraphics[width = 7cm]{figures/editDistanceRecurrent.png}
+    \includegraphics[width = 7cm]{figures/editDistance36.png}
 %    \includegraphics[width = 4cm]{figures/accuracy.png}
-      \caption{Parsing latex output after training on diagrams with $\leq 12$ objects. It generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. It generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
     \end{minipage}
   
   \end{figure}
@@ -566,40 +571,38 @@ a user sketches a diagram,
 and the system responds by proposing a few candidate interpretations.
 The user could then select the one closest to their intention and edit it if necessary.
 
-
+\setlength\tabcolsep{3.5pt}
 \begin{figure}[H]
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-73.png}
-    \includegraphics[width = 2cm]{figures/73-parse.png}     
-    \subcaption{A recurrent network architecture}
+  \begin{minipage}[t]{8.25cm}
+    \begin{tabular}{llll}
+      \includegraphics[width = 2cm]{figures/expert-38.png}&
+      \includegraphics[width = 2cm]{figures/expert-73.png}&
+      \includegraphics[width = 2cm]{figures/expert-77.png}&
+      \includegraphics[width = 2cm]{figures/expert-21.png}
+      \\
+      \includegraphics[width = 2cm]{figures/38-parse.png}     &
+      \includegraphics[width = 2cm]{figures/73-parse.png}     &
+      \includegraphics[width = 2cm]{figures/77-parse.png}    &
+      \includegraphics[width = 2cm]{figures/21-parse.png}    
+      \end{tabular}
+    \subcaption{Left to right: Ising model, recurrent network architecture, a figure from a deep learning textbook, graphical model}
   \end{minipage}
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-21.png}
-    \includegraphics[width = 2cm]{figures/21-parse.png}    
-    \subcaption{A graphical model}
+\hfill  \begin{minipage}[t]{4.25cm}
+    \begin{tabular}{ll}
+          \includegraphics[width = 2cm]{figures/expert-34.png}&
+          \includegraphics[width = 2cm]{figures/expert-1.png}\\
+              \includegraphics[width = 2cm]{figures/34-parse.png}     &
+      \includegraphics[width = 2cm]{figures/expert-1-parse.png}    
+    \end{tabular}
+
+
+    \subcaption{Near misses. Rightmost: illusory contours (note: no SMC)}
   \end{minipage}
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-77.png}
-    \includegraphics[width = 2cm]{figures/77-parse.png}    
-    \subcaption{A figure from a deep learning textbook}
-    \end{minipage}
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-1.png}
-    \includegraphics[width = 2cm]{figures/expert-1-parse.png}    
-    \subcaption{Near miss}
-  \end{minipage}
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-38.png}
-    \includegraphics[width = 2cm]{figures/38-parse.png}     
-    \subcaption{Ising model}
-  \end{minipage}
-  \begin{minipage}[t]{2.25cm}
-    \includegraphics[width = 2cm]{figures/expert-34.png}
-    \includegraphics[width = 2cm]{figures/34-parse.png}     
-    \subcaption{Illusory contours (note: no SMC)}
-    \end{minipage}
+
+
   \caption{Example drawings above model outputs. See also Fig.~\ref{firstPageExamples}. Stochastic search (SMC) can help correct for these errors, as can the program synthesizer (Section~\ref{synthesizerHelpsParsing})}\label{lotsOfHandDrawings}
 \end{figure}
+\setlength\tabcolsep{6pt}
 
 \begin{figure}[h]\centering
 \vspace{-0.25cm}  \begin{minipage}{0.8\textwidth} 
@@ -611,7 +614,7 @@ The user could then select the one closest to their intention and edit it if nec
 
 
 
-
+\pagebreak
 
 \section{Synthesizing graphics programs from execution traces}\label{programSynthesisSection}
 While the execution trace of a graphics program describes the contents
@@ -629,18 +632,18 @@ encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
   \begin{tabular}{rl}\toprule
-  Program$\to$&Command; $\cdots$; Command\\
-  Command$\to$&\texttt{circle}(Expression,Expression)\\
-  Command$\to$&\texttt{rectangle}(Expression,Expression,Expression,Expression)\\
-  Command$\to$&\texttt{line}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
-  Command$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ if }$(\text{Var} > 0)$\texttt{ \{ }Program\texttt{ \}; }Program\texttt{ \}}\\
-  Command$\to$&\texttt{reflect}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
-  Expression$\to$&$\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$\\
+  Program$\to$&Statement; $\cdots$; Statement\\
+  Statement$\to$&\texttt{circle}(Expression,Expression)\\
+  Statement$\to$&\texttt{rectangle}(Expression,Expression,Expression,Expression)\\
+  Statement$\to$&\texttt{line}(Expression,Expression,Expression,Expression,Boolean,Boolean)\\
+  Statement$\to$&\texttt{for}$(0\leq \text{Var}  < \text{Expression})$\texttt{ \{ if }$(\text{Var} > 0)$\texttt{ \{ }Program\texttt{ \}; }Program\texttt{ \}}\\
+  Statement$\to$&\texttt{reflect}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
+  Expression$\to$&$\mathbb{Z}$\texttt{ * }Var\texttt{ + }$\mathbb{Z}$\\
   Var$\to$&A free (unused) variable\\
-  $\mathcal{Z}$$\to$&an integer\\
-  Axis$\to$&\texttt{X = }$\mathcal{Z}$ | \texttt{Y = }$\mathcal{Z}$\\\bottomrule
+  $\mathbb{Z}$\to$&an integer\\
+  Axis$\to$&\texttt{X = }$\mathbb{Z}$ | \texttt{Y = }$\mathbb{Z}$\\\bottomrule
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathcal{Z}$\texttt{ * }Var\texttt{ + }$\mathcal{Z}$).}\label{DSL}
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertibb/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathbb{Z}$\texttt{ * }Var\texttt{ + }$\mathbb{Z}$).}\label{DSL}
 \end{table}
 
 Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
@@ -653,8 +656,7 @@ and seek the minimum cost program consistent with $T$:
   \text{program}(T) = \argmin_{p\in \text{DSL, s.t. }p \text{ evaluates to } T} \text{cost}(p)\label{programObjective}
 \end{equation}
 We define the
-cost of a program to be the number of statements it contains, where a
-statement is a ``Command'' in Table~\ref{DSL}.
+cost of a program to be the number of Statement's it contains (Table~\ref{DSL}).
 We also penalize using many different numerical constants; see supplement.
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
@@ -677,7 +679,8 @@ with 16\% of the diagrams timing out the synthesizer after 3 hours.
 See Figure~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
 A main impediment to our use of these general techniques is
 the prohibitively high cost of searching for programs.
-We next describe how to learn to synthesize programs much faster (Section~\ref{learningASearchPolicy}).
+We next describe how to learn to synthesize programs much faster (Section~\ref{learningASearchPolicy}),
+timing out on 2\% of the drawings and solving most problems in under a minute.
 
 \subsection{Learning a search policy for synthesizing programs}\label{learningASearchPolicy}
 
@@ -768,48 +771,51 @@ a policy which always picks the quickest to search $\sigma $
  also containing a minimum cost program.
 Our approach improves upon Sketch by itself,
 and comes close to the Oracle's performance.
-Of course one could never construct this Oracle,
+One could never construct this Oracle,
 because the agent does not know ahead of time which
 $\sigma $'s contain minimum cost programs nor does it know how long each
 $\sigma $ will take to search.
+The Oracle is an upper bound on the performance of any search policy.
+With this learned policy in hand we can now synthesize most programs in under a minute.
+\begin{figure}[h]
+  \centering  \includegraphics[width = 14cm]{figures/policyComparison.png}
+  \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\cite{solar2008program} program synthesizer. Oracle: baseline that always picks the easiest synthesis problem containing a minimum cost program. Learned policy: a bias-optimal learned search policy running on an ideal timesharing machine. Oracle is impossible to implement and is an upper bound on the performance of any search policy. $\infty = $ timeout. Red dashed line is median time.}\label{policyEvaluation}
+\end{figure}
 
-\begin{figure}
-\centering  \includegraphics[width = 14cm]{figures/policyComparison.png}
-  \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\cite{solar2008program} program synthesizer. Oracle: baseline that always picks the easiest synthesis problem containing a minimum cost program. Learned policy: a bias-optimal learned search policy. Oracle is impossible to implement and is an upper bound on the performance of any search policy. $\infty = $ timeout. Red dashed line is median time.}\label{policyEvaluation}
-  \end{figure}
 
 
-With this policy in hand we can now synthesize most programs in under a minute.
 
 
 \newcommand{\exampleProgramSize}{4.5cm}
-\newcommand{\exampleTraceSize}{4cm}
-\newcommand{\exampleDrawingSize}{2cm}
+\newcommand{\exampleTraceSize}{3.5cm}
+\newcommand{\exampleDrawingSize}{1.25cm}
+\lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{figure}
-\hspace{-0.7cm}  \begin{tabular}{m{2.5cm}llc}
+\centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
     \textbf{Drawing}&\textbf{Trace}&\textbf{Program}&\begin{tabular}{c}
       \textbf{Compression}\\\textbf{factor}
       \end{tabular}\\
     \midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-29-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Line(2,15, 4,15)
 Line(4,9, 4,13)
 Line(3,11, 3,14)
 Line(2,13, 2,15)
 Line(3,14, 6,14)
 Line(4,13, 8,13)
-\end{verbatim}
-\end{minipage}&     \begin{minipage}{\exampleProgramSize} \begin{verbatim}
+\end{lstlisting}
+\end{minipage}&     \begin{minipage}{\exampleProgramSize} \begin{lstlisting}
 for(i<3)
- line(i,-1*i+6, 2*i+2,-1*i+6)
+ line(i,-1*i+6,
+      2*i+2,-1*i+6)
  line(i,-2*i+4,i,-1*i+6)
-       \end{verbatim}
+       \end{lstlisting}
      \end{minipage}&$\frac{6}{3} = 2\text{x}$\\\midrule
      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Line(5,13, 2,10),
   arrow = True)
 Circle(5,9)
@@ -819,10 +825,10 @@ Line(2,8, 2,6),
 Circle(2,5)
 Circle(5,14)
 Circle(2,9)
-\end{verbatim}
-\emph{... etc. ...; 13 lines}\\
+\end{lstlisting}
+\emph{... etc. ...; 13 lines}
 \end{minipage}&
-             \begin{minipage}{\exampleProgramSize}\begin{verbatim}
+             \begin{minipage}{\exampleProgramSize}\begin{lstlisting}
 circle(4,10)
 for(i<3)
  circle(-3*i+7,5)
@@ -831,10 +837,10 @@ for(i<3)
       arrow=True)
  line(4,9,-3*i+7,6,
       arrow=True)
-\end{verbatim}
+\end{lstlisting}
 \end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Circle(5,8)
 Circle(2,8)
 Circle(8,11)
@@ -844,10 +850,10 @@ Line(3,8, 4,8)
 Line(3,11, 4,11)
 Line(8,9, 8,10)
 Circle(5,14)
-\end{verbatim}
-  \emph{... etc. ...; 21 lines}\\
+\end{lstlisting}
+  \emph{... etc. ...; 21 lines}
 \end{minipage}&\begin{minipage}{\exampleProgramSize}
-\begin{verbatim}
+\begin{lstlisting}
 for(i<3)
  for(j<3)
   if(j>0)
@@ -856,10 +862,10 @@ for(i<3)
   line(-3*i+7,-3*j+8,
        -3*i+7,-3*j+9)
   circle(-3*j+7,-3*i+7)
-\end{verbatim}
+\end{lstlisting}
 \end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-75-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Line(11,14, 13,14), 
   arrow = True)
 Circle(10,10)
@@ -869,11 +875,11 @@ Line(7,14, 9,14),
   arrow = True)
 Circle(6,10)
 Circle(2,10)
-\end{verbatim}
-    \emph{... etc. ...; 15 lines}\\
+\end{lstlisting}
+    \emph{... etc. ...; 15 lines}
 \end{minipage}&
 \begin{minipage}{\exampleProgramSize}
-    \begin{verbatim}
+    \begin{lstlisting}
 for(i<4)
  line(-4*i+13,4,-4*i+13,2,
       arrow=True)
@@ -882,12 +888,33 @@ for(i<4)
    circle(-4*i+13,4*j+-3)
   line(-4*j+10,5,-4*j+12,5,
        arrow=True)
-\end{verbatim}
+\end{lstlisting}
   \end{minipage}&$\frac{15}{6} = 2.5\text{x}$\\\midrule    
+
+  \includegraphics[width = \exampleDrawingSize]{figures/expert-7-trim.png}&
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+Line(5,11,5,13)
+Circle(5,9)
+Circle(5,14)
+Circle(2,9)
+Circle(2,14)
+Circle(8,14)
+Circle(8,9)
+Line(2,10,2,13)
+Line(8,12,8,13)
+\end{lstlisting}
+  \end{minipage}&\begin{minipage}{\exampleProgramSize}
+\begin{lstlisting}
+for (i<3)
+ circle(-3*i+7,1)
+ circle(-3*i+7,6)
+ line(-3*i+7,-1*i+4,-3*i+7,5)
+\end{lstlisting}
+\end{minipage}&$\frac{9}{4} = 2.25\text{x}$\\\midrule    
 
   \includegraphics[width = \exampleDrawingSize]{figures/expert-72-trim.png}&
 
-\begin{minipage}{\exampleTraceSize}\begin{verbatim}
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Circle(2,8)
 Rectangle(6,9, 7,10)
 Circle(8,8)
@@ -897,22 +924,22 @@ Circle(2,14)
 Circle(8,14)
 Circle(5,11)
 Rectangle(3,12, 4,13)
-\end{verbatim}
+\end{lstlisting}
   \end{minipage}&\begin{minipage}{\exampleProgramSize}
-\begin{verbatim}
+\begin{lstlisting}
 reflect(y=8)
  for(i<3)
   if(i>0)
    rectangle(3*i-1,2,3*i,3)
   circle(3*i+1,3*i+1)
-\end{verbatim}
+\end{lstlisting}
 \end{minipage}&$\frac{9}{5} = 1.8\text{x}$\\\bottomrule
   \end{tabular}
-  \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformation in the top figure.}\label{exampleSynthesisResults}
+  \caption{Example drawings (left), their ground truth traces (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformations in the top figure and second figure to bottom.}\label{exampleSynthesisResults}
   \end{figure}
 
 
-
+\pagebreak
 \section{Applications of graphics program synthesis}\label{applicationsSection}
 Why synthesize a graphics program,
 if the execution trace already suffices to recover the objects in an image?
@@ -999,8 +1026,7 @@ imagine hand drawing a repetitive graphical model structure
 and having our system automatically induce and extend the pattern.
 Fig.~\ref{extrapolationFigure} shows extrapolations of programs synthesized from ground truth traces;
 see supplement for our full set of extrapolations.
- 
-\begin{figure}[h]
+\begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}
     \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}  
   \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by
@@ -1013,6 +1039,7 @@ running loops for extra iterations.}\label{extrapolationFigure}
 % \remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Equation 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
 
 
+%\pagebreak
 \section{Discussion}
 
 \section{Related work}
