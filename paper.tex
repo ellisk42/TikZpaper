@@ -185,13 +185,15 @@ for (i < 3)
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Figure 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
 We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a set of primitive shape-drawing commands. We refer to this set as a \emph{trace},\footnote{For our domain we do not require the trace to be ordered -- so it is similar to, but not exactly the same as, the execution trace of the program.} since it corresponds to the commands that a program would have issued but lacks the high-level structure that determines how the program decided to issue them.
-For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the input. The network is trained from an automatically-generated corpus of synthetic image-generating programs.
+For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the image.
+%The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 
 The second step involves generating a high-level program capable of producing the trace identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
-This paper argues that this stage is best achieved by \emph{constraint-based program synthesis} \cite{solar2008program}. The program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
+%This paper argues that this stage is best
+We achieve this by \emph{constraint-based program synthesis} \cite{solar2008program}. The program synthesizer can search the space of possible programs for one capable of producing the desired trace -- inducing structures like
 symmetries, repetition, or conditional branches.
-Although these program synthesizers do not need any training data,
+Although these program do not need any training data,
 we show how to learn a \emph{search policy} 
 in order to synthesize programs an order of magnitude faster than constraint-based synthesis techniques alone.
 
@@ -404,6 +406,8 @@ Tensorflow~\cite{tensorflow2015-whitepaper}.
 \caption{Our neural architecture for inferring the trace of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\cite{jaderberg2015spatial}.}  \label{architecture}
 \end{figure}
 \begin{table}[h]
+  \caption{Primitive drawing commands currently supported by our model.}
+\label{drawingCommandTable}
 \begin{tabular}{ll}\toprule
   \begin{tabular}{l}
     \verb|circle|$(x,y)$
@@ -428,8 +432,6 @@ Tensorflow~\cite{tensorflow2015-whitepaper}.
     \end{tabular}
 \\  \bottomrule
 \end{tabular}
-\caption{Primitive drawing commands currently supported by our model.}
-\label{drawingCommandTable}
 \end{table}
 
 
@@ -597,14 +599,14 @@ The user could then select the one closest to their intention and edit it if nec
       \includegraphics[width = 2cm]{figures/77-parse.png}    &
       \includegraphics[width = 2cm]{figures/21-parse.png}    
       \end{tabular}
-    \subcaption{Left to right: Ising model, recurrent network architecture, figure from a deep learning textbook (Goodfellow et al:~\cite{Goodfellow-et-al-2016}), graphical model}
+    \subcaption{Left to right: Ising model, recurrent network architecture, figure from a deep learning textbook \cite{Goodfellow-et-al-2016}, graphical model}
   \end{minipage}
 \hfill  \begin{minipage}[t]{4.25cm}
     \begin{tabular}{ll}
-          \includegraphics[width = 2cm]{figures/expert-34.png}&
-          \includegraphics[width = 2cm]{figures/expert-1.png}\\
-              \includegraphics[width = 2cm]{figures/34-parse.png}     &
-      \includegraphics[width = 2cm]{figures/expert-1-parse.png}    
+          \includegraphics[width = 2cm]{figures/expert-1.png}&
+          \includegraphics[width = 2cm]{figures/expert-34.png}\\
+      \includegraphics[width = 2cm]{figures/expert-1-parse.png}     &
+              \includegraphics[width = 2cm]{figures/34-parse.png}    
     \end{tabular}
 
 
@@ -645,6 +647,7 @@ languages community is called a Domain Specific Language (DSL)~\cite{polozov2015
 encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
+  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertibb/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathbb{Z}$\texttt{ * }Var\texttt{ + }$\mathbb{Z}$).}\label{DSL}
   \begin{tabular}{rl}\toprule
   Program$\to$&Statement; $\cdots$; Statement\\
   Statement$\to$&\texttt{circle}(Expression,Expression)\\
@@ -654,10 +657,9 @@ encodes prior knowledge of what graphics programs tend to look like.
   Statement$\to$&\texttt{reflect}$(\text{Axis})$\texttt{ \{ }Program\texttt{ \}}\\
   Expression$\to$&$\mathbb{Z}$\texttt{ * }Var\texttt{ + }$\mathbb{Z}$\\
   Var$\to$&A free (unused) variable\\
-  $\mathbb{Z}$\to$&an integer\\
+  $\mathbb{Z}\to$&an integer\\
   Axis$\to$&\texttt{X = }$\mathbb{Z}$ | \texttt{Y = }$\mathbb{Z}$\\\bottomrule
   \end{tabular}
-  \caption{Grammar over graphics programs. We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertibb/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathbb{Z}$\texttt{ * }Var\texttt{ + }$\mathbb{Z}$).}\label{DSL}
 \end{table}
 
 Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
@@ -678,8 +680,10 @@ The constrained optimization problem in
 Equation~\ref{programObjective} is intractable in general, but there
 exist efficient-in-practice tools for finding exact solutions to such
 program synthesis problems. We use the state-of-the-art Sketch
-tool~\cite{solar2008program}. Describing Sketch's program synthesis
-algorithm is beyond the scope of this paper; see~\cite{solar2008program}.  At a
+tool~\cite{solar2008program}.
+%Describing Sketch's program synthesis
+%algorithm is beyond the scope of this paper; see~\cite{solar2008program}.
+At a
 high level, Sketch takes as input a space of programs, along with a
 specification of the program's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
@@ -719,6 +723,7 @@ for explaining the trace.
 Our goal now is to find the parameters of the policy, written $\theta$, which best navigates this trade-off.
 
 \begin{table}[h]\centering
+  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. In our notation, we write $\sigma $ to mean an assignment to each of these parameters, so $\sigma $ can assume one of 24 different values.}\label{policyOutput}
   \begin{tabular}{lll}\toprule
   Parameter&Description&Range\\\midrule
   Loops?&Is the program allowed to loop?&$\{\text{True},\text{False}\}$\\
@@ -727,12 +732,11 @@ Our goal now is to find the parameters of the policy, written $\theta$, which be
   Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
   \\\bottomrule
   \end{tabular}
-  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. In our notation, we write $\sigma $ to mean an assignment to each of these parameters, so $\sigma $ can assume one of 24 different values.}\label{policyOutput}
   \end{table}
 
 
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
-We use a \emph{bias-optimal search algorithm} (see Schmidhuber 2004:~\cite{schmidhuber2004optimal}):
+We use a \emph{bias-optimal search algorithm} (see~\cite{schmidhuber2004optimal}):
 
 \textbf{Definition: Bias optimality.} A search algorithm is $n$-\emph{bias optimal}
 with respect to a distribution $\probability_{\text{bias}}[\cdot ]$ if it is
