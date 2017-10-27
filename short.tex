@@ -761,12 +761,10 @@ for(i<3)
      \end{minipage}&$\frac{6}{3} = 2\text{x}$\\\midrule
      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Line(5,13, 2,10),
-  arrow = True)
+Line(5,13,2,10,arrow)
 Circle(5,9)
 Circle(8,5)
-Line(2,8, 2,6), 
-  arrow = True)
+Line(2,8, 2,6,arrow)
 Circle(2,5)
 \end{lstlisting}
 \small\emph{... etc. ...; 13 lines}
@@ -776,10 +774,8 @@ circle(4,10)
 for(i<3)
  circle(-3*i+7,5)
  circle(-3*i+7,1)
- line(-3*i+7,4,-3*i+7,2,
-      arrow=True)
- line(4,9,-3*i+7,6,
-      arrow=True)
+ line(-3*i+7,4,-3*i+7,2,arrow)
+ line(4,9,-3*i+7,6,arrow)
 \end{lstlisting}
 \end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
@@ -807,10 +803,10 @@ for(i<3)
 \end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-101-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Rectangle((1,10), (3,11))
-Rectangle((1,12), (3,13))
-Rectangle((4,8), (6,9))
-Rectangle((4,10), (6,11))
+Rectangle(1,10,3,11)
+Rectangle(1,12,3,13)
+Rectangle(4,8,6,9)
+Rectangle(4,10,6,11)
 \end{lstlisting}
   \small\emph{... etc. ...; 16 lines}
 \end{minipage}&\begin{minipage}{\exampleProgramSize}
@@ -823,11 +819,9 @@ for(i<4)
 \end{minipage}&$\frac{16}{3} = 5.3\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-75-extra-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Line(11,14, 13,14), 
-  arrow = True)
+Line(11,14,13,14,arrow)
 Circle(10,10)
-Line(10,13, 10,11), 
-  arrow = True)
+Line(10,13,10,11,arrow)
 Circle(6,10)
 \end{lstlisting}
     \small\emph{... etc. ...; 15 lines}
@@ -835,31 +829,41 @@ Circle(6,10)
 \begin{minipage}{\exampleProgramSize}
     \begin{lstlisting}
 for(i<4)
- line(-4*i+13,4,-4*i+13,2,
-      arrow=True)
+ line(-4*i+13,4,-4*i+13,2,arrow)
  for(j<3)
   if(j>0)
    circle(-4*i+13,4*j+-3)
   line(-4*j+10,5,-4*j+12,5,
-       arrow=True)
+       arrow)
 \end{lstlisting}
   \end{minipage}&$\frac{15}{6} = 2.5\text{x}$\\\midrule    
 
-  \includegraphics[width = \exampleDrawingSize]{figures/expert-7-trim.png}&
+  \includegraphics[width = \exampleDrawingSize]{figures/expert-71-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Line(5,11,5,13)
-Circle(5,9)
-Circle(5,14)
-Line(8,12,8,13)
-\end{lstlisting}\small\emph{... etc. ...; 9 lines}%
+Line(3,10,3,14,arrow)
+Rectangle(11,8,15,10)
+Rectangle(11,14,15,15)
+Line(13,10,13,14,arrow)
+  \end{lstlisting}\small\emph{... etc. ...; 16 lines}%
   \end{minipage}&\begin{minipage}{\exampleProgramSize}
+%% \begin{lstlisting}
+%% for (i<3)
+%%  circle(-3*i+7,1)
+%%  circle(-3*i+7,6)
+%%  line(-3*i+7,-1*i+4,-3*i+7,5)
+%% \end{lstlisting}
 \begin{lstlisting}
-for (i<3)
- circle(-3*i+7,1)
- circle(-3*i+7,6)
- line(-3*i+7,-1*i+4,-3*i+7,5)
+for(i<3)
+ line(7,1,5*i+2,3,arrow)
+ for(j<i+1)
+  if(j>0)
+   line(5*j-1,9,5*i,5,arrow)
+  line(5*j+2,5,5*j+2,9,arrow)
+ rectangle(5*i,3,5*i+4,5)
+ rectangle(5*i,9,5*i+4,10)
+rectangle(2,0,12,1)
 \end{lstlisting}
-\end{minipage}&$\frac{9}{4} = 2.25\text{x}$\\\midrule    
+\end{minipage}&$\frac{16}{9} = 1.8\text{x}$\\\midrule    
 
   \includegraphics[width = \exampleDrawingSize]{figures/expert-72-trim.png}&
 
@@ -880,7 +884,7 @@ reflect(y=8)
 \end{lstlisting}
 \end{minipage}&$\frac{9}{5} = 1.8\text{x}$ %\\\bottomrule
   \end{tabular}
-\caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformations in the top figure and second figure to bottom.}\label{exampleSynthesisResults}
+\caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformations in the top figure, and the complex program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.7cm}
   \end{figure}
 
