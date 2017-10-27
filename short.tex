@@ -707,26 +707,25 @@ Eq.~\ref{programObjective} is intractable in general, but there
 exist efficient-in-practice tools for finding exact solutions to such
 program synthesis problems. We use the state-of-the-art Sketch
 tool~\cite{solar2008program}.
-%Describing Sketch's program synthesis
-%algorithm is beyond the scope of this paper; see~\cite{solar2008program}.
-At a high level, Sketch takes as input a space of programs, along with
+%At a high level,
+Sketch takes as input a space of programs, along with
 a specification of the program's behavior and optionally a cost
 function.  It translates the synthesis problem into a constraint
 satisfaction problem and then uses a SAT solver to find a minimum-cost
 program satisfying the specification.  Sketch requires a
  \emph{finite program space}, which here means that the depth of the
 program syntax tree is bounded (we set the bound to 3),
-but comes with the guarantee that it will
-always eventually find the globally optimal (depth-bounded) solution.
+but has the guarantee that it 
+always eventually finds the globally optimal solution.
 In exchange for this optimality guarantee
 it comes with no guarantees
 on runtime.
 For our domain synthesis times vary from minutes to hours,
 with 27\% of the drawings timing out the synthesizer after 1 hour.
-See Fig.~\ref{exampleSynthesisResults} for examples of the kinds of programs our system recovers.
+Fig.~\ref{exampleSynthesisResults} shows programs recovered by our system.
 A main impediment to our use of these general techniques is
 the prohibitively high cost of searching for programs.
-We next describe how to learn to synthesize programs much faster (Section~\ref{learningASearchPolicy}),
+We next describe how to learn to synthesize programs much faster (Sec.~\ref{learningASearchPolicy}),
 timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 
 \newcommand{\exampleProgramSize}{4cm}
@@ -796,8 +795,8 @@ for(i<3)
   if(j>0)
    line(-3*j+8,-3*i+7,
         -3*j+9,-3*i+7)
-  line(-3*i+7,-3*j+8,
-       -3*i+7,-3*j+9)
+   line(-3*i+7,-3*j+8,
+        -3*i+7,-3*j+9)
   circle(-3*j+7,-3*i+7)
 \end{lstlisting}
 \end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
@@ -882,10 +881,9 @@ reflect(y=8)
    rectangle(3*i-1,2,3*i,3)
   circle(3*i+1,3*i+1)
 \end{lstlisting}
-\end{minipage}&$\frac{9}{5} = 1.8\text{x}$ %\\\bottomrule
+\end{minipage}&$\frac{9}{5} = 1.8\text{x}$ \\\bottomrule
   \end{tabular}
-\caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure, and affine transformations in the top figure, and the complex program in the second figure to bottom.}\label{exampleSynthesisResults}
-%  \vspace{-0.7cm}
+\caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
   \end{figure}
 
 \subsection{Learning a search policy for synthesizing programs}\label{learningASearchPolicy}
@@ -921,12 +919,10 @@ Our goal now is to find the parameters of the policy, written $\theta$, which be
   \\\bottomrule
   \end{tabular}
   \end{table}
-
-
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
-We use a \emph{bias-optimal search algorithm} (see~\cite{schmidhuber2004optimal}):
+We use a \emph{bias-optimal search algorithm}~\citep{schmidhuber2004optimal}:
 
-\noindent\textbf{Definition: Bias-optimality.}
+\noindent\textbf{Definition: Bias-optimality.} 
    A search algorithm is $n$-\emph{bias optimal}
 with respect to a distribution $\probability_{\text{bias}}[\cdot ]$ if it is
 guaranteed to find a solution in $\sigma $ after searching for at least time
@@ -1068,35 +1064,40 @@ alternative similarity metrics between drawings which would capture pixel-level 
 We used our learned distance metric between trace sets, $L_{\text{learned}}(\cdot|\cdot)$,
 to find drawings that are either close together or far apart according to the learned
 distance metric over images.
-Tbl.~\ref{similarityMatrix} illustrates the kinds of drawings that these different metrics put closely together,
+Fig.~\ref{similarityMatrix} illustrates the kinds of drawings that these different metrics put closely together,
 while the supplement shows low dimensional projections of
 program and image features.
 
 \newcommand{\similaritySize}{1cm}
 \newcommand{\similarityArrowSize}{0.35cm}
-\begin{table}[t]
-\centering  \caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Program features base captures abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Section~\ref{generalizingTheHandDrawings}).}\label{similarityMatrix}
-  \begin{tabular}{lll}
-    &\textbf{Close in program space}&\textbf{Far apart in program space}\\\\
-    \textbf{Close in image space}&\begin{tabular}{l}
+\begin{figure}[t]
+  \begin{tabular}{c|c|c|}
+    \multicolumn{1}{c}{}    &\multicolumn{1}{c}{\textbf{Close in program space}}&\multicolumn{1}{c}{\textbf{Far apart in program space}}\\\cline{2-3}
+    \multicolumn{1}{c|}{}&&\\
+    \multicolumn{1}{c|}{    \begin{tabular}{l}\textbf{Close in }\\ \textbf{image space} \end{tabular}}    &
+    \begin{tabular}{l}
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-20-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-21-trim.png}\end{minipage}\\\\
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-50-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-2-trim.png}\end{minipage}
-      \end{tabular} &
+    \end{tabular} &
     \begin{tabular}{l}
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-22-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-77-trim.png}\end{minipage}\\\\
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-64-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-97-trim.png}\end{minipage}
-      \end{tabular}&\\
-    \textbf{Far apart in image space}&
-    \begin{tabular}{l}
+    \end{tabular}\\
+    \multicolumn{1}{c|}{}&&\\\cline{2-3}
+    \multicolumn{1}{c|}{}&&\\
+    \multicolumn{1}{c|}{    \begin{tabular}{c}\textbf{Far apart in }\\ \textbf{image space} \end{tabular}}    &        \begin{tabular}{l}
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
     \end{tabular}&
     \begin{tabular}{l}
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-75-extra-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-89-trim.png}\end{minipage}\\\\
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-3-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-39-trim.png}\end{minipage}
-      \end{tabular}
+    \end{tabular}
+\\    \multicolumn{1}{c|}{}&&\\\cline{2-3}\cline{2-3}    
   \end{tabular}
-  \end{table}
+  
+  \centering
+\caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Features of the program capture abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Section~\ref{generalizingTheHandDrawings}). The off-diagonal entries highlight the difference between these metrics: similarity of programs captures high-level features like repetition and symmetry, whereas similarity of images correspondends to similar drawing commands being in similar places. See Section 2 of the supplement for more examples.}\label{similarityMatrix}  \end{figure}
 
 %% We project these features down to a
 %% 2-dimensional subspace using primary component analysis
@@ -1120,7 +1121,7 @@ program and image features.
 Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
 For example,
 we could change all of the circles to squares or make all of the lines be dashed.
-We \textbf{extrapolate} figures
+We extrapolate figures
 by increasing the number of times that loops are executed.
 Extrapolating repetitive visuals patterns comes naturally to humans,
 and building this ability into an application is practical:
