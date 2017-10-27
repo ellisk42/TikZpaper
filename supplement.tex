@@ -11,7 +11,7 @@
 \usepackage{dsfont}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
-\usepackage[final]{nips_2017}
+\usepackage{iclr2018_conference,times}%\usepackage[final]{nips_2017}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -50,6 +50,12 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{tikz}
+\usetikzlibrary{fit}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.text,decorations.pathreplacing}
+\usetikzlibrary{decorations.pathmorphing}
+
 % As of 2011, we use the hyperref package to produce hyperlinks in the
 % resulting PDF.  If this breaks your system, please commend out the
 % following usepackage line and replace \usepackage{icml2016} with
@@ -66,6 +72,8 @@
 % this with the following command.
 
 \newcommand{\Expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
+\newcommand{\indicator}{\mathds{1}} %{{\rm I\kern-.3em E}}
+\newcommand{\expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
 
 \newtheorem{proposition}{Proposition}
@@ -167,13 +175,139 @@ example of the kinds of corrections that it makes. On the whole
 it modestly improves our Top-1 accuracy from 63\% to 67\%.  Recall that
 from Fig. 6 of the main paper that the best improvement
 in accuracy we could possibly get is 70\% by looking at the top 10 traces. 
-\begin{wrapfigure}{R}{5.5cm}
-  \includegraphics[width = 5cm]{figures/programSuccess7.png}
+\begin{figure}[h]\centering
+  \begin{minipage}{6cm}
+      \includegraphics[width = 5cm]{figures/programSuccess7.png}
   \includegraphics[width = 5cm]{figures/programSuccess16.png}
+    \end{minipage}
   \caption{Left: hand drawing. Center: interpretation favored by the deep network. Right: interpretation favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus (top example) continuing the pattern of not having an arrow is preferred, or (bottom example) continuing the binary search tree is preferred.}\label{exampleOfProgramCorrectingMistake}
-\end{wrapfigure}
+\end{figure}
+\pagebreak
 
+\section{Measuring similarity between drawings}
+
+We measure the similarity between two drawings by extracting features
+of the best programs that describe them. Our features are counts of the number of times that different components in the
+DSL were used.  We project these features down to a
+2-dimensional subspace using primary component analysis
+(PCA); see Fig.\ref{NMF}.  One could use many
+alternative similarity metrics between drawings which would capture pixel-level similarities while missing high-level geometric similarities.
+We used our learned distance metric between traces, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
+while missing similarities at the level of the program.
+\begin{figure}[h]
+\centering  \begin{minipage}{\textwidth}\centering
+  %\includegraphics[width = 0.69\textwidth]{figures/PCA.png}
+  \includegraphics[width = 0.69\textwidth]{figures/PCA_improved.png}
+    \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left; complicated programs are at the top and simple programs are at the bottom.}    \label{NMF}
+  \end{minipage} %\hfill
+  \begin{minipage}{\textwidth}\centering
+    \includegraphics[width = 0.69\textwidth]{figures/imageSimilarity.png} 
+    \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
+  \end{minipage}
+\end{figure}
+
+\section{Learning a bias optimal policy}
+Recall from the main paper that our goal is to estimate the policy minimizing the following loss:
+\begin{align}
+\textsc{Loss}(\theta ; \mathcal{D})& =  \expect_{T\sim\mathcal{D}}\left[ \min_{\sigma\in \text{\textsc{Best}}(T)}\frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}\right] + \lambda \Vert\theta\Vert_2^2\label{policyLoss}\\
+\text{where }  \sigma \in\text{\textsc{Best}}(T) &\text{ if  a minimum cost program for }T \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }T} \text{cost}(p) \nonumber
+\end{align}
+We make this optimization problem tractable by annealing our loss function during gradient descent:
+\begin{align}
+&  \textsc{Loss}_\beta(\theta ; \mathcal{D}) =  \expect_{T\sim\mathcal{D}}\left[ \textsc{SoftMinimum}_\beta \left\{
+    \frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}    : \sigma\in \text{\textsc{Best}}(T)\right\}\right] + \lambda \Vert\theta\Vert_2^2\label{softenedObjective}\\
+  \text{where }&\textsc{SoftMinimum}_\beta (x_1,x_2,x_3,\cdots ) = \sum_n x_n  \frac{e^{-\beta x_n}}{\sum_{n'}e^{-\beta x_{n'}}}
+\end{align}
+Notice that $\textsc{SoftMinimum}_{\beta = \infty}(\cdot )$ is just $\min(\cdot )$.
+We set the regularization coefficient $\lambda = 0.1$ and minimize equation~\ref{softenedObjective}
+using Adam for 2000 steps, linearly increasing $\beta$ from $1$ to $2$.
+
+We parameterize the space of policies as a simple log bilinear model:
+\begin{equation}
+  \pi_{\theta}(\sigma |T)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{trace}}(T)\right)
+\end{equation}
+where:
+\begin{align*}
+  \phi_{\text{params}}(\sigma ) = [&\indicator [\sigma \text{ can loop}] ;\\
+    &\indicator [\sigma \text{ can reflect}];\\
+    &\indicator [\sigma \text{ is incremental}] ; \\
+    &\indicator [\sigma \text{ has depth bound }1];\indicator [\sigma \text{ has depth bound }2];\indicator [\sigma \text{ has depth bound }3];]\\
+  \phi_{\text{trace}}(T) = [&\text{\# circles in }T;\text{\# rectangles in }T;\text{\# lines in }T;1]
+  \end{align*}
+
+\pagebreak
 \section{Neural network architecture}
+
+\subsection{High-level overview}
+\tikzset{>=latex}
+\begin{figure}[t]
+  \begin{tikzpicture}
+  \node[draw,blue,ultra thick,anchor = west,inner sep=0pt,label=below:Target image: $I$](observation) at (0,-1) {\includegraphics[width = 2cm]{figures/expert-18.png}};
+  \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(T)$] (canvas) at (0,-4) {};
+  \draw[lightgray,ultra thin,step = 0.125] ([xshift = 0.5,yshift = 0.5]canvas.south west) grid ([xshift = -0.5,yshift = -0.5]canvas.north east);
+  % draw partial image on canvas
+  \draw (0.375cm,-3.25cm) circle (0.125cm);
+  \draw (0.625cm,-3.625) circle (0.125cm);
+  \draw (0.75cm,-3.375) circle (0.125cm);
+
+  \node[draw,ultra thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
+  \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.5cm]CNN.west) {$\bigoplus$};
+
+  \node[rotate = -90,draw,ultra thick,inner sep=0pt,minimum width = 3cm,minimum height = 0.5cm] (features) at ([xshift = 1.5cm]CNN.east) {Image features};
+
+  \node[draw,ultra thick,minimum size = 1cm](c1) at ([xshift = 1.5cm]features.north) {MLP};
+  \node(l1) at ([yshift = -1.5cm]c1.south) {\verb|circle(|};
+  \node[draw,ultra thick,minimum size = 1cm](a2) at ([xshift = 1cm,yshift = 1.5cm]c1.east) {STN};
+  \node[draw,ultra thick,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east) {MLP};
+  \draw[->,ultra thick] (a2.south) -- (c2.north);
+  \draw[->,ultra thick,red] (c1.south) -- (l1.north);
+  \node(l2) at ([yshift = -1.5cm]c2.south) {\verb|X=7,|};
+  \draw[->,ultra thick,red] (c2.south) -- (l2.north);
+  \node[draw,ultra thick,minimum size = 1cm](a3) at ([xshift = 1cm,yshift = 1.5cm]c2.east) {STN};
+  \node[draw,ultra thick,minimum size = 1cm](c3) at ([xshift = 1cm]c2.east) {MLP};
+  
+  \draw[->,ultra thick] (a3.south) -- (c3.north);
+  \node(l3) at ([yshift = -1.5cm]c3.south) {\verb|Y=12)|};
+  \draw[->,ultra thick,red] (c3.south) -- (l3.north);
+
+  
+  \draw[->,ultra thick] (features.north) -- (c1.west);
+  \draw[->,ultra thick] (features.north) to[out = 45,in = 160] (a2.north);
+  \draw[->,ultra thick] (features.north) to[out = 70,in = 140] (a3.north);
+  \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c2.west);
+  \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- ([yshift = -0.2cm]c3.west);
+  \draw[->,ultra thick] ([xshift = 0.25cm]l2.north) -- ([yshift = -0.25cm]c3.west);
+
+  \node(next)[draw,very thick,fit = (l1) (l2) (l3), dashed, label = below:{Next drawing command}] {};
+
+  \draw[-{>[scale = 1.5]},very thick,dashed] (next.west) -- ([yshift = -0.2cm]canvas.east) node [midway, below, sloped] (TextNode) {Renderer}; %: \LaTeX~Ti\emph{k}Z};
+  
+  \draw[->,ultra thick] (canvas.east) -- (tensorProduct.south);%[yshift = -0.5cm]CNN.west);
+  \draw[->,ultra thick] (observation.east) -- (tensorProduct.north);%([yshift = 0.5cm]CNN.west);
+  \draw[->,ultra thick] (tensorProduct.east)  -- node[fill = white,rotate = 90] {{\tiny $256\times 256\times 2$}}  (CNN.west);
+  \draw[->,ultra thick] (CNN.east) -- node[fill = white,rotate = 90] {{\tiny $16\times 16\times 10$}} (features.south);
+%  \draw[]
+  
+%  \node at (canvas.x,canvas.y) {Canvas};
+\end{tikzpicture}
+\caption{Our neural architecture for inferring the trace set of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
+\end{figure}
+For the model in Fig.~\ref{architecture}, the distribution over the next drawing command factorizes as:
+\begin{equation}
+  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(T)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
+\end{equation}
+where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
+the target image, $T$ is a trace set, $\theta$ are the
+parameters of the neural network, $f_\theta(\cdot,\cdot)$ is the
+image feature extractor (convolutional network), and $a_\theta(\cdot|\cdot)$ is an attention mechanism. The distribution over
+traces factorizes as:
+\begin{equation}
+  \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
+\end{equation}
+where $|T|$ is the length of trace $T$, the subscripts
+on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
+token is emitted by the network to signal that the trace
+explains the image.
 
 \subsection{Convolutional network}
 The convolutional network takes as input 2 $256\times 256$ images
@@ -413,7 +547,7 @@ See figure~\ref{exampleTrainingData} for examples of the kinds of scenes that th
 \end{figure}
 
 For readers wishing to generate their own synthetic training sets,
-we refer them to our source code at:~\url{https://github.com/ellisk42/TikZ}.
+we refer them to our source code at:~\url{redactedForAnonymity.com}.%https://github.com/ellisk42/TikZ}.
 
 \section{The cost function for programs}
 
@@ -507,6 +641,9 @@ a repetition of length 2 as being a reflection rather a loop.
 \section{Full results on drawings data set}
 
 Below we show our full data set of drawings. The leftmost column is a hand drawing. The middle column is a rendering of the most likely trace discovered by the neurally guided SMC sampling scheme. The rightmost column is the program we synthesized from a ground truth execution trace of the drawing.
+Note that because the inference procedure is stochastic,
+the top one most likely sample can vary from run to run.
+Below we report a representative sample from a run with 2000 particles.
 \input{synthesizerOutputs.tex}
 
  
