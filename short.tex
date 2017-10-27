@@ -197,7 +197,7 @@ We present a hybrid architecture for inferring graphics programs that is structu
 The second step involves synthesizing a high-level program capable of producing the trace set identified by the first phase.
 %In principle, we could also train a neural network to learn this mapping. In practice, though, this would be challenging because it would no longer be sufficient to train the network with a synthetic corpus of randomly generated programs, since our goal is to generate programs that satisfy certain semantic constraints that ensure that we get the program that the user most likely intended.
 %This paper argues that this stage is best
-We achieve this by \emph{constraint-based program synthesis} \citep{solar2008program}. The program synthesizer searches the space of possible programs for one capable of producing the desired trace -- inducing structures like
+We achieve this by \emph{constraint-based program synthesis} \citep{solar2008program}. The program synthesizer searches the space of possible programs for one capable of producing the desired trace set -- inducing structures like
 symmetries, loops, or conditional branches.
 Although these program synthesizers do not need any training data,
 we show how to learn a \emph{search policy} 
@@ -335,7 +335,7 @@ command, the network takes as input the target image $I$ as well as
 the rendered output of previous drawing commands.  Intuitively, the
 network looks at the image it wants to explain, as well as what it has
 already drawn.  It then decides either to stop drawing or proposes
-another drawing command to add to the trace; if it decides
+another drawing command to add to the trace set; if it decides
 to continue drawing, the predicted primitive is rendered to its
 ``canvas'' and the process repeats.
 
@@ -344,7 +344,7 @@ pass a $256\times 256$ target image and a rendering of the trace so
 far (encoded as a two-channel image) to a convolutional network. Given
 the features extracted by the convnet, a multilayer perceptron then
 predicts a distribution over the next drawing command to add to the
-trace; see Tbl.~\ref{drawingCommandTable} for the drawing commands we currently model.  We predict the drawing
+trace set; see Tbl.~\ref{drawingCommandTable} for the drawing commands we currently model.  We predict the drawing
 command token-by-token,\footnote{Tokens are atomic symbols in the programming language  -- so the model is \emph{not} predicting lines of code character-by-character, but instead the model knows about the syntactic structure of primitive drawing commands} conditioning each token both on the image
 features and on the previously generated tokens. We also use a
 differentiable attention mechanism (Spatial Transformer
@@ -524,7 +524,7 @@ critical test of generalization: when trained on images with $\leq 12$
 objects, it successfully parses scenes with many more objects than the
 training data.
 We compare with a baseline that models the problem as image captioning (LSTM in Fig.~\ref{syntheticResults}).
-Given the target image, this baseline produces the trace in one shot by
+Given the target image, this baseline produces the trace set in one shot by
 using a CNN to extract features of the input which are passed to an LSTM which finally predicts
 the trace token-by-token.
 This architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}),
@@ -573,9 +573,9 @@ So, for hand drawings,
 we \emph{learn} a surrogate likelihood function,
 $L_{\text{learned}}(\cdot|\cdot)$.
 The density $L_{\text{learned}}(\cdot|\cdot)$ is predicted by a convolutional network that we train to predict
-the distance between two traces conditioned upon their renderings.
+the distance between two trace sets conditioned upon their renderings.
 We train our likelihood surrogate to approximate the symmetric difference,
-which is  the number of drawing commands by which two traces differ:
+which is  the number of drawing commands by which two trace sets  differ:
   \begin{equation}
     -\log L_{\text{learned}}(\text{render}(T_1)|\text{render}(T_2))\approx |T_1 - T_2| + |T_2 - T_1|\label{symmetricDistance}
     \end{equation}
@@ -648,7 +648,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
   \end{minipage}\hfill%
       \begin{minipage}[c]{0.4\textwidth} 
   \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 100)?
-    Distance to ground truth trace measured by the intersection over union of predicted vs. ground truth traces. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth trace. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}
+    Distance to ground truth trace set measured by the intersection over union of predicted vs. ground truth. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth trace. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}
       \end{minipage}
             \vspace{-1cm}
 \end{figure}
@@ -663,7 +663,7 @@ Although the trace set of a graphics program describes the contents
 of a scene, it does not encode higher-level features of the image,
 such as repeated motifs or symmetries.  A \emph{graphics
   program} better describes such structures.
-We seek to synthesize graphics programs from their traces.
+We seek to synthesize graphics programs from their trace sets.
 
 We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
@@ -688,7 +688,7 @@ encodes prior knowledge of what graphics programs tend to look like.
   \end{tabular}
 \end{table}
 
-Given the DSL and a trace $T$, we want to recover a program that both evaluates to $T$
+Given the DSL and a trace set $T$, we want to recover a program that both evaluates to $T$
 and, at the same time, is the ``best'' explanation of $T$.
 For example, we might prefer more general programs or, in the spirit of Occam's razor,
 prefer shorter programs.
@@ -722,7 +722,7 @@ it comes with no guarantees
 on runtime.
 For our domain synthesis times vary from minutes to hours,
 with 27\% of the drawings timing out the synthesizer after 1 hour.
-Fig.~\ref{exampleSynthesisResults} shows programs recovered by our system.
+Tbl.~\ref{exampleSynthesisResults} shows programs recovered by our system.
 A main impediment to our use of these general techniques is
 the prohibitively high cost of searching for programs.
 We next describe how to learn to synthesize programs much faster (Sec.~\ref{learningASearchPolicy}),
@@ -733,7 +733,8 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \newcommand{\exampleDrawingSize}{1.25cm}
 \lstset{basicstyle = \scriptsize\ttfamily}
 
-\begin{figure}[t]
+\begin{table}[t]
+  \caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -883,8 +884,7 @@ reflect(y=8)
 \end{lstlisting}
 \end{minipage}&$\frac{9}{5} = 1.8\text{x}$ \\\bottomrule
   \end{tabular}
-\caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these traces (middle right). Compared to the trace the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
-  \end{figure}
+  \end{table}
 
 \subsection{Learning a search policy for synthesizing programs}\label{learningASearchPolicy}
 
@@ -908,17 +908,7 @@ but smaller spaces are less likely to contain a minimum cost program
 for explaining the trace.
 Our goal now is to find the parameters of the policy, written $\theta$, which best navigate this trade-off.
 
-\begin{table}[h]\centering
-  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. We slightly abuse notation by writing $\sigma $ to mean an assignment to each of these parameters (so $\sigma $ assumes one of 24 different values) and to mean the set of programs selected by that parameterization (so $\sigma \subseteq \text{DSL}$)}\label{policyOutput}
-  \begin{tabular}{lll}\toprule
-  Parameter&Description&Range\\\midrule
-  Loops?&Is the program allowed to loop?&$\{\text{True},\text{False}\}$\\
-  Reflects?&Is the program allowed to have reflections?&$\{\text{True},\text{False}\}$\\
-  Incremental?&Solve the problem piece-by-piece or all at once?&$\{\text{True},\text{False}\}$\\
-  Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
-  \\\bottomrule
-  \end{tabular}
-  \end{table}
+
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
 We use a \emph{bias-optimal search algorithm}~\citep{schmidhuber2004optimal}:
 
@@ -931,14 +921,11 @@ takes to verify that $\sigma $ contains a solution to the
 search problem.
 
 
-Intuitively, an $n$-bias optimal search algorithm
-spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time
-exploring solution space $\sigma $.
-An example of a $1$-bias optimal search algorithm is a time-sharing system
-that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.
-We construct a $1$-bias optimal search algorithm for our domain by
-identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$
-and $t(\sigma )  $ with how long the synthesizer takes to search  the programs in $\sigma $.
+
+
+Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $. An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. We construct a $1$-bias optimal search algorithm for our domain by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$ and $t(\sigma )  $ with how long the synthesizer takes to search  the programs in $\sigma $. This means that the search algorithm explores the entire program space, but spends most of its time searching through the regions of the space that  the policy judges to be most promising.
+
+
 Now in theory any $\pi_\theta(\cdot |\cdot ) $ is a bias-optimal searcher.
 But the actual runtime of the algorithm depends strongly upon
 the bias $\probability_{\text{bias}}[\cdot ]$.
@@ -983,6 +970,17 @@ $\sigma $'s contain minimum cost programs nor does it know how long each
 $\sigma $ will take to search.
 The Oracle is an upper bound on the performance of any search policy.
 With this learned policy in hand we can synthesize 58\% of programs within a minute.
+\begin{table}[h]\centering
+  \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program. We slightly abuse notation by writing $\sigma $ to mean an assignment to each of these parameters (so $\sigma $ assumes one of 24 different values) and to mean the set of programs selected by that parameterization (so $\sigma \subseteq \text{DSL}$)}\label{policyOutput}
+  \begin{tabular}{lll}\toprule
+  Parameter&Description&Range\\\midrule
+  Loops?&Is the program allowed to loop?&$\{\text{True},\text{False}\}$\\
+  Reflects?&Is the program allowed to have reflections?&$\{\text{True},\text{False}\}$\\
+  Incremental?&Solve the problem piece-by-piece or all at once?&$\{\text{True},\text{False}\}$\\
+  Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
+  \\\bottomrule
+  \end{tabular}
+  \end{table}
 \begin{figure}[h]
   \centering  \includegraphics[width = 14cm]{figures/policyComparison.png}
   \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. Oracle: baseline that picks the easiest synthesis problem containing a minimum cost program. Learned policy: a bias-optimal learned search policy running on an ideal timesharing machine. Oracle  upper bounds  the performance of any search policy. $\infty = $ timeout. Red dashed line is median time. Learned policy evaluated using 20-fold cross validation.}\label{policyEvaluation}
@@ -994,7 +992,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
 
 
 
-\section{Applications of graphics program synthesis}\label{applicationsSection}
+\pagebreak\section{Applications of graphics program synthesis}\label{applicationsSection}
 Why synthesize a graphics program,
 if the trace already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
