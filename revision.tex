@@ -13,7 +13,7 @@
 %\usepackage[final]{nips_2017}
 %ICLR packages:
 \usepackage{iclr2018_conference,times}
-\iclrfinalcopy
+%\iclrfinalcopy
 
 
 
@@ -193,7 +193,7 @@ for (i < 3)
  
 The key observation behind our work is that generating a programmatic representation from an image of a diagram actually involves two distinct steps that require different technical approaches. The first step involves identifying the components such as rectangles, lines and arrows that make up the image. The second step involves identifying the high-level structure in how the components were drawn. In Fig. 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram. 
 
-We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step, our approach uses a deep network to infer a set of primitive shape-drawing commands. We refer to this set as a \emph{trace set} since it corresponds to the set of commands in a program's execution trace but lacks the high-level structure that determines how the program decided to issue them.
+We present a hybrid architecture for inferring graphics programs that is structured around these two steps. For the first step,   a deep network to infers a set of primitive shape-drawing commands. We refer to this set as a \emph{trace set} since it corresponds to the set of commands in a program's execution trace but lacks the high-level structure that determines how the program decided to issue them.
 %For added robustness, we train the network to produce a proposal distribution of the most likely traces and use stochastic search to find the trace that best matches the image.
 %The network is trained from an automatically-generated corpus of synthetic image-generating programs.
 The second step involves synthesizing a high-level program capable of producing the trace set identified by the first phase.
@@ -331,23 +331,20 @@ trace set, $T$, from an image, $I$.
 Our model is a combination of  ideas from 
 Neurally-Guided Procedural Models~\citep{ritchie2016neurally}
 and Attend-Infer-Repeat~\citep{eslami1603attend}.
-Our model constructs the
-trace set one drawing command at a time.  When predicting the next drawing
-command, the network takes as input the target image $I$ as well as
-the rendered output of previous drawing commands.  Intuitively, the
-network looks at the image it wants to explain, as well as what it has
-already drawn.  It then decides either to stop drawing or proposes
-another drawing command to add to the trace set; if it decides
-to continue drawing, the predicted primitive is rendered to its
-``canvas'' and the process repeats.
-
+The network constructs the
+trace set one drawing command at a time, conditioned on what it has drawn so far.
+%When predicting the next drawing
+%command, the network takes as input the target image $I$ as well as
+%the rendered output of previous drawing commands.
+%Intuitively, the network looks at the image it wants to explain, as well as what it has already drawn.  It then decides either to stop drawing or proposes another drawing command to add to the trace set; if it decides to continue drawing, the predicted primitive is rendered to its ``canvas'' and the process repeats.
 Fig.~\ref{architecture} illustrates this architecture.  We first
 pass a $256\times 256$ target image and a rendering of the trace set so
 far (encoded as a two-channel image) to a convolutional network. Given
 the features extracted by the convnet, a multilayer perceptron then
 predicts a distribution over the next drawing command to add to the
 trace set; see Tbl.~\ref{drawingCommandTable} for the drawing commands we currently model.  We predict the drawing
-command token-by-token,\footnote{Tokens are atomic symbols in the programming language  -- so the model is \emph{not} predicting lines of code character-by-character, but instead the model knows about the syntactic structure of primitive drawing commands} conditioning each token both on the image
+command token-by-token,%\footnote{Tokens are atomic symbols in the programming language  -- so the model is \emph{not} predicting lines of code character-by-character, but instead the model knows about the syntactic structure of primitive drawing commands}
+ conditioning each token both on the image
 features and on the previously generated tokens. We also use a
 differentiable attention mechanism (Spatial Transformer
 Networks:~\cite{jaderberg2015spatial}) to let the model attend to
@@ -449,43 +446,42 @@ Tensorflow~\citep{tensorflow2015-whitepaper}.
 \end{table}
 
 
-For the model in Fig.~\ref{architecture}, the distribution over the next drawing command factorizes as:
-\begin{equation}
-  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(T)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
-\end{equation}
-where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
-the target image, $T$ is a trace set, $\theta$ are the
-parameters of the neural network, $f_\theta(\cdot,\cdot)$ is the
-image feature extractor (convolutional network), and $a_\theta(\cdot|\cdot)$ is an attention mechanism. The distribution over
-traces factorizes as:
-\begin{equation}
-  \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
-\end{equation}
-where $|T|$ is the length of trace $T$, the subscripts
-on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
-token is emitted by the network to signal that the trace
-explains the image.
-
+%% For the model in Fig.~\ref{architecture}, the distribution over the next drawing command factorizes as:
+%% \begin{equation}
+%%   \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(T)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
+%% \end{equation}
+%% where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
+%% the target image, $T$ is a trace set, $\theta$ are the
+%% parameters of the neural network, $f_\theta(\cdot,\cdot)$ is the
+%% image feature extractor (convolutional network), and $a_\theta(\cdot|\cdot)$ is an attention mechanism. The distribution over
+%% traces factorizes as:
+%% \begin{equation}
+%%   \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
+%% \end{equation}
+%% where $|T|$ is the length of trace set $T$, the subscripts
+%% on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
+%% token is emitted by the network to signal that the trace set
+%% explains the image.
 We train the network by sampling trace sets $T$ and target
 images $I$ for randomly generated scenes
 and maximizing
-Eq.~\ref{objective}
-%% the likelihood of $T$ given $I$ with respect to
-%% the model parameters, $\theta$,
+%Eq.~\ref{objective}
+ the likelihood of $T$ given $I$ with respect to
+ the model parameters, $\theta$,
   by gradient ascent.
 We trained the network on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
 
-Training does not require backpropagation across the sequence
-of drawing commands: drawing to the canvas `blocks' the gradients,
-effectively offloading memory to an external visual store.  
-This approach is like an autoregressive version of
-Attend-Infer-Repeat~\citep{eslami1603attend}, but critically, without a learned
-  recurrent memory state, e.g. an RNN.  We can do without an RNN
-because we learn from ground truth (image, trace) pairs.  This
-allows us to handle scenes with many objects without
-worrying about the conditioning of gradients as they propagate
-over long sequences, and makes training more straightforward: it
-is just maximum likelihood estimation of the model parameters.
+%% Training does not require backpropagation across the sequence
+%% of drawing commands: drawing to the canvas `blocks' the gradients,
+%% effectively offloading memory to an external visual store.  
+%% This approach is like an autoregressive version of
+%% Attend-Infer-Repeat~\citep{eslami1603attend}, but critically, without a learned
+%%   recurrent memory state, e.g. an RNN.  We can do without an RNN
+%% because we learn from ground truth (image, trace) pairs.  This
+%% allows us to handle scenes with many objects without
+%% worrying about the conditioning of gradients as they propagate
+%% over long sequences, and makes training more straightforward: it
+%% is just maximum likelihood estimation of the model parameters.
 
 
 
@@ -501,13 +497,6 @@ exponentially in $n$, assuming it has a nonzero chance of making a
 mistake.  For added robustness as $n$ becomes large, we treat the
 neural network outputs as proposals for a Sequential Monte Carlo (SMC) sampling scheme~\citep{SMCBook}.  For
 the SMC sampler, we use pixel-wise distance as a surrogate
-\begin{wrapfigure}{R}{8cm}
-  \centering
-      \includegraphics[width = 7cm]{figures/editDistance36.png}
-%    \includegraphics[width = 4cm]{figures/accuracy.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. It generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-1cm}
-\end{wrapfigure}
-\noindent
 for a
 likelihood function. The SMC sampler is designed to produce samples
 from the distribution $\propto L(I|\text{render}(T))
@@ -518,6 +507,14 @@ includes the likelihood under the proposal distribution.
 Intuitively, both the proposal
 distribution and the distance function offer complementary signals for
 whether a drawing command is correct.
+
+\begin{wrapfigure}{R}{8cm}
+  \centering
+      \includegraphics[width = 7cm]{figures/editDistance36.png}
+%    \includegraphics[width = 4cm]{figures/accuracy.png}
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. It generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}%\vspace{-1cm}
+\end{wrapfigure}
+
 
 Fig.~\ref{syntheticResults}
 compares the neural network with SMC against the neural network by
@@ -584,13 +581,11 @@ which is  the number of drawing commands by which two trace sets  differ:
 
 
 
-Pixel-wise
-distance
-metrics are sensitive to the details of how
-arrows, dashes, and corners are drawn -- but we wish to be invariant
-to these details.
-So, we learn a distance metric over images that
-approximates the distance metric in the search space over traces.
+%% Pixel-wise distance metrics are sensitive to the details of how
+%% arrows, dashes, and corners are drawn -- but we wish to be invariant
+%% to these details.
+%% So, we learn a distance metric over images that
+%% approximates the distance metric in the search space over traces.
 
 
 We evaluate our system on 100 hand-drawn figures; see Fig.~\ref{drawingSuccesses}--\ref{drawingFailures}.
@@ -655,12 +650,11 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
       \vspace{-1cm}
 \end{figure}
 
-\pagebreak
-
-
-
-
 %\pagebreak
+
+
+
+
 
 \section{Synthesizing graphics programs from trace sets}\label{programSynthesisSection}
 Although the trace set of a graphics program describes the contents
@@ -673,7 +667,7 @@ We constrain the space of allowed programs by writing down a context
 free grammar over a space of programs. Although it might be desirable
 to synthesize programs in a Turing-complete language such as Lisp or
 Python, a more tractable approach is to specify what in the program
-languages community is called a Domain Specific Language (DSL)~\cite{polozov2015flashmeta}. Our DSL (Tbl.~\ref{DSL})
+languages community is called a Domain Specific Language (DSL)~\citep{polozov2015flashmeta}. Our DSL (Tbl.~\ref{DSL})
 encodes prior knowledge of what graphics programs tend to look like.
 
 \begin{table}[H]
@@ -710,7 +704,7 @@ The constrained optimization problem in
 Eq.~\ref{programObjective} is intractable in general, but there
 exist efficient-in-practice tools for finding exact solutions to such
 program synthesis problems. We use the state-of-the-art Sketch
-tool~\cite{solar2008program}.
+tool~\citep{solar2008program}.
 %At a high level,
 Sketch takes as input a space of programs, along with
 a specification of the program's behavior and optionally a cost
@@ -738,7 +732,7 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{table}[t]
-  \caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these trace sets (middle right). Compared to the trace sets the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops in the Ising model, special case conditionals for the HMM, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
+  \caption{Example drawings (left), their ground truth trace sets (middle left), and programs synthesized from these trace sets (middle right). Compared to the trace sets the programs are more compressive (right: programs have fewer lines than traces) and automatically group together related drawing commands. Note the nested loops  and special case conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -763,25 +757,25 @@ for(i<3)
  line(i,-2*i+4,i,-1*i+6)
        \end{lstlisting}
      \end{minipage}&$\frac{6}{3} = 2\text{x}$\\\midrule
-     \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Line(5,13,2,10,arrow)
-Circle(5,9)
-Circle(8,5)
-Line(2,8, 2,6,arrow)
-Circle(2,5)
-\end{lstlisting}
-\small\emph{... etc. ...; 13 lines}
-\end{minipage}&
-             \begin{minipage}{\exampleProgramSize}\begin{lstlisting}
-circle(4,10)
-for(i<3)
- circle(-3*i+7,5)
- circle(-3*i+7,1)
- line(-3*i+7,4,-3*i+7,2,arrow)
- line(4,9,-3*i+7,6,arrow)
-\end{lstlisting}
-\end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
+%%      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
+%% \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+%% Line(5,13,2,10,arrow)
+%% Circle(5,9)
+%% Circle(8,5)
+%% Line(2,8, 2,6,arrow)
+%% Circle(2,5)
+%% \end{lstlisting}
+%% \small\emph{... etc. ...; 13 lines}
+%% \end{minipage}&
+%%              \begin{minipage}{\exampleProgramSize}\begin{lstlisting}
+%% circle(4,10)
+%% for(i<3)
+%%  circle(-3*i+7,5)
+%%  circle(-3*i+7,1)
+%%  line(-3*i+7,4,-3*i+7,2,arrow)
+%%  line(4,9,-3*i+7,6,arrow)
+%% \end{lstlisting}
+%% \end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Circle(5,8)
@@ -821,26 +815,26 @@ for(i<4)
             -3*i+11,-2*j+7)
 \end{lstlisting}
 \end{minipage}&$\frac{16}{3} = 5.3\text{x}$\\\midrule
-\includegraphics[width = \exampleDrawingSize]{figures/expert-75-extra-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Line(11,14,13,14,arrow)
-Circle(10,10)
-Line(10,13,10,11,arrow)
-Circle(6,10)
-\end{lstlisting}
-    \small\emph{... etc. ...; 15 lines}
-\end{minipage}&
-\begin{minipage}{\exampleProgramSize}
-    \begin{lstlisting}
-for(i<4)
- line(-4*i+13,4,-4*i+13,2,arrow)
- for(j<3)
-  if(j>0)
-   circle(-4*i+13,4*j+-3)
-  line(-4*j+10,5,-4*j+12,5,
-       arrow)
-\end{lstlisting}
-  \end{minipage}&$\frac{15}{6} = 2.5\text{x}$\\\midrule    
+%% \includegraphics[width = \exampleDrawingSize]{figures/expert-75-extra-trim.png}&
+%% \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+%% Line(11,14,13,14,arrow)
+%% Circle(10,10)
+%% Line(10,13,10,11,arrow)
+%% Circle(6,10)
+%% \end{lstlisting}
+%%     \small\emph{... etc. ...; 15 lines}
+%% \end{minipage}&
+%% \begin{minipage}{\exampleProgramSize}
+%%     \begin{lstlisting}
+%% for(i<4)
+%%  line(-4*i+13,4,-4*i+13,2,arrow)
+%%  for(j<3)
+%%   if(j>0)
+%%    circle(-4*i+13,4*j+-3)
+%%   line(-4*j+10,5,-4*j+12,5,
+%%        arrow)
+%% \end{lstlisting}
+%%   \end{minipage}&$\frac{15}{6} = 2.5\text{x}$\\\midrule    
 
   \includegraphics[width = \exampleDrawingSize]{figures/expert-71-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
@@ -931,29 +925,29 @@ search problem.
 Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $. An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. We construct a $1$-bias optimal search algorithm for our domain by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$ and $t(\sigma )  $ with how long the synthesizer takes to search  the programs in $\sigma $. This means that the search algorithm explores the entire program space, but spends most of its time searching through the regions of the space that  the policy judges to be most promising.
 
 
-\begin{figure}\centering
-  \begin{tikzpicture}
-    \node[anchor = west] at (0,5.25) {Entire program search space};
-    \draw[fill = yellow,fill opacity = 0.15,draw = black] (0,0) rectangle (5,5);
-    \draw [fill = yellow, opacity = 0.2] (0,0)--(0,2)--(4,0)--(0,0);
-    \draw [fill = yellow, opacity = 0.4,cycle] (0,5)--(0,1)--(3,5);
-    \draw [fill = yellow, opacity = 0.6,cycle] (2.5,5)--(3.2,0)--(5,0)--(5,5);
-    \draw (0,2) -- node[below,sloped]{short programs} (4,0);
-    \draw (0,2) -- node[above,sloped]{long programs} (4,0);
-    \draw (2.5,5) -- node[above,sloped]{programs w/ reflections} (3.2,0);
-    \draw (0,1) -- node[above,sloped]{ programs w/ loops} (3,5);
-    \node(p1)[anchor =west ] at (5.5,3.5) {$\pi_\theta(\text{short, no loop/reflect}) = $};
-    \draw [fill = yellow, fill opacity = 0.2,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p1.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p1.east);
-    \node(p2)[anchor =west ] at ([yshift = -0.5cm]p1.west) {$\pi_\theta(\text{long, loops}) = $};
-    \draw [fill = yellow, fill opacity = 0.4,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p2.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p2.east);
-    \node(p3)[anchor =west ] at ([yshift = -0.5cm]p2.west) {$\pi_\theta(\text{long, no loop/reflect}) = $};
-    \draw [fill = yellow, fill opacity = 0.15,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p3.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p3.east);
-    \node(p4)[anchor =west ] at ([yshift = -0.5cm]p3.west) {$\pi_\theta(\text{long, reflects}) = $};
-    \draw [fill = yellow, fill opacity = 0.6,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p4.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p4.east);
-    \node(p5)[anchor =west ] at ([yshift = -0.5cm]p4.west) {\emph{etc.}};
-  \end{tikzpicture}
-  \caption{The bias-optimal search algorithm divides the entire (intractable) program search space in to (tractable) program subspaces (written $\sigma $), each of which contains a restricted set of programs. For example, one subspace might be short programs which don't loop. The policy $\pi$ predicts a distribution over program subspaces. The weight that $\pi$ assigns to a subspace is indicated by it's yellow shading in the above figure.}
-  \end{figure}
+%% \begin{figure}\centering
+%%   \begin{tikzpicture}
+%%     \node[anchor = west] at (0,5.25) {Entire program search space};
+%%     \draw[fill = yellow,fill opacity = 0.15,draw = black] (0,0) rectangle (5,5);
+%%     \draw [fill = yellow, opacity = 0.2] (0,0)--(0,2)--(4,0)--(0,0);
+%%     \draw [fill = yellow, opacity = 0.4,cycle] (0,5)--(0,1)--(3,5);
+%%     \draw [fill = yellow, opacity = 0.6,cycle] (2.5,5)--(3.2,0)--(5,0)--(5,5);
+%%     \draw (0,2) -- node[below,sloped]{short programs} (4,0);
+%%     \draw (0,2) -- node[above,sloped]{long programs} (4,0);
+%%     \draw (2.5,5) -- node[above,sloped]{programs w/ reflections} (3.2,0);
+%%     \draw (0,1) -- node[above,sloped]{ programs w/ loops} (3,5);
+%%     \node(p1)[anchor =west ] at (5.5,3.5) {$\pi_\theta(\text{short, no loop/reflect}) = $};
+%%     \draw [fill = yellow, fill opacity = 0.2,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p1.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p1.east);
+%%     \node(p2)[anchor =west ] at ([yshift = -0.5cm]p1.west) {$\pi_\theta(\text{long, loops}) = $};
+%%     \draw [fill = yellow, fill opacity = 0.4,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p2.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p2.east);
+%%     \node(p3)[anchor =west ] at ([yshift = -0.5cm]p2.west) {$\pi_\theta(\text{long, no loop/reflect}) = $};
+%%     \draw [fill = yellow, fill opacity = 0.15,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p3.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p3.east);
+%%     \node(p4)[anchor =west ] at ([yshift = -0.5cm]p3.west) {$\pi_\theta(\text{long, reflects}) = $};
+%%     \draw [fill = yellow, fill opacity = 0.6,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p4.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p4.east);
+%%     \node(p5)[anchor =west ] at ([yshift = -0.5cm]p4.west) {\emph{etc.}};
+%%   \end{tikzpicture}
+%%   \caption{The bias-optimal search algorithm divides the entire (intractable) program search space in to (tractable) program subspaces (written $\sigma $), each of which contains a restricted set of programs. For example, one subspace might be short programs which don't loop. The policy $\pi$ predicts a distribution over program subspaces. The weight that $\pi$ assigns to a subspace is indicated by it's yellow shading in the above figure.}
+%%   \end{figure}
 
 Now in theory any $\pi_\theta(\cdot |\cdot ) $ is a bias-optimal searcher.
 But the actual runtime of the algorithm depends strongly upon
@@ -1021,11 +1015,10 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
 
 
 
-\pagebreak\section{Applications of graphics program synthesis}\label{applicationsSection}
+\section{Applications of graphics program synthesis}\label{applicationsSection}
 Why synthesize a graphics program,
 if the trace set already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
-%\remark{I'm of two minds about how these subsections should be ordered. The current ordering leads with the coolest results, which is nice. But it's a bit...deflating?...to start with such cool results and then end on the somewhat technical point of how the synthesizer can help correct parse errors. An alternative would be to flip the ordering, starting with the technical point and building toward progressively cooler results. This requires a bit more patience on the part of the reader, but the overall narrative flow/payoff feels better. In any case, whatever ordering you pick should be the same order as these applications are mentioned in the abstract.}
 
 \subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
 \begin{wrapfigure}{r}{5.5cm}\vspace{-0.5cm}
@@ -1098,33 +1091,37 @@ program and image features.
 \newcommand{\similaritySize}{1cm}
 \newcommand{\similarityArrowSize}{0.35cm}
 \begin{figure}[t]
-  \begin{tabular}{c|c|c|}
-    \multicolumn{1}{c}{}    &\multicolumn{1}{c}{\textbf{Close in program space}}&\multicolumn{1}{c}{\textbf{Far apart in program space}}\\\cline{2-3}
-    \multicolumn{1}{c|}{}&&\\
-    \multicolumn{1}{c|}{    \begin{tabular}{l}\textbf{Close in }\\ \textbf{image space} \end{tabular}}    &
+  \begin{tabular}{|c|c|}
+    \multicolumn{1}{c}{\textbf{Close in program space, far in image space}}&
+    \multicolumn{1}{c}{\textbf{Close in image space, far in program space}}\\\hline&\\
+    
     \begin{tabular}{l}
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-20-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-21-trim.png}\end{minipage}\\\\
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-50-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-2-trim.png}\end{minipage}
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
     \end{tabular} &
+    
     \begin{tabular}{l}
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-22-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-77-trim.png}\end{minipage}\\\\
       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-64-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-97-trim.png}\end{minipage}
-    \end{tabular}\\
-    \multicolumn{1}{c|}{}&&\\\cline{2-3}
-    \multicolumn{1}{c|}{}&&\\
-    \multicolumn{1}{c|}{    \begin{tabular}{c}\textbf{Far apart in }\\ \textbf{image space} \end{tabular}}    &        \begin{tabular}{l}
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
-    \end{tabular}&
-    \begin{tabular}{l}
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-75-extra-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-89-trim.png}\end{minipage}\\\\
-      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-3-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-39-trim.png}\end{minipage}
     \end{tabular}
-\\    \multicolumn{1}{c|}{}&&\\\cline{2-3}\cline{2-3}    
+\\&\\    \hline
+    %\\
+%    \multicolumn{1}{c|}{}&&\\\cline{2-3}
+%    \multicolumn{1}{c|}{}&&\\ \multicolumn{1}{c|}{}
+    %& %% \begin{tabular}{l}
+    %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
+    %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
+    %% \end{tabular}
+    %&
+    %% \begin{tabular}{l}
+    %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-75-extra-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-89-trim.png}\end{minipage}\\\\
+    %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-3-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-39-trim.png}\end{minipage}
+    %% \end{tabular}
+%\\ \multicolumn{1}{c|}{}&&\\\cline{2-3}\cline{2-3}
   \end{tabular}
   
   \centering
-\caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Features of the program capture abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Section~\ref{generalizingTheHandDrawings}). The off-diagonal entries highlight the difference between these metrics: similarity of programs captures high-level features like repetition and symmetry, whereas similarity of images correspondends to similar drawing commands being in similar places. See Section 2 of the supplement for more examples.}\label{similarityMatrix}  \end{figure}
+\caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Features of the program capture abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Sec.~\ref{generalizingTheHandDrawings}). Similarity of programs captures high-level features like repetition and symmetry, whereas similarity of images corresponds to similar drawing commands being in similar places. See Sec. 2 of the supplement for more examples.}\label{similarityMatrix}  \end{figure}
 
 %% We project these features down to a
 %% 2-dimensional subspace using primary component analysis
@@ -1158,7 +1155,7 @@ Fig.~\ref{extrapolationFigure} shows extrapolations produced by our system.
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
+%  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
   \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by
 running loops for extra iterations.}\label{extrapolationFigure}
   \end{figure}
@@ -1213,16 +1210,11 @@ Our image-to-trace parsing architecture builds on prior work on controlling proc
 We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the trace through the guide program as a symbolic parse of the target image.
 We then show how to efficiently synthesize higher-level programs from these traces.
 
-In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\citep{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\citep{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
+%In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\citep{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\citep{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
-\textbf{Hand-drawn sketches:} Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
-The CogSketch system~\citep{forbus2011cogsketch} also aims to have a
-high-level understanding of hand-drawn figures. Their primary goal is
-cognitive modeling (they apply their system to solving IQ-test
-style visual reasoning problems), whereas we are interested in
-building an automated AI application (e.g. in our system the user need
-not annotate which strokes correspond to which shapes; our neural
-network produces something equivalent to the annotations).
+%\textbf{Hand-drawn sketches:} Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
+
+%The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling (they apply their system to solving IQ-test style visual reasoning problems), whereas we are interested in building an automated AI application (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
 %A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
 %Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
 %and they applied their technique to synthetic scenes used in human behavioral studies.
@@ -1231,7 +1223,7 @@ network produces something equivalent to the annotations).
 \textbf{The Trace Hypothesis:} The idea that an execution trace could assist in program learning goes back to the 1970's~\citep{Summers:1977:MLP:321992.322002} and has  been applied in neural models of program induction, like Neural Program Interpreters~\citep{DBLP:journals/corr/ReedF15}, or DeepCoder, which predicts what functions occur in the execution trace~\citep{BalGauBroetal16}.
 Our contribution to this idea is the trace hypothesis:
 that  trace sets can be inferred from perceptual data,
-and that the trace is the correct bridge between perception and symbolic representation.
+and that the trace set is a useful bridge between perception and symbolic representation.
 Our work is the first to articulate and explore this hypothesis
 by demonstrating how a trace could be inferred and how it can be used to synthesize a high-level program.
 
@@ -1252,9 +1244,9 @@ In the near future, we believe it will be possible to produce professional-looki
 More generally, we believe the trace hypothesis, as realized in our two-phase system---parsing into trace sets, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for other domains in which agents must programmatically reason about noisy perceptual input.
 
 
-\subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl and Jiajun Wu on the design of the neural architecture.
+%% \subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl and Jiajun Wu on the design of the neural architecture.
 
-\subsubsection*{Supplemental information.} The supplement may be found at:~\url{http://web.mit.edu/ellisk/www/graphicsProgramSupplement.pdf}
+%% \subsubsection*{Supplemental information.} The supplement may be found at:~\url{http://web.mit.edu/ellisk/www/graphicsProgramSupplement.pdf}
 
 
 %\input{synthesizerOutputs.tex}
