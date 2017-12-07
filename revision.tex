@@ -208,7 +208,7 @@ we show how to learn a \emph{search policy}
 in order to synthesize programs an order of magnitude faster than constraint-based synthesis techniques alone.
 
 One might be tempted to try to go directly from perceptual input (an image) to a program,
-much like recent neural models of program induction that regress from problem statements to programs (e.g.,~\cite{devlin2017robustfill}). We advocate an alternative model, which we call The Trace Hypothesis:
+much like recent neural models of program induction that regress from problem statements to programs (e.g.,~\cite{devlin2017robustfill}). We advocate an alternative framing, which we call The Trace Hypothesis:
 
 %% Images are high-dimensional and unstructured while programs are high-level
 %% and symbolic. We resolve this mismatch by advancing a new model of
@@ -933,7 +933,8 @@ search problem.
 
 
 
-Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $. An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$ and $t(\sigma )  = t(\sigma|T)$, where $t(\sigma|T)$ is how long the synthesizer takes to search $\sigma $ for a program for $T$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
+%Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $.
+An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |T)$ and $t(\sigma )  = t(\sigma|T)$, where $t(\sigma|T)$ is how long the synthesizer takes to search $\sigma $ for a program for $T$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
 
 
 %% \begin{figure}\centering
@@ -979,8 +980,8 @@ and for each $\sigma $.
 %synthesis problems takes a little over a day on 40 CPUs.
 %With the training set in hand we  %This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
 We locally minimize this loss using gradient descent. % while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
-See supplement for details.
-Because we want to learn a policy from only $100$ hand-drawn sketches,
+%See supplement for details.
+Because we want to learn a policy from only $100$ hand-drawn diagrams,
 we chose a simple low-capacity, bilinear model for a policy:
 \begin{equation}
   \pi_{\theta}(\sigma |T)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{trace}}(T)\right)
@@ -1019,7 +1020,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
   \end{tabular}
   \end{table}
 \begin{figure}[h]
-  \centering  \includegraphics[width = 14cm]{figures/policyComparison.png}
+  \centering  \includegraphics[width = 11cm]{figures/policyComparison.png}
   \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. Oracle:  upper bounds  the performance of any search policy. Learned policy: a bias-optimal learned search policy running on an ideal timesharing machine.  $\infty = $ timeout. Red dashed line is median time. Learned policy evaluated using 20-fold cross validation.}\label{policyEvaluation}
 \end{figure} 
 
@@ -1034,14 +1035,15 @@ Why synthesize a graphics program,
 if the trace set already suffices to recover the objects in an image?
 Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 
-\subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
-\begin{wrapfigure}{r}{5.5cm}\vspace{-0.5cm}
+\pagebreak\subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
+\begin{wrapfigure}{r}{5cm}\vspace{-0.5cm}
   \includegraphics[width = 5cm]{figures/programSuccess7.png}
   \includegraphics[width = 5cm]{figures/programSuccess16.png}
-  \caption{Left: hand drawings. Center: interpretations favored by the deep network. Right: interpretations favored after learning a prior over programs. Our learned prior favors shorter, simpler programs, thus (top example) continuing the pattern of not having an arrow is preferred, or (bottom example) continuing the ``binary search tree'' is preferred.}\label{exampleOfProgramCorrectingMistake}
-\vspace{0.5cm}  \end{wrapfigure}
+  \caption{Left: hand drawings. Center: interpretations favored by the deep network. Right: interpretations favored after learning a prior over programs. The prior favors  simpler programs, thus (top) continuing the pattern of not having an arrow is preferred, or (bottom) continuing the ``binary search tree'' is preferred.}\label{exampleOfProgramCorrectingMistake}
+\vspace{-0.75cm}  \end{wrapfigure}
 The program synthesizer corrects errors made by the neural network by favoring trace sets which lead to more
-concise or general programs.  For example, figures with perfectly aligned objects are preferable to figures whose parts are slightly misaligned, and precise alignment lends itself to short
+concise or general programs.  For example, figures with perfectly aligned objects are preferable, %% to figures whose parts are slightly misaligned,
+and precise alignment lends itself to short
 programs.
 Concretely,
 we run the program synthesizer on the
@@ -1051,19 +1053,18 @@ reranks the Top-$k$  by  the prior probability of their programs.
 The prior probability of a program is learned by picking the prior maximizing
 the likelihood of the ground truth trace sets;
 see supplement for details.
-
-This procedure can only fix
-mistakes made by the neural network when
+But, this procedure can only correct errors when
 a correct trace set is in the Top-$k$.
 Our sampler could only do better on
-7/100 drawings by looking at the Top-5 or Top-100 samples
+7/100 drawings by looking at the Top-100 samples
 (see Fig.~\ref{drawingIntersectionOverUnion}),
 precluding a statistically significant analysis of how much
 learning a prior over programs could help correct errors.
 But,
-learning this prior does sometimes
-help correct mistakes made by the neural network, and also
-occasionally introduces mistakes of its own; see
+learning this prior does sometimes 
+help correct mistakes made by the neural network; %% , and also
+%% occasionally introduces mistakes of its own; 
+see
 Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
 example of the kinds of corrections that it makes.
 See supplement for details.
@@ -1156,22 +1157,22 @@ See supplement for details.
 %% \end{figure}
 
 \subsection{Extrapolating figures}
-Having access to the source code of a graphics program facilitates coherent, high-level edits to the figure generated by that program. 
-For example,
-we could change all of the circles to squares or make all of the lines be dashed.
-We extrapolate figures
+Having access to the source code of a graphics program facilitates coherent, high-level image editing.
+%For example,
+%we could change all of the circles to squares or make all of the lines be dashed.
+For example we can extrapolate figures
 by increasing the number of times that loops are executed.
 Extrapolating repetitive visuals patterns comes naturally to humans,
-and building this ability into an application is practical:
+and is a practical application:
 imagine hand drawing a repetitive graphical model structure
 and having our system automatically induce and extend the pattern.
 Fig.~\ref{extrapolationFigure} shows extrapolations produced by our system.
 \begin{figure}[H]\centering
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}
+  \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix1.png}
+  \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix2.png}
 %  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
-  \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by
-running loops for extra iterations.}\label{extrapolationFigure}
+   \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by our system.}
+  \label{extrapolationFigure}
   \end{figure}
 %\input{extrapolations.tex}
 
@@ -1229,7 +1230,7 @@ In the computer graphics literature, there have been other systems which convert
 \textbf{Hand-drawn sketches:} Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
 
 The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling (they apply their system to solving IQ-test style visual reasoning problems), whereas we are interested in building an automated AI application (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
-A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
+%A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
 %% Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
 %% and they applied their technique to synthetic scenes used in human behavioral studies.
 %% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
