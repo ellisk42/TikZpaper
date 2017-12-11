@@ -267,8 +267,11 @@ in contrast to converting images to vectors or low-level parses~\citep{huang2017
 building on Levin search~\citep{levin1973universal}
 and recent work like DeepCoder~\citep{BalGauBroetal16}.
 (3) The trace hypothesis: a framework for going from perception to programs,
-which connects this work to other models of program induction that use traces,
+which connects this work to other trace--based models,
 like the  Neural Program Interpreter~\citep{DBLP:journals/corr/ReedF15}.
+
+Even with the high-level idea of a trace set, going from hand drawings to programs remains difficult. We address the following challenges:
+(1) Inferring trace sets from noisy hand drawings requires design choices from the deep learning and computer vision toolkits (Section~\ref{neuralNetworkSection}); (2) Discovering good programs requires solving a difficult combinatorial search problem, because the programs are often long and complicated (e.g., 9 lines of code, with nested loops and conditionals). We give a generic framework for learning a \emph{search policy} that quickly guides program synthesizers toward the target programs.
   
 
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
@@ -557,24 +560,25 @@ but, for this domain, cannot parse cluttered scenes with many objects.
 %%   \end{figure}
 
 \subsection{Generalizing to real hand drawings}\label{generalizingTheHandDrawings}
-\begin{wrapfigure}{R}{6cm}
-\centering\vspace{-0.7cm}  \begin{minipage}[t]{2.5cm}\centering\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
-    \subcaption{}
-  \end{minipage}\\
-   \begin{minipage}[t]{2.5cm}\includegraphics[width = 2cm]{figures/60-groundTruth-reduced.png}
-    \subcaption{}
-  \end{minipage}%
-  \begin{minipage}[t]{2.5cm}\includegraphics[width = 2cm]{figures/60-1-reduced.png}
-    \subcaption{}
-  \end{minipage}%
-    \caption{(a): hand drawing. (b): Rendering of the trace set our model infers for (a). (c): noisy rendering of (b).}\label{handDrawingExamples}
-\end{wrapfigure}
+%% \begin{wrapfigure}{R}{6cm}
+%% \centering\vspace{-0.7cm}  \begin{minipage}[t]{2.5cm}\centering\includegraphics[width = 2cm]{figures/expert-60-reduced.png}
+%%     \subcaption{}
+%%   \end{minipage}\\
+%%    \begin{minipage}[t]{2.5cm}\includegraphics[width = 2cm]{figures/60-groundTruth-reduced.png}
+%%     \subcaption{}
+%%   \end{minipage}%
+%%   \begin{minipage}[t]{2.5cm}\includegraphics[width = 2cm]{figures/60-1-reduced.png}
+%%     \subcaption{}
+%%   \end{minipage}%
+%%     \caption{(a): hand drawing. (b): Rendering of the trace set our model infers for (a). (c): noisy rendering of (b).}\label{handDrawingExamples}
+%% \end{wrapfigure}
 
 %A practical application of our neural network is the automatic conversion of hand drawings into a subset of \LaTeX.
  We trained the model
 to generalize to hand drawings by introducing noise into the
 renderings of the training target images.
-We designed this noise process to introduce the kinds of variations found in hand drawings (Fig.~\ref{handDrawingExamples}; see supplement for details).
+We designed this noise process to introduce the kinds of variations found in hand drawings (%% Fig.~\ref{handDrawingExamples}; 
+see supplement for details).
 
 Our neurally-guided SMC procedure
 used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in section~\ref{neuralNetworkSection}).
