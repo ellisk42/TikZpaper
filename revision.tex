@@ -261,17 +261,18 @@ rectangle(...)
 \end{figure}
 
 The new contributions of this work are:
-(1) A model that converts sketches to high-level programs:
+(1) The trace hypothesis: a framework for going from perception to programs,
+which connects this work to other trace--based models,
+like the  Neural Program Interpreter~\citep{DBLP:journals/corr/ReedF15};
+(2) A model based on the trace hypothesis that converts sketches to high-level programs:
 in contrast to converting images to vectors or low-level parses~\citep{huang2017shape,Nishida:2016:ISU:2897824.2925951,nsd,DBLP:journals/corr/Beltramelli17,im2latex}.
-(2) An algorithm for learning a policy for efficiently searching for programs,
+(3) A generic algorithm for learning a policy for efficiently searching for programs,
 building on Levin search~\citep{levin1973universal}
 and recent work like DeepCoder~\citep{BalGauBroetal16}.
-(3) The trace hypothesis: a framework for going from perception to programs,
-which connects this work to other trace--based models,
-like the  Neural Program Interpreter~\citep{DBLP:journals/corr/ReedF15}.
 
-Even with the high-level idea of a trace set, going from hand drawings to programs remains difficult. We address the following challenges:
-(1) Inferring trace sets from noisy hand drawings requires design choices from the deep learning and computer vision toolkits (Section~\ref{neuralNetworkSection}); (2) Discovering good programs requires solving a difficult combinatorial search problem, because the programs are often long and complicated (e.g., 9 lines of code, with nested loops and conditionals). We give a generic framework for learning a \emph{search policy} that quickly guides program synthesizers toward the target programs.
+Even with the high-level idea of a trace set, going from hand drawings to programs remains difficult. We address  these challenges:
+(1) Inferring trace sets from images requires \emph{domain-specific} design choices from the deep learning and computer vision toolkits (Sec.~\ref{neuralNetworkSection}). (2) Generalizing to noisy hand drawings requires learning a \emph{domain-specific} noise model that is invariant to the variations across hand drawings (Sec.~\ref{generalizingTheHandDrawings}).  (3) Discovering good programs requires solving a difficult combinatorial search problem, because the programs are often long and complicated (e.g., 9 lines of code, with nested loops and conditionals). We give a \emph{domain-general} framework for learning a search policy that quickly guides program synthesizers toward the target programs (Sec.~\ref{learningASearchPolicy}).
+
   
 
 %under a quantitative objective that maximizes the likelihood according to a prior distribution that aims to capture the user’s preference.
@@ -350,7 +351,7 @@ pass a $256\times 256$ target image and a rendering of the trace set so
 far (encoded as a two-channel image) to a convolutional network. Given
 the features extracted by the convnet, a multilayer perceptron then
 predicts a distribution over the next drawing command to add to the
-trace set; see Tbl.~\ref{drawingCommandTable} for the drawing commands we currently model.
+trace set (see Tbl.~\ref{drawingCommandTable}).
 %We predict the drawing command token-by-token,
 %\footnote{Tokens are atomic symbols in the programming language  -- so the model is \emph{not} predicting lines of code character-by-character, but instead the model knows about the syntactic structure of primitive drawing commands}
 %%   conditioning each token both on the image
@@ -367,9 +368,9 @@ different regions of the image while predicting drawing commands.
 %$x$ coordinate.
 We currently constrain
 coordinates to lie on a discrete $16\times 16$ grid,
-but the grid could be made arbitrarily fine.  See supplement for the full details
-of the architecture, which we implemented in
-Tensorflow~\citep{tensorflow2015-whitepaper}.
+but the grid could be made arbitrarily fine.  %% See supplement for the full details
+%% of the architecture, which we implemented in
+%% Tensorflow~\citep{tensorflow2015-whitepaper}.
 %% \remark{There are some more details that are important to provide
 %%   about this architecture in the supplement: the
 %%   functional form(s) of the probability distributions over tokens, the
@@ -497,7 +498,12 @@ We trained the network on $10^5$ scenes, which takes a day on an Nvidia TitanX G
 %% is just maximum likelihood estimation of the model parameters.
 
 
-
+\begin{wrapfigure}{r}{8cm}
+  \vspace{-0.25cm}
+  \centering
+      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-0.7cm} 
+\end{wrapfigure}
 Our network can ``derender'' random synthetic images
 %those shown in Fig.~\ref{trainingData}.
 by doing a beam search to
@@ -522,18 +528,13 @@ and using it to invert a generative model (the renderer).
 %% Intuitively, both the proposal
 %% distribution and the distance function offer complementary signals for
 %% whether a drawing command is correct.
-\begin{wrapfigure}{R}{8cm}
-\vspace{-0.25cm}  \centering
-      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
-%    \includegraphics[width = 4cm]{figures/accuracy.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-0.5cm} 
-\end{wrapfigure}
 
-\textbf{Experiment 1.} 
+
+\textbf{Experiment 1: Figure~\ref{syntheticResults}.}
   To evaluate which components of the model are necessary to parse complicated scenes,
   we compared  the neural network
   with SMC against the neural network by
-itself or SMC by itself (Fig.~\ref{syntheticResults}).  Only the combination of the two passes a
+itself or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 12$
 objects, it successfully parses scenes with many more objects than the
 training data.
@@ -995,9 +996,9 @@ the parameter settings of $\sigma $ (see Tbl.~\ref{policyOutput})
 and $\phi_{\text{trace}}(T)$ extracts a few simple features of the trace set $T$;
 see supplement for details.
 
-\textbf{Experiment 3.}
+\textbf{Experiment 3: Figure~\ref{policyEvaluation}.}
 We compare synthesis times for our learned search policy
-with two alternatives (Fig.~\ref{policyEvaluation}):
+with two alternatives:
  \emph{Sketch}, which poses the
 entire problem wholesale to the Sketch program synthesizer;
 and an \emph{Oracle},
