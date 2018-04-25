@@ -129,6 +129,29 @@ MIT\\
 
 \maketitle
 
+\section{Further testing of the trace hypothesis}
+
+Recall that we factored the graphics program synthesis problem into two components: (1) a perception-facing component, whose job is to go from perceptual input to a set of commands that must occur in the execution trace of the program (\textbf{trace set}); and (2) a program synthesis component, whose job is to infer a program whose execution trace contains those commands. This is a different approach from other recent program induction models (e.g.,~\cite{devlin2017robustfill,nps}), which regress directly from a program induction problem to the source code of the program. We motivated the usefulness of our factoring of the problem via The Trace Hypothesis.
+
+\textbf{Experiment.} To test whether the trace hypothesis is necessary for our domain, we trained a model to regress directly from images to graphics programs. This baseline model, which we call the \emph{no-trace baseline}, was able to infer some simple programs, but failed completely on more sophisticated scenes.
+
+Baseline model architecture: The model architecture is a straightforward, image-captioning-style CNN$\to$LSTM. We keep the same CNN architecture from our main model (Section~\ref{CNNarchitecture}), with the sole difference that it takes only one image as input. The LSTM decoder produces the program token-by-token: so we flatten the program's hierarchical structure, and use special ``bracketing'' symbols to convey nesting structure, in the spirit of~\citep{vinyals2015grammar}. The LSTM decoder has 2 hidden layers with 1024 units. We used 64-dimensional embeddings for the program tokens.
+
+Training and evaluation: The model was trained on $10^7$ synthetically generated programs -- 2 orders of magnitude more data than the model we present in the main paper. We then evaluated the baseline on \emph{synthetic renders} of our 100 hand drawings (the testing set used throughout the paper). Recall that our model was evaluated on noisy real hand drawings. We sample programs from this baseline model conditioned on a synthetic render of a hand drawing, and report only the sampled program whose execution trace most closely matched the ground truth trace set, as measured by the symmetric difference of the two sets. We allow the baseline model to spend 1 hour drawing samples per drawing -- recall that our model finds 58\% of programs in under a minute. Together these training and evaluation choices are intended to make the problem as easy as possible for the no-trace baseline.
+
+Results: The no-trace  baseline succeeds for trivial programs (a few lines, no variables, loops, etc.); occasionally gets small amounts of simple looping structure; and fails utterly for most of our test cases. See Figure~\ref{noTrace}.
+
+\begin{figure}[h]\centering
+      \includegraphics[width = 2cm]{figures/noTraceOutputs/11.png}
+  \includegraphics[width = 2cm]{figures/noTraceOutputs/16.png}
+    \includegraphics[width = 2cm]{figures/noTraceOutputs/29.png}
+    \includegraphics[width = 2cm]{figures/noTraceOutputs/7.png}
+        \includegraphics[width = 2cm]{figures/noTraceOutputs/94.png}
+      \includegraphics[width = 2cm]{figures/noTraceOutputs/38.png}
+  \caption{Top, white: synthetic rendering of a hand drawing. Bottom, black: output of best program found by no-trace baseline.}\label{noTrace}
+  \end{figure}
+ 
+
 \section{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
 The program synthesizer can help correct errors from the execution trace proposal network by favoring execution traces which lead to more concise or general programs.
 For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
@@ -309,7 +332,7 @@ on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens
 token is emitted by the network to signal that the trace
 explains the image.
 
-\subsection{Convolutional network}
+\subsection{Convolutional network}\label{CNNarchitecture}
 The convolutional network takes as input 2 $256\times 256$ images
 represented as a $2\times 256\times 256$ volume. These are
 passed through two layers of convolutions separated by ReLU
@@ -354,6 +377,7 @@ for more details.
 Training takes a little bit less than a day on a Nvidia TitanX GPU.
 The network was trained on $10^5$ synthetic examples.
 
+\begin{comment}
 \subsection{Predicting continuous coordinates using Mixture Density Networks}
 
 Our main paper describes a neural model for parsing hand drawings
@@ -428,6 +452,7 @@ See Figure~\ref{continuousParses} to see the traces recovered by the beam search
     model. Black-on-white: hand drawings. White-on-black, below each
     hand drawing: the parse inferred by the model.}\label{continuousParses} 
   \end{figure}
+\end{comment}
 \subsection{LSTM Baseline}
 
 We  compared our deep network with a baseline that models the problem as a kind of image captioning.

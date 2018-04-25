@@ -138,17 +138,15 @@ MIT\\
   into graphics programs written in a subset of \LaTeX.~The model
   combines techniques from deep learning and program synthesis.  We
   learn a convolutional neural network that proposes plausible drawing
-  primitives that explain an image. These drawing primitives are
-  like a trace of the set of primitive commands issued by a graphics
+  primitives that explain an image. These drawing primitives are like
+  a trace of the set of primitive commands issued by a graphics
   program. We learn a model that uses program synthesis techniques to
-  recover a graphics program from that trace. These programs have constructs like variable
-  bindings, iterative loops, or simple kinds of conditionals. With a
-  graphics program in hand, we can correct errors made by the deep
-  network %, measure similarity between drawings by use of similar high-level geometric
-  %structures,
-  and extrapolate drawings.  Taken together these results
-  are a step towards agents that induce useful, human-readable
-  programs from perceptual input.
+  recover a graphics program from that trace. These programs have
+  constructs like variable bindings, iterative loops, or simple kinds
+  of conditionals. With a graphics program in hand, we can correct
+  errors made by the deep network and extrapolate drawings.  Taken
+  together these results are a step towards agents that induce useful,
+  human-readable programs from perceptual input.
 \end{abstract}
 
 \section{Introduction}
@@ -271,7 +269,7 @@ building on Levin search~\citep{levin1973universal}
 and recent work like DeepCoder~\citep{BalGauBroetal16}.
 
 Even with the high-level idea of a trace set, going from hand drawings to programs remains difficult. We address  these challenges:
-(1) Inferring trace sets from images requires \emph{domain-specific} design choices from the deep learning and computer vision toolkits (Sec.~\ref{neuralNetworkSection}). (2) Generalizing to noisy hand drawings requires learning a \emph{domain-specific} noise model that is invariant to the variations across hand drawings (Sec.~\ref{generalizingTheHandDrawings}).  (3) Discovering good programs requires solving a difficult combinatorial search problem, because the programs are often long and complicated (e.g., 9 lines of code, with nested loops and conditionals). We give a \emph{domain-general} framework for learning a search policy that quickly guides program synthesizers toward the target programs (Sec.~\ref{learningASearchPolicy}).
+(1) Inferring trace sets from images requires \emph{domain-specific} design choices from the deep learning and computer vision toolkits (Sec.~\ref{neuralNetworkSection}). (2) Generalizing to noisy hand drawings, we will show, requires learning a \emph{domain-specific} noise model that is invariant to the variations across hand drawings (Sec.~\ref{generalizingTheHandDrawings}).  (3) Discovering good programs requires solving a difficult combinatorial search problem, because the programs are often long and complicated (e.g., 9 lines of code, with nested loops and conditionals). We give a \emph{domain-general} framework for learning a search policy that quickly guides program synthesizers toward the target programs (Sec.~\ref{learningASearchPolicy}).
 
   
 
@@ -388,7 +386,7 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
   \draw (0.75cm,-3.375) circle (0.125cm);
 
   \node[draw,ultra thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
-  \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.5cm]CNN.west) {$\bigotimes$};
+  \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.5cm]CNN.west) {$\bigoplus$};
 
   \node[rotate = -90,draw,ultra thick,inner sep=0pt,minimum width = 3cm,minimum height = 0.5cm] (features) at ([xshift = 1.5cm]CNN.east) {Image features};
 
@@ -604,13 +602,13 @@ which is  the number of drawing commands by which two trace sets  differ:
 %% So, we learn a distance metric over images that
 %% approximates the distance metric in the search space over traces.
 
-  \textbf{Experiment 2.}
+  \textbf{Experiment 2: Figures~\ref{drawingSuccesses}--\ref{drawingIntersectionOverUnion}.}
     We evaluated, but did not train, our system on 100 real hand-drawn figures; see Fig.~\ref{drawingSuccesses}--\ref{drawingFailures}.
 These were drawn carefully but not perfectly with the aid of graph paper.
 %Because our model assumes that objects are snapped to a $16\times 16$ grid, 
 %we made the drawings on graph paper.
 For each drawing we annotated a ground truth trace set and had the neurally guided SMC sampler
-produce $10^3$ samples for each drawing.
+produce $10^3$ samples. % for each drawing.
 For 63\% of the drawings, the Top-1 most likely sample exactly matches the
 ground truth; with more samples, the model finds trace sets
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
@@ -661,7 +659,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
   \end{minipage}\hfill%
       \begin{minipage}[c]{0.4\textwidth} 
   \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 100)?
-    Distance to ground truth trace set measured by the intersection over union of predicted vs. ground truth. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}            \vspace{-0.5cm}
+    Distance to ground truth trace set measured by the intersection over union (IoU) of predicted vs. ground truth: IoU of sets $A$ and $B$ is $|A\cap B|/|A\cup B|$. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}            \vspace{-0.5cm}
       \end{minipage}
 
 \end{figure}
