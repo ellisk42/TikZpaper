@@ -388,7 +388,7 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
 \end{tikzpicture}
 \caption{Our neural architecture for inferring the spec of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
 \end{figure}
-\begin{table}[t]
+\begin{table}[h]
   \caption{Primitive drawing commands currently supported by our model.}
 \label{drawingCommandTable}
 \begin{tabular}{ll}\toprule
@@ -411,7 +411,7 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
   \begin{tabular}{l}
     \verb|STOP|
   \end{tabular}&\begin{tabular}{l}
-    Finishes trace set inference
+    Finishes spec inference
     \end{tabular}
 \\  \bottomrule
 \end{tabular}
