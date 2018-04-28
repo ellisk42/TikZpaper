@@ -244,21 +244,30 @@ we interpret our two-step factoring  as a generative model where a latent progra
  and so we learn models that accelerate inference for both programs and specs,
  in the spirit of ``amortized inference''~\cite{paige2016inference},
  using a neural network to amortize the cost of inferring specs from images and using
- a variant of Adaptive Levin Search~\cite{schmidhuber1997shifting}
+ a variant of Bias--Optimal Search~\cite{schmidhuber2004optimal}
  to amortize the cost of synthesizing programs from specs.
  \begin{figure}[h]
   \centering\begin{tikzpicture}
-    \node[ thick,anchor = west,inner sep=0pt,label={[yshift = 0.3cm]{\small Image}}](observation) at (0,0) {\includegraphics[width = 1.5cm]{figures/expert-39-trimmed.png}};
-    \node[ultra thick,anchor = west,inner sep=0pt](traceSource) at (3,0.5){    \begin{lstlisting}[basicstyle = \scriptsize\ttfamily]
+  \node[ thick,anchor = west,inner sep=0pt,label={[yshift = 0.3cm]{\small \begin{tabular}{c}
+          Image\\
+          (Observed)
+  \end{tabular}}}](observation) at (0,0) {\includegraphics[width = 1.5cm]{figures/expert-39-trimmed.png}};
+    \node[ultra thick,anchor = west,inner sep=0pt](traceSource) at (3.7,0.5){    \begin{lstlisting}[basicstyle = \scriptsize\ttfamily]
 line, line,
 rectangle,
 line, ...
 \end{lstlisting}};
-    \node[ultra thick,anchor = west,inner sep=0pt](traceImage) at (3.3,-0.5) {
+    \node[ultra thick,anchor = west,inner sep=0pt](traceImage) at (4,-0.5) {
       \includegraphics[width = 0.9cm]{figures/39-parse.png}}; 
-    \node(trace)[draw,thin,fit = (traceImage) (traceSource), label = above:{{\small Drawing commands (Spec)}}] {};
+    \node(trace)[draw,thin,fit = (traceImage) (traceSource), label = above:{{\small \begin{tabular}{c}
+            Spec/Drawing Commands\\
+            (Latent)
+    \end{tabular}}}] {};
     
-    \node[draw, thick,anchor = west,inner sep=2pt,label=above:{\small Program}](program) at (6.3,0) {
+    \node[draw, thick,anchor = west,inner sep=2pt,label=above:{\small \begin{tabular}{c}
+          Program\\
+          (Latent)
+    \end{tabular}}](program) at (7.7,0) {
       \begin{lstlisting}
 for (j < 3)
 for (i < 3)
@@ -267,17 +276,17 @@ if (...)
  line(...)
 rectangle(...)
     \end{lstlisting}};
-    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Extrapolation}](extrapolate) at (9.9,0.5) {\includegraphics[width = 1.3cm]{figures/39-extrapolated.png}};
+    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Extrapolation}](extrapolate) at (12,0.5) {\includegraphics[width = 1.3cm]{figures/39-extrapolated.png}};
 %    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Similarity}](similarity) at (11.3,0) {\includegraphics[width = 1cm]{figures/expert-38-trim.png}};
-    \node[ultra thick,anchor = west,text width = 1.3cm,inner sep=0pt](errors) at (10,-1.2) {\small Error correction};
+    \node[ultra thick,anchor = west,text width = 1.3cm,inner sep=0pt](errors) at (12.1,-1.2) {\small Error correction};
 
     \draw[->, ultra thick] (trace.west) -- node[fill = white,rotate = -90] {{\small Rendering}} (observation.east);
-    \draw[->, thick, red] ([xshift = -5]observation.south) to[out = -30,in = -150] node[midway,yshift = -6]{{\small Learning + Stochastic search}} ([xshift = -15]trace.south);
+    \draw[->, very thick, red] ([xshift = -5]observation.south) to[out = -30,in = -150] node[midway,yshift = -6]{{\small Learning + Stochastic search}} ([xshift = -15]trace.south);
     \draw[->, ultra thick] (program.west) -- node[fill = white,rotate = -90] {{\small Execution}} (trace.east);
-    \draw[->, thick, red] ([xshift = 10]trace.south) to[out = -10,in = -170] node[midway,yshift = -6]{{\small Learning + Program synthesis}} ([xshift = 10]program.south);
+    \draw[->, thick, red, very thick] ([xshift = 10]trace.south) to[out = -10,in = -170] node[midway,yshift = -6]{{\small Learning + Program synthesis}} ([xshift = 10]program.south);
 %    \draw[->, thick, red] (program.east) to[out = 80,in = 180] (errors.west);
 %    \draw[->, thick] (program.east) to[out = 40,in = -230] (similarity.west);
-    \draw[->, thick, red] (program.east) to[out = 60,in = 180] (extrapolate.west);
+    \draw[->, thick, red, very thick] (program.east) to[out = 60,in = 180] (extrapolate.west);
 
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
     ([yshift = -15,xshift = -115]trace.south) -- node[below = 6pt] {{\small Section~\ref{neuralNetworkSection}: Image$\to$Spec}} ([yshift = -15,xshift = -5]trace.south);
@@ -440,7 +449,7 @@ We trained our network by sampling specs $S$ and target
 images $I$ for randomly generated scenes
 and maximizing $\probability_\theta[S|I]$,
 %Eq.~\ref{objective}
- the likelihood of $S$ given $I$ with respect to
+ the likelihood of $S$ given $I$, with respect to
   model parameters $\theta$, by gradient ascent.
 We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
 
@@ -456,13 +465,13 @@ We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
 %% over long sequences, and makes training more straightforward: it
 %% is just maximum likelihood estimation of the model parameters.
 
-
 \begin{wrapfigure}{r}{8cm}
   \vspace{-0.25cm}
   \centering
       \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
       \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}%\vspace{-0.7cm} 
 \end{wrapfigure}
+
 Our network can ``derender'' random synthetic images
 %those shown in Fig.~\ref{trainingData}.
 by doing a beam search to
@@ -502,22 +511,6 @@ using the CNN to extract features of the input which are passed to an LSTM which
 the trace set token-by-token (LSTM in Fig.~\ref{syntheticResults}).
 This architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}),
 but, for this domain, cannot parse cluttered scenes with many objects.
-
-
-
-%% \begin{figure}[H]\centering
-%%   \begin{minipage}{6cm}
-%%     \begin{minipage}[t]{3cm}\fbox{\includegraphics[width=2.75cm]{figures/randomScene-58-7.png}}\end{minipage}%
-%%     \begin{minipage}[t]{3cm}\fbox{\includegraphics[width=2.75cm]{figures/randomScene-33-5.png}}\end{minipage}
-%%     \caption{Network is trained to infer traces for randomly generated scenes like the two shown above. See supplement for details of the training data generation.}\label{trainingData}
-%%   \end{minipage}\hfill%
-%%   \begin{minipage}{7.5cm}\centering
-%%     \includegraphics[width = 7cm]{figures/editDistance36.png}
-%% %    \includegraphics[width = 4cm]{figures/accuracy.png}
-%%       \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. It generalizes to scenes with many more objects. Neither the stochastic search nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}
-%%     \end{minipage}
-  
-%%   \end{figure}
 
 \subsection{Generalizing to real hand drawings}\label{generalizingTheHandDrawings}
 %% \begin{wrapfigure}{R}{6cm}
@@ -883,7 +876,7 @@ Our goal now is to find the parameters of the policy, written $\theta$, which be
 
 
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
-We use a \emph{bias-optimal search algorithm}~\citep{schmidhuber2004optimal}:
+We use a bias-optimal search algorithm~\citep{schmidhuber2004optimal}:
 
 \noindent\textbf{Definition: Bias-optimality.} 
    A search algorithm is $n$-\emph{bias optimal}
@@ -897,7 +890,7 @@ search problem.
 
 
 %Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $.
-An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
+An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. Bias-optimal search over program spaces is called \textbf{Levin Search}~\cite{levin1973universal}. We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
 
 
 %% \begin{figure}\centering
@@ -933,19 +926,19 @@ expected bias-optimal time to solve a training corpus, $\mathcal{D}$, of graphic
 \textsc{Loss}(\theta ; \mathcal{D})& =  \expect_{S\sim\mathcal{D}}\left[ \min_{\sigma\in \text{\textsc{Best}}(S)}\frac{t(\sigma | S)}{\pi_\theta (\sigma | S)}\right] + \lambda \Vert\theta\Vert_2^2\label{policyLoss}\\
 \text{where }  \sigma \in\text{\textsc{Best}}(S) &\text{ if  a minimum cost program for }S \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }S} \text{cost}(p) \nonumber
 \end{align}
-Practically, bias optimality has now bought us the following: (1) a guarantee that the policy will always find the minimum cost program; and (2) a differentiable loss function for the policy parameters that takes into account the cost of searching, in contrast to e.g. DeepCoder~\citep{BalGauBroetal16}.
+%Practically, bias optimality has now bought us the following: (1) a guarantee that the policy will always find the minimum cost program; and (2) a differentiable loss function for the policy parameters that takes into account the cost of searching, in contrast to e.g. DeepCoder~\citep{BalGauBroetal16}.
 
-To generate a training corpus for learning a policy which minimizes this loss,
+To generate a training corpus for learning a policy,
 we synthesized minimum cost programs for each of our hand drawings
-and for each $\sigma $.
+and for each $\sigma $,
 %Solving these
 %\footnote{There are 100 the drawings and $2\times 2\times 2\times 3 = 24$ different values of $\sigma $}
 %synthesis problems takes a little over a day on 40 CPUs.
 %With the training set in hand we  %This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
-We locally minimize this loss using gradient descent. % while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
+then minimized~\ref{policyLoss} using gradient descent. % while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
 %See supplement for details.
 Because we want to learn a policy from only $100$ hand-drawn diagrams,
-we chose a simple low-capacity, bilinear model for a policy:
+we chose a  low-capacity, bilinear model for $\pi$:
 \begin{equation}
   \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
 \end{equation}
@@ -956,9 +949,11 @@ see supplement for details.
 
 \textbf{Experiment 3: Figure~\ref{policyEvaluation}.}
 We compare synthesis times for our learned search policy
-with two alternatives:
+with three alternatives:
  \emph{Sketch}, which poses the
-entire problem wholesale to the Sketch program synthesizer;
+ entire problem wholesale to the Sketch program synthesizer;
+ a DeepCoder--inspired model, \emph{DC}, that learns to predict which program components (loops, reflections)
+ are likely to be useful~\cite{BalGauBroetal16};
 and an \emph{Oracle},
 a policy which always picks the quickest to search $\sigma $
  also containing a minimum cost program.
@@ -992,13 +987,14 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
       Median \\search time
       \end{tabular}&Timeouts\\\midrule
     Sketch&274 sec&27\%\\
+    DC&187 sec&2\%\\
     Oracle&6 sec&2\%\\
     Learned policy&28 sec&2\%\\\bottomrule 
     \end{tabular}.  
   \end{minipage}\hfill%
   \begin{minipage}[c]{0.5\textwidth}
-    \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. Oracle:  upper bounds  the performance of any search policy. Learned policy: our bias-optimal learned search policy running.  %% $\infty = $ timeout. Red dashed line is median time.
-          Learned policy evaluated using 20-fold cross validation.}\label{policyEvaluation}
+    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. DC: Baseline that predicts program components, trained like~\cite{BalGauBroetal16}. Oracle:  upper bounds  the performance of any search policy. Learned policy: ours  %% $\infty = $ timeout. Red dashed line is median time.
+           evaluated using 20-fold cross validation.}\label{policyEvaluation}
     \end{minipage}
 \end{figure} 
 
@@ -1181,11 +1177,11 @@ experiments motivate our use of constraint-based techniques.
 
 
 
-\textbf{Deep Learning:} Our neural network bears resemblance to the Attend-Infer-Repeat (AIR) system, which learns to decompose an image into its constituent objects~\citep{eslami1603attend}. AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference.
+\textbf{Deep Learning:} Our neural network combines the architectural ideas of Attend-Infer-Repeat~\citep{eslami1603attend} -- which learns to decompose an image into its constituent objects -- with the training regime and SMC inference  of Neurally Guided Procedural Modeling~\cite{ritchie2016neurally} -- which learns to control procedural graphics programs.
+%AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference.
 %; this is similar to our approach's first stage, which parses images into traces. Our approach further produces interpretable, symbolic programs which generate those traces.
-Our network  differs in its architecture and training regime: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (trace, image) pairs.
+%Our network  differs in its architecture and training regime: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (trace, image) pairs.
 %Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
-
 IM2LATEX~\citep{im2latex} is a recent work that also converts images to
 ~\LaTeX.
 Their goal is to derender  \LaTeX~ equations,
@@ -1194,14 +1190,14 @@ Our goal is to go from
 noisy input to a high-level program,
 which goes beyond markup languages by supporting
 programming constructs like loops and conditionals.
-Recovering a high-level program is more challenging than recovering markup
-because it is a highly under constrained symbolic reasoning problem.
+%Recovering a high-level program is more challenging than recovering markup
+%because it is a highly under constrained symbolic reasoning problem.
 
 
-Our image-to-trace parsing architecture builds on prior work on controlling procedural graphics programs~\citep{ritchie2016neurally}.
+%Our image-to-trace parsing architecture builds on prior work on controlling procedural graphics programs~\citep{ritchie2016neurally}.
 %Given a program which generates random 2D recursive structures such as vines, that system learns a structurally-identical ``guide program'' whose output can be directed, via neural networks, to resemble a given target image. 
-We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the trace through the guide program as a symbolic parse of the target image.
-We then show how to efficiently synthesize higher-level programs from these traces.
+%% We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the trace through the guide program as a symbolic parse of the target image.
+%% We then show how to efficiently synthesize higher-level programs from these traces.
 
 In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\citep{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\citep{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
