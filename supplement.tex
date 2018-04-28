@@ -11,7 +11,8 @@
 \usepackage{dsfont}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
-\usepackage{iclr2018_conference,times}%\usepackage[final]{nips_2017}
+%\usepackage{iclr2018_conference,times}
+\usepackage{nips_2017}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -129,17 +130,17 @@ MIT\\
 
 \maketitle
 
-\section{Further testing of the trace hypothesis}
+\section{Why not use an end--to--end solution?}
 
-Recall that we factored the graphics program synthesis problem into two components: (1) a perception-facing component, whose job is to go from perceptual input to a set of commands that must occur in the execution trace of the program (\textbf{trace set}); and (2) a program synthesis component, whose job is to infer a program whose execution trace contains those commands. This is a different approach from other recent program induction models (e.g.,~\cite{devlin2017robustfill,nps}), which regress directly from a program induction problem to the source code of the program. We motivated the usefulness of our factoring of the problem via The Trace Hypothesis.
+Recall that we factored the graphics program synthesis problem into two components: (1) a perception-facing component, whose job is to go from perceptual input to a set of commands that must occur in the execution of the program (\textbf{spec}); and (2) a program synthesis component, whose job is to infer a program whose execution contains those commands. This is a different approach from other recent program induction models (e.g.,~\cite{devlin2017robustfill,nps}), which regress directly from a program induction problem to the source code of the program.
 
-\textbf{Experiment.} To test whether the trace hypothesis is necessary for our domain, we trained a model to regress directly from images to graphics programs. This baseline model, which we call the \emph{no-trace baseline}, was able to infer some simple programs, but failed completely on more sophisticated scenes.
+\textbf{Experiment.} To test whether this factoring is necessary for our domain, we trained a model to regress directly from images to graphics programs. This baseline model, which we call the \emph{no-spec baseline}, was able to infer some simple programs, but failed completely on more sophisticated scenes.
 
 Baseline model architecture: The model architecture is a straightforward, image-captioning-style CNN$\to$LSTM. We keep the same CNN architecture from our main model (Section~\ref{CNNarchitecture}), with the sole difference that it takes only one image as input. The LSTM decoder produces the program token-by-token: so we flatten the program's hierarchical structure, and use special ``bracketing'' symbols to convey nesting structure, in the spirit of~\citep{vinyals2015grammar}. The LSTM decoder has 2 hidden layers with 1024 units. We used 64-dimensional embeddings for the program tokens.
 
-Training and evaluation: The model was trained on $10^7$ synthetically generated programs -- 2 orders of magnitude more data than the model we present in the main paper. We then evaluated the baseline on \emph{synthetic renders} of our 100 hand drawings (the testing set used throughout the paper). Recall that our model was evaluated on noisy real hand drawings. We sample programs from this baseline model conditioned on a synthetic render of a hand drawing, and report only the sampled program whose execution trace most closely matched the ground truth trace set, as measured by the symmetric difference of the two sets. We allow the baseline model to spend 1 hour drawing samples per drawing -- recall that our model finds 58\% of programs in under a minute. Together these training and evaluation choices are intended to make the problem as easy as possible for the no-trace baseline.
+Training and evaluation: The model was trained on $10^7$ synthetically generated programs -- 2 orders of magnitude more data than the model we present in the main paper. We then evaluated the baseline on \emph{synthetic renders} of our 100 hand drawings (the testing set used throughout the paper). Recall that our model was evaluated on noisy real hand drawings. We sample programs from this baseline model conditioned on a synthetic render of a hand drawing, and report only the sampled program whose output most closely matched the ground truth spec spec, as measured by the symmetric difference of the two sets. We allow the baseline model to spend 1 hour drawing samples per drawing -- recall that our model finds 58\% of programs in under a minute. Together these training and evaluation choices are intended to make the problem as easy as possible for the baseline.
 
-Results: The no-trace  baseline succeeds for trivial programs (a few lines, no variables, loops, etc.); occasionally gets small amounts of simple looping structure; and fails utterly for most of our test cases. See Figure~\ref{noTrace}.
+Results: The no-spec baseline succeeds for trivial programs (a few lines, no variables, loops, etc.); occasionally gets small amounts of simple looping structure; and fails utterly for most of our test cases. See Figure~\ref{noSpec}.
 
 \begin{figure}[h]\centering
       \includegraphics[width = 2cm]{figures/noTraceOutputs/11.png}
@@ -148,24 +149,24 @@ Results: The no-trace  baseline succeeds for trivial programs (a few lines, no v
     \includegraphics[width = 2cm]{figures/noTraceOutputs/7.png}
         \includegraphics[width = 2cm]{figures/noTraceOutputs/94.png}
       \includegraphics[width = 2cm]{figures/noTraceOutputs/38.png}
-  \caption{Top, white: synthetic rendering of a hand drawing. Bottom, black: output of best program found by no-trace baseline.}\label{noTrace}
+  \caption{Top, white: synthetic rendering of a hand drawing. Bottom, black: output of best program found by no-spec baseline.}\label{noSpec}
   \end{figure}
  
 
 \section{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
-The program synthesizer can help correct errors from the execution trace proposal network by favoring execution traces which lead to more concise or general programs.
+The program synthesizer can help correct errors from the execution spec proposal network by favoring execution specs which lead to more concise or general programs.
 For example, one generally prefers figures with perfectly aligned objects over figures whose parts are slightly misaligned -- and precise alignment lends itself to short programs.
 Similarly, figures often have repeated parts,
 which the program synthesizer might be able to model as a loop or reflectional symmetry.
-So, in considering several candidate traces proposed by the neural network,
-we might prefer traces whose best programs have desirable features such being short or having iterated structures.
+So, in considering several candidate specs proposed by the neural network,
+we might prefer specs whose best programs have desirable features such being short or having iterated structures.
 
-Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section 3 of the main paper samples a set of candidate traces, written $\mathcal{F}(I)$.
-Instead of predicting the most likely trace in $\mathcal{F}(I)$ according to the neural network,
-we can take into account the programs that best explain the traces. 
-Writing $\hat{T}(I)$ for the trace the model predicts for image $I$,
+Concretely, we implemented the following scheme: for an image $I$, the neurally guided sampling scheme of section 2 of the main paper samples a set of candidate specs, written $\mathcal{F}(I)$.
+Instead of predicting the most likely spec in $\mathcal{F}(I)$ according to the neural network,
+we can take into account the programs that best explain the specs. 
+Writing $\hat{S}(I)$ for the spec the model predicts for image $I$,
 \begin{equation}
-\hat{T}(I) = \argmax_{T\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(T))\times \probability_\theta[T|I] \times\probability_{\beta} [ \text{program}(T)] 
+\hat{S}(I) = \argmax_{S\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(S))\times \probability_\theta[S|I] \times\probability_{\beta} [ \text{program}(S)] 
 \end{equation}
 where $\probability_{\beta} [\cdot]$ is a prior probability
 distribution over programs parameterized by $\beta$.
@@ -175,21 +176,21 @@ from $\probability_{\beta} [\cdot]$, then the program is executed deterministica
 and then we observe a noisy version of the program's output, where $L_\text{learned}(I|\text{render}(\cdot))\times\probability_\theta[\cdot|I]$
 is our observation model.
 
-Given a corpus of graphics program synthesis problems with annotated ground truth traces (i.e. $(I,T)$ pairs),
+Given a corpus of graphics program synthesis problems with annotated ground truth specs (i.e. $(I,S)$ pairs),
 we find a maximum likelihood estimate of $\beta$:
 \begin{equation}
-  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(T)]\times L_{\text{learned}}(I|\text{render}(T))\times \probability_\theta[T|I]}{\sum_{T'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(T')]\times L_{\text{learned}}(I|\text{render}(T'))\times \probability_\theta[T'|I]} \right]
+  \beta^* = \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(S)]\times L_{\text{learned}}(I|\text{render}(S))\times \probability_\theta[S|I]}{\sum_{S'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(S')]\times L_{\text{learned}}(I|\text{render}(S'))\times \probability_\theta[S'|I]} \right]
 \end{equation}
 where the expectation is taken both over the model predictions and the
-$(I,T)$ pairs in the training corpus.  We define $\probability_{\beta}
+$(I,S)$ pairs in the training corpus.  We define $\probability_{\beta}
 [\cdot]$ to be a log linear distribution $\propto \exp
 (\beta\cdot \phi(\text{program}))$, where $\phi(\cdot)$ is a feature
 extractor for programs.  We extract a few basic features of a
 program, such as its size and how many loops it has, and use these
-features to help predict whether a trace is the correct explanation
+features to help predict whether a spec is the correct explanation
 for an image.
 
-We synthesized programs for the top 10 traces
+We synthesized programs for the top 10 specs
 output by the deep network.  Learning this prior over programs can
 help correct mistakes made by the neural network, and also
 occasionally introduces mistakes of its own; see
@@ -197,7 +198,7 @@ Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
 example of the kinds of corrections that it makes. On the whole
 it modestly improves our Top-1 accuracy from 63\% to 67\%.  Recall that
 from Fig. 6 of the main paper that the best improvement
-in accuracy we could possibly get is 70\% by looking at the top 10 traces. 
+in accuracy we could possibly get is 70\% by looking at the top 10 specs. 
 \begin{figure}[h]\centering
   \begin{minipage}{6cm}
       \includegraphics[width = 5cm]{figures/programSuccess7.png}
@@ -215,7 +216,7 @@ DSL were used.  We project these features down to a
 2-dimensional subspace using primary component analysis
 (PCA); see Fig.\ref{NMF}.  One could use many
 alternative similarity metrics between drawings which would capture pixel-level similarities while missing high-level geometric similarities.
-We used our learned distance metric between traces, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
+We used our learned distance metric between specs, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
 while missing similarities at the level of the program.
 \begin{figure}[h]
 \centering  \begin{minipage}{\textwidth}\centering
@@ -232,13 +233,13 @@ while missing similarities at the level of the program.
 \section{Learning a bias optimal policy}
 Recall from the main paper that our goal is to estimate the policy minimizing the following loss:
 \begin{align}
-\textsc{Loss}(\theta ; \mathcal{D})& =  \expect_{T\sim\mathcal{D}}\left[ \min_{\sigma\in \text{\textsc{Best}}(T)}\frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}\right] + \lambda \Vert\theta\Vert_2^2\label{policyLoss}\\
-\text{where }  \sigma \in\text{\textsc{Best}}(T) &\text{ if  a minimum cost program for }T \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }T} \text{cost}(p) \nonumber
+\textsc{Loss}(\theta ; \mathcal{D})& =  \expect_{S\sim\mathcal{D}}\left[ \min_{\sigma\in \text{\textsc{Best}}(S)}\frac{t(\sigma | S)}{\pi_\theta (\sigma | S)}\right] + \lambda \Vert\theta\Vert_2^2\label{policyLoss}\\
+\text{where }  \sigma \in\text{\textsc{Best}}(S) &\text{ if  a minimum cost program for }S \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }S} \text{cost}(p) \nonumber
 \end{align}
 We make this optimization problem tractable by annealing our loss function during gradient descent:
 \begin{align}
-&  \textsc{Loss}_\beta(\theta ; \mathcal{D}) =  \expect_{T\sim\mathcal{D}}\left[ \textsc{SoftMinimum}_\beta \left\{
-    \frac{t(\sigma | T)}{\pi_\theta (\sigma | T)}    : \sigma\in \text{\textsc{Best}}(T)\right\}\right] + \lambda \Vert\theta\Vert_2^2\label{softenedObjective}\\
+&  \textsc{Loss}_\beta(\theta ; \mathcal{D}) =  \expect_{S\sim\mathcal{D}}\left[ \textsc{SoftMinimum}_\beta \left\{
+    \frac{t(\sigma | S)}{\pi_\theta (\sigma | S)}    : \sigma\in \text{\textsc{Best}}(S)\right\}\right] + \lambda \Vert\theta\Vert_2^2\label{softenedObjective}\\
   \text{where }&\textsc{SoftMinimum}_\beta (x_1,x_2,x_3,\cdots ) = \sum_n x_n  \frac{e^{-\beta x_n}}{\sum_{n'}e^{-\beta x_{n'}}}
 \end{align}
 Notice that $\textsc{SoftMinimum}_{\beta = \infty}(\cdot )$ is just $\min(\cdot )$.
@@ -247,7 +248,7 @@ using Adam for 2000 steps, linearly increasing $\beta$ from $1$ to $2$.
 
 We parameterize the space of policies as a simple log bilinear model:
 \begin{equation}
-  \pi_{\theta}(\sigma |T)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{trace}}(T)\right)
+  \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
 \end{equation}
 where:
 \begin{align*}
@@ -255,7 +256,7 @@ where:
     &\indicator [\sigma \text{ can reflect}];\\
     &\indicator [\sigma \text{ is incremental}] ; \\
     &\indicator [\sigma \text{ has depth bound }1];\indicator [\sigma \text{ has depth bound }2];\indicator [\sigma \text{ has depth bound }3];]\\
-  \phi_{\text{trace}}(T) = [&\text{\# circles in }T;\text{\# rectangles in }T;\text{\# lines in }T;1]
+  \phi_{\text{spec}}(S) = [&\text{\# circles in }S;\text{\# rectangles in }S;\text{\# lines in }S;1]
   \end{align*}
 
 \pagebreak
@@ -265,8 +266,8 @@ where:
 \tikzset{>=latex}
 \begin{figure}[t]
   \begin{tikzpicture}
-  \node[draw,blue,ultra thick,anchor = west,inner sep=0pt,label=below:Target image: $I$](observation) at (0,-1) {\includegraphics[width = 2cm]{figures/expert-18.png}};
-  \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(T)$] (canvas) at (0,-4) {};
+  \node[draw,blue,ultra thick,anchor = west,inner sep=0pt,label=below:Sarget image: $I$](observation) at (0,-1) {\includegraphics[width = 2cm]{figures/expert-18.png}};
+  \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(S)$] (canvas) at (0,-4) {};
   \draw[lightgray,ultra thin,step = 0.125] ([xshift = 0.5,yshift = 0.5]canvas.south west) grid ([xshift = -0.5,yshift = -0.5]canvas.north east);
   % draw partial image on canvas
   \draw (0.375cm,-3.25cm) circle (0.125cm);
@@ -313,23 +314,23 @@ where:
   
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
-\caption{Our neural architecture for inferring the trace set of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
+\caption{Our neural architecture for inferring the spec of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
 \end{figure}
 For the model in Fig.~\ref{architecture}, the distribution over the next drawing command factorizes as:
 \begin{equation}
-  \probability_\theta [t_1t_2\cdots t_K | I,T] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(T)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
+  \probability_\theta [t_1t_2\cdots t_K | I,S] = \prod_{k = 1}^K \probability_\theta \left[t_k | a_\theta \left(f_\theta(I,\text{render}(S)) | \{t_j\}_{j = 1}^{k - 1}\right), \{t_j\}_{j = 1}^{k - 1}\right]
 \end{equation}
 where $t_1t_2\cdots t_K$ are the tokens in the drawing command, $I$ is
-the target image, $T$ is a trace set, $\theta$ are the
+the target image, $S$ is a spec, $\theta$ are the
 parameters of the neural network, $f_\theta(\cdot,\cdot)$ is the
 image feature extractor (convolutional network), and $a_\theta(\cdot|\cdot)$ is an attention mechanism. The distribution over
-traces factorizes as:
+specs factorizes as:
 \begin{equation}
-  \probability_\theta [T|I] = \prod_{n = 1}^{|T|} \probability_\theta [T_n | I,T_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,T]\label{objective}
+  \probability_\theta [S|I] = \prod_{n = 1}^{|S|} \probability_\theta [S_n | I,S_{1:(n-1)}]\times\probability_\theta [\verb|STOP| | I,S]\label{objective}
 \end{equation}
-where $|T|$ is the length of trace $T$, the subscripts
-on $T$ index drawing commands within the trace (so $T_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
-token is emitted by the network to signal that the trace
+where $|S|$ is the length of spec $S$, the subscripts
+on $S$ index drawing commands within the spec (so $S_n$ is a sequence of tokens: $t_1t_2\cdots t_K$), and the \verb|STOP|
+token is emitted by the network to signal that the spec
 explains the image.
 
 \subsection{Convolutional network}\label{CNNarchitecture}
@@ -434,7 +435,7 @@ the MDN variant fares poorly in comparison.
 \end{figure}
 
 We evaluated the MDN version of our model on hand drawings by (1)
-performing a beam search in order to find the trace maximizing
+performing a beam search in order to find the spec maximizing
 $\probability [T|I]$, and (2) constraining the predicted coordinates
 to lie on the $16\times 16$ grid. We constrain the predicted coordinates
 to lie on the grid by integrating the predicted densities about each grid location.
@@ -443,8 +444,8 @@ we compute a probability mass function $\probability [t_n|t_{1:(n - 1)}]$ as:
 \begin{equation}
   \probability [t_n = t|t_{1:(n - 1)}] = \int_{t - \frac{1}{2}}^{t + \frac{1}{2}} \mathrm{d}t_n \; p(t_n|t_{1:(n - 1)})\label{constrainingEquation}
 \end{equation}
-Even after using Eq.~\ref{constrainingEquation} to constrain the predicted coordinates to lie on the $16\times 16$ grid, the MDN variant of the model only produces finished traces for 48/100 of the drawings.
-See Figure~\ref{continuousParses} to see the traces recovered by the beam search.
+Even after using Eq.~\ref{constrainingEquation} to constrain the predicted coordinates to lie on the $16\times 16$ grid, the MDN variant of the model only produces finished specs for 48/100 of the drawings.
+See Figure~\ref{continuousParses} to see the specs recovered by the beam search.
 
 \begin{figure}
   \includegraphics[width = \textwidth]{figures/continuousParses.png}
@@ -456,9 +457,9 @@ See Figure~\ref{continuousParses} to see the traces recovered by the beam search
 \subsection{LSTM Baseline}
 
 We  compared our deep network with a baseline that models the problem as a kind of image captioning.
-Given the target image, this baseline produces the program trace in one shot by
+Given the target image, this baseline produces the program spec in one shot by
 using a CNN to extract features of the input which are passed to an LSTM which finally predicts
-the trace token-by-token.
+the spec token-by-token.
 This general architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}).
 
 Concretely, we kept the image feature extractor architecture (a CNN) as in our model,
@@ -517,7 +518,7 @@ of having extraneous pixels) and not predicting pixels where they
 don't exist (at the expense of leaving some pixels unexplained). Because our sampling procedure incrementally constructs the scene part-by-part,
 we want $\alpha > \beta$.
 That is, it is preferable to leave some pixels unexplained;
-for once a particle in SMC adds a drawing primitive to its trace that is not actually in the latent scene,
+for once a particle in SMC adds a drawing primitive to its spec that is not actually in the latent scene,
 it can never recover from this error.
 In our experiments on synthetic data we used $\alpha = 0.8$ and $\beta = 0.04$. 
 \section{Generating synthetic training data}
@@ -539,7 +540,7 @@ thus the training data enforces a canonical order in which to draw any scene.
 
 To make the training data look more like naturally occurring figures,
 we put a Chinese restaurant process prior~\cite{gershman2012tutorial} over
-the values of the X and Y coordinates that occur in the execution trace.
+the values of the X and Y coordinates that occur in the execution spec.
 This encourages reuse of coordinate values,
 and so produces training data that tends to have parts that are nicely aligned.
 
@@ -576,7 +577,7 @@ we refer them to our source code at:~\url{redactedForAnonymity.com}.%https://git
 
 \section{The cost function for programs}
 
-We seek the minimum cost program which evaluates to (produces the drawing primitives in) an execution trace $T$:
+We seek the minimum cost program which evaluates to (produces the drawing primitives in) an execution spec $T$:
 \begin{equation}
   \text{program}(T) = \argmin_{\substack{p\in \text{DSL}\\p \text{ evaluates to } T}} \text{cost}(p)\label{programObjective}
 \end{equation}
@@ -647,7 +648,7 @@ a repetition of length 2 as being a reflection rather a loop.
 %%    \label{guideAlgorithm}
 %% \begin{algorithmic}
 %%   \STATE {\bfseries Input:} Neural network NN, beam size $N$, maximum length $L$, target image $x$
-%%   \STATE {\bfseries Output:} Samples of the program trace
+%%   \STATE {\bfseries Output:} Samples of the program spec
 %%   \STATE Set $B_0 = \{\text{empty program}\}$
 %%   \FOR{$1\leq l\leq L$}
 %%   \FOR{$1\leq n\leq N$}
@@ -665,7 +666,7 @@ a repetition of length 2 as being a reflection rather a loop.
 
 \section{Full results on drawings data set}
 
-Below we show our full data set of drawings. The leftmost column is a hand drawing. The middle column is a rendering of the most likely trace discovered by the neurally guided SMC sampling scheme. The rightmost column is the program we synthesized from a ground truth execution trace of the drawing.
+Below we show our full data set of drawings. The leftmost column is a hand drawing. The middle column is a rendering of the most likely spec discovered by the neurally guided SMC sampling scheme. The rightmost column is the program we synthesized from a ground truth execution spec of the drawing.
 Note that because the inference procedure is stochastic,
 the top one most likely sample can vary from run to run.
 Below we report a representative sample from a run with 2000 particles.

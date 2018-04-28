@@ -74,7 +74,7 @@
 
 \newcommand{\expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
-\newcommand{\indicator}{\mathds{I}} %{{\rm I\kern-.3em P}}
+\newcommand{\indicator}{\mathds{1}} %{{\rm I\kern-.3em P}}
 
 \newcommand{\remark}[1]{\textcolor{red}{[#1]}}
 \newcommand{\exampleImageSize}{2cm}
@@ -658,7 +658,8 @@ prefer shorter programs.
 We wrap these intuitions up into a cost function over programs,
 and seek the minimum cost program consistent with $S$:
 \begin{equation}
-  \text{program}(S) = \argmin_{p\in \text{DSL, s.t. }p \text{ consistent w/ } S} \text{cost}(p)\label{programObjective}
+  %  \text{program}(S) = \argmin_{p\in \text{DSL, s.t. }p \text{ consistent w/ } S} \text{cost}(p)\label{programObjective}
+    \text{program}(S) = \argmax_{p\in \text{DSL}} \indicator\left[p \text{ consistent w/ } S \right]\exp \left( -\text{cost}(p) \right)\label{programObjective}
 \end{equation}
 We define the
 cost of a program to be the number of Statement's it contains (Tbl.~\ref{DSL}).
@@ -890,7 +891,7 @@ search problem.
 
 
 %Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $.
-An example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $. Bias-optimal search over program spaces is called \textbf{Levin Search}~\cite{levin1973universal}. We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
+Bias-optimal search over program spaces is known as \textbf{Levin Search}~\cite{levin1973universal}; an example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.  We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
 
 
 %% \begin{figure}\centering
@@ -947,12 +948,12 @@ the parameter settings of $\sigma $ (see Tbl.~\ref{policyOutput})
 and $\phi_{\text{spec}}(S)$ extracts a few simple features of the trace set $S$;
 see supplement for details.
 
-\textbf{Experiment 3: Figure~\ref{policyEvaluation}.}
+\textbf{Experiment 3: Table~\ref{policyEvaluation}.}
 We compare synthesis times for our learned search policy
 with three alternatives:
  \emph{Sketch}, which poses the
  entire problem wholesale to the Sketch program synthesizer;
- a DeepCoder--inspired model, \emph{DC}, that learns to predict which program components (loops, reflections)
+ a DeepCoder--style model, \emph{DC}, which learns to predict which program components (loops, reflections)
  are likely to be useful~\cite{BalGauBroetal16};
 and an \emph{Oracle},
 a policy which always picks the quickest to search $\sigma $
@@ -994,7 +995,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
   \end{minipage}\hfill%
   \begin{minipage}[c]{0.5\textwidth}
     \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. DC: Baseline that predicts program components, trained like~\cite{BalGauBroetal16}. Oracle:  upper bounds  the performance of any search policy. Learned policy: ours  %% $\infty = $ timeout. Red dashed line is median time.
-           evaluated using 20-fold cross validation.}\label{policyEvaluation}
+           evaluated w/ 20-fold cross validation.}\label{policyEvaluation}
     \end{minipage}
 \end{figure} 
 
@@ -1166,8 +1167,7 @@ underpinnings from Levin
 search~\citep{levin1973universal,solomonoff1984optimum} and
 Schmidhuber's OOPS model~\citep{schmidhuber2004optimal}.
 DeepCoder~\citep{BalGauBroetal16} is a recent model which, like ours, learns to predict likely program components.
-Our work differs because we treat
-the problem as \emph{metareasoning}, identifying and modeling
+Our work differs by identifying and modeling
 the trade-off between tractability and probability of success.
 TerpreT~\citep{gaunt2016terpret} 
 systematically compares constraint-based program synthesis techniques
@@ -1182,10 +1182,9 @@ experiments motivate our use of constraint-based techniques.
 %; this is similar to our approach's first stage, which parses images into traces. Our approach further produces interpretable, symbolic programs which generate those traces.
 %Our network  differs in its architecture and training regime: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (trace, image) pairs.
 %Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
-IM2LATEX~\citep{im2latex} is a recent work that also converts images to
-~\LaTeX.
-Their goal is to derender  \LaTeX~ equations,
-which recovers a markup language representation.
+IM2LATEX~\citep{im2latex} is a recent work that 
+ derenders  \LaTeX~ equations,
+recovering a markup language representation.
 Our goal is to go from
 noisy input to a high-level program,
 which goes beyond markup languages by supporting
