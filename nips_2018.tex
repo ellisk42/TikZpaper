@@ -74,6 +74,7 @@
 
 \newcommand{\expect}{\mathds{E}} %{{\rm I\kern-.3em E}}
 \newcommand{\probability}{\mathds{P}} %{{\rm I\kern-.3em P}}
+\newcommand{\indicator}{\mathds{I}} %{{\rm I\kern-.3em P}}
 
 \newcommand{\remark}[1]{\textcolor{red}{[#1]}}
 \newcommand{\exampleImageSize}{2cm}
@@ -151,8 +152,8 @@ MIT\\
 
 \section{Introduction}
 
-Human vision is rich -- we infer 3D shape, objects, parts of objects,
-and relations between objects -- but vision is also abstract:
+Human vision is rich -- we infer shape, objects, parts of objects,
+and relations between objects -- and vision is also abstract:
 we can perceive the radial symmetry of a spiral staircase,
 the iterated repetition in the Ising model,
 see the forest for the trees, and also the recursion within the trees.
@@ -160,8 +161,8 @@ How could we build an agent with similar visual inference abilities?
 Here we
 cast this problem as program learning,
 and take as our goal to learn high--level
-graphics programs from images.
-The graphics programs we consider draw simple figures like those found in machine learning papers
+graphics programs from simple 2D drawings.
+The graphics programs we consider make figures like those found in machine learning papers
 (Fig.~\ref{firstPageExamples}),
 and capture high-level features of a drawing like
 symmetry, repetition, and reuse of structure.
@@ -231,7 +232,7 @@ reflect(y=8)
  The key observation behind our work is that inferring the program from an image involves two distinct steps that require different technical approaches. The first step involves inferring what objects make up an image -- for diagrams, these are things like as rectangles, lines and arrows. The second step involves identifying the high-level structure in how the objects were drawn. In Fig. 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram.
 
  Framed as probabilistic inference,
- our two-step factoring cashes out as a generative model where a latent program
+we interpret our two-step factoring  as a generative model where a latent program
  is executed to produce a set of drawing commands,
  which are then rendered to form an image (Fig.~\ref{roadmap}).
  We refer to this set of drawing commands as a \textbf{specification (spec)} because it specifies what the graphics program drew while lacking the high-level structure determining how the program decided to draw it.
@@ -255,7 +256,7 @@ line, ...
 \end{lstlisting}};
     \node[ultra thick,anchor = west,inner sep=0pt](traceImage) at (3.3,-0.5) {
       \includegraphics[width = 0.9cm]{figures/39-parse.png}}; 
-    \node(trace)[draw,thin,fit = (traceImage) (traceSource), label = above:{{\small Spec}}] {};
+    \node(trace)[draw,thin,fit = (traceImage) (traceSource), label = above:{{\small Drawing commands (Spec)}}] {};
     
     \node[draw, thick,anchor = west,inner sep=2pt,label=above:{\small Program}](program) at (6.3,0) {
       \begin{lstlisting}
@@ -298,7 +299,7 @@ and Attend-Infer-Repeat~\citep{eslami1603attend}, but
 we wish to emphasize
 that one could use
 many different approaches from the computer vision toolkit to
-parse an image into primitive drawing commands  (in our terminology, a ``spec'')~\cite{nsd}.
+parse an image in to primitive drawing commands  (in our terminology, a ``spec'')~\cite{nsd}.
 Our network constructs the
 spec one drawing command at a time, conditioned on what it has drawn so far (Fig.~\ref{architecture}).
 %When predicting the next drawing
@@ -437,10 +438,10 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
 %% explains the image.
 We trained our network by sampling specs $S$ and target
 images $I$ for randomly generated scenes
-and maximizing
+and maximizing $\probability_\theta[S|I]$,
 %Eq.~\ref{objective}
  the likelihood of $S$ given $I$ with respect to
- the model parameters, $\theta$, by gradient ascent.
+  model parameters $\theta$, by gradient ascent.
 We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
 
 %% Training does not require backpropagation across the sequence
@@ -460,19 +461,21 @@ We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
   \vspace{-0.25cm}
   \centering
       \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-0.7cm} 
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}%\vspace{-0.7cm} 
 \end{wrapfigure}
 Our network can ``derender'' random synthetic images
 %those shown in Fig.~\ref{trainingData}.
 by doing a beam search to
-recover  specs maximizing $\probability_\theta[S|I]$. But, if the network predicts an incorrect
+recover  specs maximizing $\probability_\theta[S|I]$. %% , where $\probability_\theta [\cdot |I]$ is
+%% the probability assigned by the network conditioned on image $I$
+ But, if the network predicts an incorrect
 drawing command, it has no way of recovering from that error.  
 %To derender an image with $n$ objects, it must correctly predict $n$ commands -- so its probability of success will decrease exponentially in $n$, assuming it has a nonzero chance of making a mistake.
 For added robustness % as $n$ becomes large,
 we treat the
  network outputs as proposals for a Sequential Monte Carlo (SMC) sampling scheme~\citep{SMCBook}.
 %For the SMC sampler, we use pixel-wise distance as a surrogate for a likelihood function.
-The SMC sampler is designed to sample
+Our SMC sampler draws samples
 from the distribution $\propto L(I|\text{render}(S))
 \probability_\theta[S|I]$, where $L(\cdot | \cdot)$
 %:\text{image}^2\to\mathbb{R}$
@@ -533,20 +536,18 @@ but, for this domain, cannot parse cluttered scenes with many objects.
 %A practical application of our neural network is the automatic conversion of hand drawings into a subset of \LaTeX.
  We trained the model
 to generalize to hand drawings by introducing noise into the
-renderings of the training target images.
-We designed this noise process to introduce the kinds of variations found in hand drawings (%% Fig.~\ref{handDrawingExamples}; 
+renderings of the training target images, where the noise process  mimics the kinds of variations found in hand drawings (%% Fig.~\ref{handDrawingExamples}; 
 see supplement for details).
-
-Our neurally-guided SMC procedure
-used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in section~\ref{neuralNetworkSection}).
-But pixel-wise distance fares poorly on hand drawings, which never exactly match
+While our neurally-guided SMC procedure
+used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in Sec.~\ref{neuralNetworkSection}),
+ pixel-wise distance fares poorly on hand drawings, which never exactly match
 the model's renders.
 So, for hand drawings,
 we learn a surrogate likelihood function,
 $L_{\text{learned}}(\cdot|\cdot)$.
 The density $L_{\text{learned}}(\cdot|\cdot)$ is predicted by a convolutional network that we train to predict
 the distance between two specs conditioned upon their renderings.
-We $L_{\text{learned}}(\cdot |\cdot )$  to approximate the symmetric difference,
+We train $L_{\text{learned}}(\cdot |\cdot )$  to approximate the symmetric difference,
 which is  the number of drawing commands by which two specs  differ:
   \begin{equation}
     -\log L_{\text{learned}}(\text{render}(S_1)|\text{render}(S_2))\approx |S_1 - S_2| + |S_2 - S_1|\label{symmetricDistance}
@@ -565,7 +566,7 @@ which is  the number of drawing commands by which two specs  differ:
 These were drawn carefully but not perfectly with the aid of graph paper.
 %Because our model assumes that objects are snapped to a $16\times 16$ grid, 
 %we made the drawings on graph paper.
-For each drawing we annotated a ground truth trace set and had the neurally guided SMC sampler
+For each drawing we annotated a ground truth spec and had the neurally guided SMC sampler
 produce $10^3$ samples. % for each drawing.
 For 63\% of the drawings, the Top-1 most likely sample exactly matches the
 ground truth; with more samples, the model finds trace sets
@@ -669,6 +670,8 @@ and seek the minimum cost program consistent with $S$:
 We define the
 cost of a program to be the number of Statement's it contains (Tbl.~\ref{DSL}).
 We also penalize using many different numerical constants; see supplement.
+Returning to the generative model in Fig.~\ref{roadmap},
+this setup is the same as saying that the prior probability of a program $p$ is $\propto \exp\left(-\text{cost}(p) \right)$ and the likelihood of a spec $S$ given a program $p$ is $\indicator[p\text{ consistent w/ }S]$.
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
 
 The constrained optimization problem in
@@ -703,7 +706,7 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{table}[t]
-  \caption{Example drawings (left), their ground truth specs (middle left), and programs synthesized from these specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops  and special case conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
+  \caption{Drawings (left), their specs (middle left), and programs synthesized from these specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note nested loops  and conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -866,7 +869,7 @@ but also offers additional constraints on the structure of the program (Tbl.~\re
 For example, a policy might decide to first try searching over small programs before searching over large programs,
 or decide to prioritize searching over programs that have loops.
 
-A search policy $\pi_\theta(\sigma  | T )$ takes as input a spec $S$ and predicts a distribution over synthesis problems, each of which is written $\sigma $ and corresponds to a set of possible programs to search over (so $\sigma \subseteq \text{DSL}$).
+A search policy $\pi_\theta(\sigma  | S )$ takes as input a spec $S$ and predicts a distribution over synthesis problems, each of which is written $\sigma $ and corresponds to a set of possible programs to search over (so $\sigma \subseteq \text{DSL}$).
 Good policies will prefer tractable program spaces,
 so that the search procedure will terminate early, 
 but should also prefer program spaces likely to contain
@@ -967,7 +970,7 @@ $\sigma $'s contain minimum cost programs nor does it know how long each
 $\sigma $ will take to search.
 %The Oracle is an upper bound on the performance of any search policy.
 With this learned policy in hand we can synthesize 58\% of programs within a minute.
-\end{experiment}
+%
 \begin{table}[h]\centering
   \caption{Parameterization of different ways of posing the program synthesis problem. The policy learns to choose parameters likely to quickly yield a minimal cost program.
     %We slightly abuse notation by writing $\sigma $ to mean an assignment to each of these parameters (so $\sigma $ assumes one of 24 different values) and to mean the set of programs selected by that parameterization (so $\sigma \subseteq \text{DSL}$)
@@ -981,9 +984,22 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
   \\\bottomrule
   \end{tabular}
   \end{table}
-\begin{figure}[h]
-  \centering  \includegraphics[width = 11cm]{figures/policyComparison.png}
-  \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. Oracle:  upper bounds  the performance of any search policy. Learned policy: a bias-optimal learned search policy running on an ideal timesharing machine.  $\infty = $ timeout. Red dashed line is median time. Learned policy evaluated using 20-fold cross validation.}\label{policyEvaluation}
+\begin{table}[h]
+  \centering
+  \begin{minipage}[c]{0.4\textwidth}
+  \begin{tabular}{lll}
+    \toprule Model&\begin{tabular}{c}
+      Median \\search time
+      \end{tabular}&Timeouts\\\midrule
+    Sketch&274 sec&27\%\\
+    Oracle&6 sec&2\%\\
+    Learned policy&28 sec&2\%\\\bottomrule 
+    \end{tabular}.  
+  \end{minipage}\hfill%
+  \begin{minipage}[c]{0.5\textwidth}
+    \caption{How long does it typically take to synthesize a minimum cost program? Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. Oracle:  upper bounds  the performance of any search policy. Learned policy: our bias-optimal learned search policy running.  %% $\infty = $ timeout. Red dashed line is median time.
+          Learned policy evaluated using 20-fold cross validation.}\label{policyEvaluation}
+    \end{minipage}
 \end{figure} 
 
 
@@ -1192,33 +1208,12 @@ In the computer graphics literature, there have been other systems which convert
 \textbf{Hand-drawn sketches:} Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
 
 The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling (they apply their system to solving IQ-test style visual reasoning problems), whereas we are interested in building an automated AI application (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
-%A key similarity however is that both CogSketch and our system have as a goal to make it easier to produce nice-looking figures.
-%% Unsupervised Program Synthesis~\cite{ellis2015unsupervised} is a related framework which was also applied to geometric reasoning problems. The goals of~\cite{ellis2015unsupervised} were cognitive modeling,
-%% and they applied their technique to synthetic scenes used in human behavioral studies.
-%% open domain sketch understanding. structure mapping style model. also taps into cyc? the user segments the ink and labels them with concepts from knowledge base. like us they focus on compositional understanding. ``cognitive simulation", solves things like Raven matrices in IQ tests. not really trying right now to be automated like our system.
-
-\textbf{The Trace Hypothesis:} The idea that an execution trace could assist in program learning goes back to the 1970's~\citep{Summers:1977:MLP:321992.322002} and has  been applied in neural models of program induction, like Neural Program Interpreters~\citep{DBLP:journals/corr/ReedF15}, or DeepCoder, which predicts what functions occur in the execution trace~\citep{BalGauBroetal16}.
-Our contribution to this idea is the trace hypothesis:
-that  trace sets can be inferred from perceptual data,
-and that the trace set is a useful bridge between perception and symbolic representation.
-Our work is the first to articulate and explore this hypothesis
-by demonstrating how a trace could be inferred and how it can be used to synthesize a high-level program.
-
-
-%% \subsection{Future work}
-%% There are many directions for future work. The proposal network  currently handles only a very small subset of \LaTeX~drawing commands, though there is no reason that it could not be extended to handle more with a higher-capacity network.
-%% In the synthesis phase, a more expressive DSL---including subroutines, recursion, and symmetry groups beyond reflections---would allow the system to effectively model a wider variety of graphical phenomena. The synthesizer itself could also be the subject of future work: the system currently uses the general-purpose Sketch synthesizer, which can take minutes to hours to run, whereas custom-built domain-specific synthesizers can run much faster or even interactively~\citep{le2014flashextract}.
-
-%% In the parsing phase, the proposal network currently samples positional variables on a discrete grid. More general types of drawings could be supported by instead sampling from continuous distributions, e.g. using Mixture Density Networks (MDN)~\citep{MDN}.
-%% We prototyped a variant of our model that predicts continuous coordinates. See supplement.
 
 \section{Contributions}
 
-We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic trace sets; it then feeds these traces to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings.
-
-
+We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic specifications; it then feeds these specs to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings.
 In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
-More generally, we believe the trace hypothesis, as realized in our two-phase system---parsing into trace sets, then searching for a low-cost symbolic program which generates those traces---may be a useful paradigm for other domains in which agents must programmatically reason about noisy perceptual input.
+More generally, we believe the problem of inferring visual programs is a promising direction for machine perception.
 
 
 \bibliographystyle{unsrt}
