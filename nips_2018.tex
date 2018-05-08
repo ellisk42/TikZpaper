@@ -229,15 +229,14 @@ reflect(y=8)
   \caption{(a): Model learns to convert hand drawings (top) into \LaTeX~(rendered below). (b) Learns to synthesize high-level graphics program from hand drawing.}\label{firstPageExamples}
 \end{figure}
  
- The key observation behind our work is that inferring the program from an image involves two distinct steps that require different technical approaches. The first step involves inferring what objects make up an image -- for diagrams, these are things like as rectangles, lines and arrows. The second step involves identifying the high-level structure in how the objects were drawn. In Fig. 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram.
+ The key observation behind our work is that going from pixels to programs involves two distinct steps, each requiring different technical approaches. The first step involves inferring what objects make up an image -- for diagrams, these are things like as rectangles, lines and arrows. The second step involves identifying the higher-level visual concepts that describe how the objects were drawn. In Fig. 1(b), it means identifying a pattern in how the circles and rectangles are being drawn that is best described with two nested loops, and which can easily be extrapolated to a bigger diagram.
 
- Framed as probabilistic inference,
-we interpret our two-step factoring  as a generative model where a latent program
+This two-step factoring can be framed as probabilistic inference in a generative model where a latent program
  is executed to produce a set of drawing commands,
  which are then rendered to form an image (Fig.~\ref{roadmap}).
  We refer to this set of drawing commands as a \textbf{specification (spec)} because it specifies what the graphics program drew while lacking the high-level structure determining how the program decided to draw it.
  We infer the spec from an image using stochastic search (Sequential Monte Carlo)
- and infer a program from a spec using  \textbf{constraint-based program synthesis} \citep{solar2008program} --
+ and infer a program from a spec using  constraint-based program synthesis~\citep{solar2008program} --
  synthesizing structures like symmetries, loops, or conditionals.
  In practice, both stochastic search and program synthesis are
  prohibitively slow,
@@ -289,14 +288,16 @@ rectangle(...)
     \draw[->, thick, red, very thick] (program.east) to[out = 60,in = 180] (extrapolate.west);
 
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-    ([yshift = -15,xshift = -115]trace.south) -- node[below = 6pt] {{\small Section~\ref{neuralNetworkSection}: Image$\to$Spec}} ([yshift = -15,xshift = -5]trace.south);
+    ([yshift = -15,xshift = -130]trace.south) -- node[below = 6pt] {{\small Section~\ref{neuralNetworkSection}: Image$\to$Spec}} ([yshift = -15,xshift = -5]trace.south);
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-    ([xshift = 5,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{programSynthesisSection}: Spec$\to$Program}} ([xshift = 140,yshift = -15]trace.south);
+    ([xshift = 5,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{programSynthesisSection}: Spec$\to$Program}} ([xshift = 170,yshift = -15]trace.south);
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-([xshift = 150,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{applicationsSection}: Applications}} ([xshift = 230,yshift = -15]trace.south);
+([xshift = 180,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{applicationsSection}: Applications}} ([xshift = 250,yshift = -15]trace.south);
   \end{tikzpicture}
   \caption{Black arrows: Top--down generative model; Program$\to$Spec$\to$Image. Red arrows: Bottom--up inference procedure.}\label{roadmap}
-\end{figure} 
+ \end{figure}
+
+ The new contributions of this work are (1) a working model that can infer high-level symbolic programs from raw perceptual input, and (2) a technique for using learning to amortizing the cost of program synthesis, described in Section~\ref{learningASearchPolicy}.
 
 \section{Neural architecture for inferring specs}\label{neuralNetworkSection}
 
@@ -347,21 +348,22 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
 
 \tikzset{>=latex}
 \begin{figure}[t]
-  \begin{tikzpicture}
+  \begin{minipage}[c]{0.65\textwidth}
+    \begin{tikzpicture}
   \node[draw,blue,ultra thick,anchor = west,inner sep=0pt,label=below:Target image: $I$](observation) at (0,-1) {\includegraphics[width = 2cm]{figures/expert-18.png}};
-  \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(T)$] (canvas) at (0,-4) {};
+  \node[draw,blue,thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 2cm,label=below:Canvas: render$(S)$] (canvas) at (0,-4) {};
   \draw[lightgray,ultra thin,step = 0.125] ([xshift = 0.5,yshift = 0.5]canvas.south west) grid ([xshift = -0.5,yshift = -0.5]canvas.north east);
   % draw partial image on canvas
   \draw (0.375cm,-3.25cm) circle (0.125cm);
   \draw (0.625cm,-3.625) circle (0.125cm);
   \draw (0.75cm,-3.375) circle (0.125cm);
 
-  \node[draw,ultra thick,anchor = west,inner sep=0pt,minimum width = 2cm,minimum height = 3cm] (CNN) at (4.5,-2.5) {CNN};
-  \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.5cm]CNN.west) {$\bigoplus$};
+  \node[draw,ultra thick,anchor = west,inner sep=0pt,minimum width = 1cm,minimum height = 2cm] (CNN) at (4,-2.5) {CNN};
+  \node[inner sep = 0pt](tensorProduct) at ([xshift = -1.3cm]CNN.west) {$\bigoplus$};
 
-  \node[rotate = -90,draw,ultra thick,inner sep=0pt,minimum width = 3cm,minimum height = 0.5cm] (features) at ([xshift = 1.5cm]CNN.east) {Image features};
+  \node[draw,ultra thick,inner sep=0pt] (features) at ([xshift = 0.01cm]CNN.east) {};
 
-  \node[draw,ultra thick,minimum size = 1cm](c1) at ([xshift = 1.5cm]features.north) {MLP};
+  \node[draw,ultra thick,minimum size = 1cm](c1) at ([xshift = 1cm]features) {MLP};
   \node(l1) at ([yshift = -1.5cm]c1.south) {\verb|circle(|};
   \node[draw,ultra thick,minimum size = 1cm](a2) at ([xshift = 1cm,yshift = 1.5cm]c1.east) {STN};
   \node[draw,ultra thick,minimum size = 1cm](c2) at ([xshift = 1cm]c1.east) {MLP};
@@ -377,9 +379,9 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
   \draw[->,ultra thick,red] (c3.south) -- (l3.north);
 
   
-  \draw[->,ultra thick] (features.north) -- (c1.west);
-  \draw[->,ultra thick] (features.north) to[out = 45,in = 160] (a2.north);
-  \draw[->,ultra thick] (features.north) to[out = 70,in = 140] (a3.north);
+  \draw[->,ultra thick] (features) -- (c1.west);
+  \draw[->,ultra thick] (features) to[out = 45,in = 160] (a2.north);
+  \draw[->,ultra thick] (features) to[out = 80,in = 140] (a3.north);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- (c2.west);
   \draw[->,ultra thick] ([xshift = 0.25cm]l1.north) -- ([yshift = -0.2cm]c3.west);
   \draw[->,ultra thick] ([xshift = 0.25cm]l2.north) -- ([yshift = -0.25cm]c3.west);
@@ -391,13 +393,18 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
   \draw[->,ultra thick] (canvas.east) -- (tensorProduct.south);%[yshift = -0.5cm]CNN.west);
   \draw[->,ultra thick] (observation.east) -- (tensorProduct.north);%([yshift = 0.5cm]CNN.west);
   \draw[->,ultra thick] (tensorProduct.east)  -- node[fill = white,rotate = 90] {{\tiny $256\times 256\times 2$}}  (CNN.west);
-  \draw[->,ultra thick] (CNN.east) -- node[fill = white,rotate = 90] {{\tiny $16\times 16\times 10$}} (features.south);
+  \draw[-,ultra thick] (CNN.east) -- %node[fill = white,rotate = 90] {{\tiny $16\times 16\times 10$}}
+  (features);
 %  \draw[]
   
 %  \node at (canvas.x,canvas.y) {Canvas};
 \end{tikzpicture}
-\caption{Our neural architecture for inferring the spec of a graphics program from its output. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: samples from a multinomial. \texttt{Typewriter font}: network outputs. Renders snapped to a $16\times 16$ grid, illustrated in \textcolor{gray}{gray}. STN (spatial transformer network) is a differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
+  \end{minipage}  \hfill%
+  \begin{minipage}[c]{0.2\textwidth}
+    \caption{Neural architecture for inferring specs from images. \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: draws from a multinomial. \texttt{Typewriter font}: network outputs. Renders on a $16\times 16$ grid, shown in \textcolor{gray}{gray}. STN: differentiable attention mechanism~\citep{jaderberg2015spatial}.}  \label{architecture}
+    \end{minipage}
 \end{figure}
+
 \begin{table}[h]
   \caption{Primitive drawing commands currently supported by our model.}
 \label{drawingCommandTable}
@@ -465,13 +472,6 @@ We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
 %% over long sequences, and makes training more straightforward: it
 %% is just maximum likelihood estimation of the model parameters.
 
-\begin{wrapfigure}{r}{8cm}
-  \vspace{-0.25cm}
-  \centering
-      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}%\vspace{-0.7cm} 
-\end{wrapfigure}
-
 Our network can ``derender'' random synthetic images
 %those shown in Fig.~\ref{trainingData}.
 by doing a beam search to
@@ -506,11 +506,18 @@ itself or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 12$
 objects, it successfully parses scenes with many more objects than the
 training data.
-We compare with a baseline that produces the trace set in one shot by
+We compare with a baseline that produces the spec in one shot by
 using the CNN to extract features of the input which are passed to an LSTM which finally predicts
-the trace set token-by-token (LSTM in Fig.~\ref{syntheticResults}).
+the spec token-by-token (LSTM in Fig.~\ref{syntheticResults}).
 This architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}),
 but, for this domain, cannot parse cluttered scenes with many objects.
+\begin{wrapfigure}{r}{8cm}
+  \vspace{-0.25cm}
+  \centering
+      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-1cm} 
+\end{wrapfigure}
+
 
 \subsection{Generalizing to real hand drawings}\label{generalizingTheHandDrawings}
 %% \begin{wrapfigure}{R}{6cm}
@@ -562,7 +569,7 @@ These were drawn carefully but not perfectly with the aid of graph paper.
 For each drawing we annotated a ground truth spec and had the neurally guided SMC sampler
 produce $10^3$ samples. % for each drawing.
 For 63\% of the drawings, the Top-1 most likely sample exactly matches the
-ground truth; with more samples, the model finds trace sets
+ground truth; with more samples, the model finds specs
 that are closer to the ground truth annotation (Fig.~\ref{drawingIntersectionOverUnion}).
 We will show that the program synthesizer
 corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
@@ -607,7 +614,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
 
 \begin{figure}[h]\centering
   \begin{minipage}[c]{0.57\textwidth} 
-    \centering  \includegraphics[width = 8cm]{figures/drawingAccuracy.png}            \vspace{-0.5cm}
+    \centering  \includegraphics[width = 8cm]{figures/drawingAccuracy.png}            \vspace{-0.5cm} 
   \end{minipage}\hfill%
       \begin{minipage}[c]{0.4\textwidth} 
   \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 100)?
@@ -873,7 +880,7 @@ tractable synthesis problems involve searching over smaller spaces,
 but smaller spaces are less likely to contain good programs.
 %a minimum cost program
 %for explaining $T$.
-Our goal now is to find the parameters of the policy, written $\theta$, which best navigate this trade-off.
+Our goal now is to find the parameters of the policy, written $\theta$, that best navigate this trade-off.
 
 
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
@@ -891,7 +898,7 @@ search problem.
 
 
 %Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $.
-Bias-optimal search over program spaces is known as \textbf{Levin Search}~\cite{levin1973universal}; an example of a $1$-bias optimal search algorithm is a time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.  We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
+Bias-optimal search over program spaces is known as \textbf{Levin Search}~\cite{levin1973universal}; an example of a $1$-bias optimal search algorithm is an ideal time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.  We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
 
 
 %% \begin{figure}\centering
@@ -930,7 +937,7 @@ expected bias-optimal time to solve a training corpus, $\mathcal{D}$, of graphic
 %Practically, bias optimality has now bought us the following: (1) a guarantee that the policy will always find the minimum cost program; and (2) a differentiable loss function for the policy parameters that takes into account the cost of searching, in contrast to e.g. DeepCoder~\citep{BalGauBroetal16}.
 
 To generate a training corpus for learning a policy,
-we synthesized minimum cost programs for each of our hand drawings
+we synthesized minimum cost programs for each  drawing
 and for each $\sigma $,
 %Solving these
 %\footnote{There are 100 the drawings and $2\times 2\times 2\times 3 = 24$ different values of $\sigma $}
@@ -938,23 +945,26 @@ and for each $\sigma $,
 %With the training set in hand we  %This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
 then minimized~\ref{policyLoss} using gradient descent. % while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
 %See supplement for details.
-Because we want to learn a policy from only $100$ hand-drawn diagrams,
-we chose a  low-capacity, bilinear model for $\pi$:
-\begin{equation}
-  \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
-\end{equation}
-where $\phi_{\text{params}}(\sigma  )$ is a one-hot encoding of
-the parameter settings of $\sigma $ (see Tbl.~\ref{policyOutput})
-and $\phi_{\text{spec}}(S)$ extracts a few simple features of the trace set $S$;
-see supplement for details.
+Because we want to learn a policy from only $100$ drawings,
+we parameterize $\pi$ with a  low-capacity bilinear model; see supplement.
+%for $\pi$:
+%% \begin{equation}
+%%   \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
+%% \end{equation}
+%% where $\phi_{\text{params}}(\sigma  )$ is a one-hot encoding of
+%% the parameter settings of $\sigma $ (see Tbl.~\ref{policyOutput})
+%% and $\phi_{\text{spec}}(S)$ extracts a few simple features of the trace set $S$;
+%% see supplement for details.
 
 \textbf{Experiment 3: Table~\ref{policyEvaluation}.}
 We compare synthesis times for our learned search policy
-with three alternatives:
+with 4 alternatives:
  \emph{Sketch}, which poses the
  entire problem wholesale to the Sketch program synthesizer;
- a DeepCoder--style model, \emph{DC}, which learns to predict which program components (loops, reflections)
+ \emph{DC}, a DeepCoder--style model that learns to predict which program components (loops, reflections)
  are likely to be useful~\cite{BalGauBroetal16};
+ \emph{End--to-End},
+ which trains a recurrent neural network to regress directly from images to programs;
 and an \emph{Oracle},
 a policy which always picks the quickest to search $\sigma $
  also containing a minimum cost program.
@@ -978,7 +988,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
   Incremental?&Solve the problem piece-by-piece or all at once?&$\{\text{True},\text{False}\}$\\
   Maximum depth& Bound on the depth of the program syntax tree&$\{1,2,3\}$
   \\\bottomrule
-  \end{tabular}
+  \end{tabular}\vspace{-0.5cm}
   \end{table}
 \begin{table}[h]
   \centering
@@ -986,17 +996,21 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
   \begin{tabular}{lll}
     \toprule Model&\begin{tabular}{c}
       Median \\search time
-      \end{tabular}&Timeouts\\\midrule
+    \end{tabular}&\begin{tabular}{c}
+      Timeouts\\(1 hr)
+      \end{tabular}\\\midrule
     Sketch&274 sec&27\%\\
     DC&187 sec&2\%\\
+    End--to--End&63 sec&94\%\\
     Oracle&6 sec&2\%\\
-    Learned policy&28 sec&2\%\\\bottomrule 
-    \end{tabular}.  
+    Ours&28 sec&2\%\\\bottomrule 
+    \end{tabular}
   \end{minipage}\hfill%
   \begin{minipage}[c]{0.5\textwidth}
-    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of the Sketch~\citep{solar2008program} program synthesizer. DC: Baseline that predicts program components, trained like~\cite{BalGauBroetal16}. Oracle:  upper bounds  the performance of any search policy. Learned policy: ours  %% $\infty = $ timeout. Red dashed line is median time.
+    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch~\citep{solar2008program}. DC: Deep--Coder style baseline that predicts program components, trained like~\cite{BalGauBroetal16}. End--to--End: neural network trained to regress directly from images to programs. Oracle:  upper bounds  the performance of any bias--optimal search policy. Ours:  %% $\infty = $ timeout. Red dashed line is median time.
            evaluated w/ 20-fold cross validation.}\label{policyEvaluation}
-    \end{minipage}
+  \end{minipage}
+  \vspace{-0.5cm}
 \end{figure} 
 
 
@@ -1006,9 +1020,9 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
 
 
 \section{Applications of graphics program synthesis}\label{applicationsSection}
-Why synthesize a graphics program,
-if the spec already suffices to recover the objects in an image?
-Within our domain of hand-drawn figures, graphics program synthesis has several uses:
+%% Why synthesize a graphics program,
+%% if the spec already suffices to recover the objects in an image?
+%% Within our domain of hand-drawn figures, graphics program synthesis has several uses:
 
 \subsection{Correcting errors made by the neural network}\label{synthesizerHelpsParsing}
 \begin{wrapfigure}{r}{5cm}\vspace{-0.5cm}
@@ -1198,11 +1212,10 @@ programming constructs like loops and conditionals.
 %% We adapt this method to a different visual domain (figures composed of multiple objects), using a broad prior over possible scenes as the initial program and viewing the trace through the guide program as a symbolic parse of the target image.
 %% We then show how to efficiently synthesize higher-level programs from these traces.
 
-In the computer graphics literature, there have been other systems which convert sketches into procedural representations. One uses a convolutional network to match a sketch to the output of a parametric 3D modeling system~\citep{huang2017shape}. Another uses convolutional networks to support sketch-based instantiation of procedural primitives within an interactive architectural modeling system~\citep{Nishida:2016:ISU:2897824.2925951}. Both systems focus on inferring fixed-dimensional parameter vectors. In contrast, we seek to automatically infer a structured, programmatic representation of a sketch which captures higher-level visual patterns.
 
-\textbf{Hand-drawn sketches:} Prior work has also applied sketch-based program synthesis to authoring graphics programs. Sketch-n-Sketch is a bi-directional editing system in which direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. We see this work as complementary to our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
-
-The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their primary goal is cognitive modeling (they apply their system to solving IQ-test style visual reasoning problems), whereas we are interested in building an automated AI application (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
+\textbf{Hand-drawn sketches:} Sketch-n-Sketch is a bi-directional editing system where direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. This work  compliments our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
+Other systems in the computer graphics literature convert sketches to procedural representations, using a convolutional network to match a sketch to the output of a parametric 3D modeling system in~\citep{huang2017shape} or supporting interactive sketch-based instantiation of procedural primitives in~\citep{Nishida:2016:ISU:2897824.2925951}. In contrast, we seek to automatically infer a programmatic representation capturing higher-level visual patterns.
+The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their  goal is cognitive modeling, whereas we are interested in building an automated AI application.% (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
 
 \section{Contributions}
 
