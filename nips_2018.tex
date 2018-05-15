@@ -158,13 +158,13 @@ we can perceive the radial symmetry of a spiral staircase,
 the iterated repetition in the Ising model,
 see the forest for the trees, and also the recursion within the trees.
 How could we build an agent with similar visual inference abilities?
-Here we
-cast this problem as program learning,
+As a small step in this direction, 
+we cast this problem as program learning,
 and take as our goal to learn high--level
 graphics programs from simple 2D drawings.
 The graphics programs we consider make figures like those found in machine learning papers
 (Fig.~\ref{firstPageExamples}),
-and capture high-level features of a drawing like
+and capture high-level features like %of a drawing like
 symmetry, repetition, and reuse of structure.
 
 %% Vision as a kind of ``inverse graphics'' is an idea that is both intuitive and old,
@@ -235,21 +235,21 @@ This two-step factoring can be framed as probabilistic inference in a generative
  is executed to produce a set of drawing commands,
  which are then rendered to form an image (Fig.~\ref{roadmap}).
  We refer to this set of drawing commands as a \textbf{specification (spec)} because it specifies what the graphics program drew while lacking the high-level structure determining how the program decided to draw it.
- We infer the spec from an image using stochastic search (Sequential Monte Carlo)
+ We infer a spec from an image using stochastic search (Sequential Monte Carlo)
  and infer a program from a spec using  constraint-based program synthesis~\citep{solar2008program} --
  synthesizing structures like symmetries, loops, or conditionals.
  In practice, both stochastic search and program synthesis are
  prohibitively slow,
  and so we learn models that accelerate inference for both programs and specs,
  in the spirit of ``amortized inference''~\cite{paige2016inference},
- using a neural network to amortize the cost of inferring specs from images and using
+ training a neural network to amortize the cost of inferring specs from images and using
  a variant of Bias--Optimal Search~\cite{schmidhuber2004optimal}
  to amortize the cost of synthesizing programs from specs.
  \begin{figure}[h]
   \centering\begin{tikzpicture}
   \node[ thick,anchor = west,inner sep=0pt,label={[yshift = 0.3cm]{\small \begin{tabular}{c}
-          Image\\
-          (Observed)
+          \textbf{Image}\\
+          \textbf{(Observed)}
   \end{tabular}}}](observation) at (0,0) {\includegraphics[width = 1.5cm]{figures/expert-39-trimmed.png}};
     \node[ultra thick,anchor = west,inner sep=0pt](traceSource) at (3.7,0.5){    \begin{lstlisting}[basicstyle = \scriptsize\ttfamily]
 line, line,
@@ -259,13 +259,13 @@ line, ...
     \node[ultra thick,anchor = west,inner sep=0pt](traceImage) at (4,-0.5) {
       \includegraphics[width = 0.9cm]{figures/39-parse.png}}; 
     \node(trace)[draw,thin,fit = (traceImage) (traceSource), label = above:{{\small \begin{tabular}{c}
-            Spec/Drawing Commands\\
-            (Latent)
+            \textbf{Spec/Drawing Commands}\\
+            \textbf{(Latent)}
     \end{tabular}}}] {};
     
     \node[draw, thick,anchor = west,inner sep=2pt,label=above:{\small \begin{tabular}{c}
-          Program\\
-          (Latent)
+          \textbf{Program}\\
+          \textbf{(Latent)}
     \end{tabular}}](program) at (7.7,0) {
       \begin{lstlisting}
 for (j < 3)
@@ -279,25 +279,31 @@ rectangle(...)
 %    \node[ultra thick,anchor = west,inner sep=0pt,label=below:{\small Similarity}](similarity) at (11.3,0) {\includegraphics[width = 1cm]{figures/expert-38-trim.png}};
     \node[ultra thick,anchor = west,text width = 1.3cm,inner sep=0pt](errors) at (12.1,-1.2) {\small Error correction};
 
-    \draw[->, ultra thick] (trace.west) -- node[fill = white,rotate = -90] {{\small Rendering}} (observation.east);
-    \draw[->, very thick, red] ([xshift = -5]observation.south) to[out = -30,in = -150] node[midway,yshift = -6]{{\small Learning + Stochastic search}} ([xshift = -15]trace.south);
-    \draw[->, ultra thick] (program.west) -- node[fill = white,rotate = -90] {{\small Execution}} (trace.east);
-    \draw[->, thick, red, very thick] ([xshift = 10]trace.south) to[out = -10,in = -170] node[midway,yshift = -6]{{\small Learning + Program synthesis}} ([xshift = 10]program.south);
+    \draw[->, ultra thick] ([yshift=10]trace.west) to[out = 150,in = 30] node[midway,yshift = 6]{{\small Rendering}} ([xshift=5,yshift=10]observation.east); % -- node[fill = white,rotate = -90] {{\small Rendering}}
+    \draw[->, very thick, red] ([yshift = -15,xshift=3]observation.east) to[out = -30,in = -150] node[midway,yshift = -12,xshift=5]{{\small \begin{tabular}{l}
+          Learning + \\Stochastic search
+    \end{tabular}}} ([yshift = -15]trace.west);
+    \draw[->, ultra thick] ([yshift=10]program.west) to[out = 150,in = 30] node[midway,yshift = 6] {{\small Execution}} ([yshift=10]trace.east);
+    \draw[->, very thick, red] ([yshift = -15,xshift=0]trace.east) to[out = -30,in = -150] node[midway,yshift = -12,xshift=9]{{\small \begin{tabular}{l}
+          Learning + \\Program synthesis
+    \end{tabular}}} ([yshift = -15]program.west);
+
+%    \draw[->, thick, red, very thick] ([xshift = 10]trace.south) to[out = -10,in = -170] node[midway,yshift = -6]{{\small Learning + Program synthesis}} ([xshift = 10]program.south);
 %    \draw[->, thick, red] (program.east) to[out = 80,in = 180] (errors.west);
 %    \draw[->, thick] (program.east) to[out = 40,in = -230] (similarity.west);
     \draw[->, thick, red, very thick] (program.east) to[out = 60,in = 180] (extrapolate.west);
 
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-    ([yshift = -15,xshift = -130]trace.south) -- node[below = 6pt] {{\small Section~\ref{neuralNetworkSection}: Image$\to$Spec}} ([yshift = -15,xshift = -5]trace.south);
+    ([yshift = -11,xshift = -130]trace.south) -- node[below = 6pt] {{\small Section~\ref{neuralNetworkSection}: Image$\to$Spec}} ([yshift = -11,xshift = -5]trace.south);
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-    ([xshift = 5,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{programSynthesisSection}: Spec$\to$Program}} ([xshift = 170,yshift = -15]trace.south);
+    ([xshift = 5,yshift = -11]trace.south) -- node[below = 6pt] {{\small Section~\ref{programSynthesisSection}: Spec$\to$Program}} ([xshift = 170,yshift = -11]trace.south);
     \draw[decoration = {brace,mirror,raise = 5pt},decorate,thick]
-([xshift = 180,yshift = -15]trace.south) -- node[below = 6pt] {{\small Section~\ref{applicationsSection}: Applications}} ([xshift = 250,yshift = -15]trace.south);
+([xshift = 180,yshift = -11]trace.south) -- node[below = 6pt] {{\small Section~\ref{applicationsSection}: Applications}} ([xshift = 255,yshift = -11]trace.south);
   \end{tikzpicture}
-  \caption{Black arrows: Top--down generative model; Program$\to$Spec$\to$Image. Red arrows: Bottom--up inference procedure.}\label{roadmap}
+  \caption{Black arrows: Top--down generative model; Program$\to$Spec$\to$Image. {\color{red}Red} arrows: Bottom--up inference procedure. \textbf{Bold:} Random variables (image/spec/program)}\label{roadmap}
  \end{figure}
 
- The new contributions of this work are (1) a working model that can infer high-level symbolic programs from raw perceptual input, and (2) a technique for using learning to amortizing the cost of program synthesis, described in Section~\ref{learningASearchPolicy}.
+ The new contributions of this work are (1) a working model that can infer high-level symbolic programs from perceptual input, and (2) a technique for using learning to amortize the cost of program synthesis, described in Section~\ref{learningASearchPolicy}.
 
 \section{Neural architecture for inferring specs}\label{neuralNetworkSection}
 
@@ -604,7 +610,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
     \end{tabular}
 
 
-    \caption{Near misses. Rightmost: illusory contours (note: no SMC)}\label{drawingFailures}
+    \caption{Near misses. Rightmost: illusory contours (note: no SMC in rightmost)}\label{drawingFailures}
   \end{minipage}
 
 
@@ -631,7 +637,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
 
 \section{Synthesizing graphics programs from specs}\label{programSynthesisSection}
 Although the spec describes the contents
-of a scene, it does not encode higher-level features of the image
+of a scene, it does not encode higher-level features of an image
 such as repeated motifs or symmetries, which are more naturally captured by a graphics program.
 We seek to synthesize graphics programs from their specs.
 
@@ -707,7 +713,7 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{table}[t]
-  \caption{Drawings (left), their specs (middle left), and programs synthesized from these specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note nested loops  and conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
+  \caption{Drawings (left), their specs (middle left), and programs synthesized from those specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops  and conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -884,7 +890,7 @@ Our goal now is to find the parameters of the policy, written $\theta$, that bes
 
 
 Given a search policy, what is the best way of using it to quickly find minimum cost programs?
-We use a bias-optimal search algorithm~\citep{schmidhuber2004optimal}:
+We use a bias-optimal search algorithm (c.f. Schmidhuber 2004~\citep{schmidhuber2004optimal}):
 
 \noindent\textbf{Definition: Bias-optimality.} 
    A search algorithm is $n$-\emph{bias optimal}
@@ -1039,7 +1045,7 @@ we run the program synthesizer on the
 Top-$k$  most likely specs output by the neurally guided sampler.
 Then, the system
 reranks the Top-$k$  by  the prior probability of their programs.
-The prior probability of a program is learned by picking the prior maximizing
+The prior probability of a program is learned by optimizing the parameters of the prior so as to maximize
 the likelihood of the ground truth specs;
 see supplement for details.
 But, this procedure can only correct errors when
@@ -1185,7 +1191,7 @@ Our work differs by identifying and modeling
 the trade-off between tractability and probability of success.
 TerpreT~\citep{gaunt2016terpret} 
 systematically compares constraint-based program synthesis techniques
-against gradient-based search techniques, like those used to train
+against gradient-based search methods, like those used to train
 Differentiable Neural Computers~\citep{graves2016hybrid}.  The TerpreT
 experiments motivate our use of constraint-based techniques.
 
