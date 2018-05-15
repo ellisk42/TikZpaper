@@ -230,7 +230,8 @@ while missing similarities at the level of the program.
   \end{minipage}
 \end{figure}
 
-\section{Learning a bias optimal policy}
+\section{Learning a search policy}
+\subsection{Modeling}\label{searchPolicyModel}
 Recall from the main paper that our goal is to estimate the policy minimizing the following loss:
 \begin{align}
 \textsc{Loss}(\theta ; \mathcal{D})& =  \expect_{S\sim\mathcal{D}}\left[ \min_{\sigma\in \text{\textsc{Best}}(S)}\frac{t(\sigma | S)}{\pi_\theta (\sigma | S)}\right] + \lambda \Vert\theta\Vert_2^2\label{policyLoss}\\
@@ -258,7 +259,44 @@ where:
     &\indicator [\sigma \text{ has depth bound }1];\indicator [\sigma \text{ has depth bound }2];\indicator [\sigma \text{ has depth bound }3];]\\
   \phi_{\text{spec}}(S) = [&\text{\# circles in }S;\text{\# rectangles in }S;\text{\# lines in }S;1]
   \end{align*}
+where the meaning of ``incremental'' is described in the next section.
+\subsection{Incremental Solving}
+Rather than give the sketch program synthesizer the entire spec all at once,
+we can instead give it subsets of the spec (subsets of the objects in the image)
+and ask it to synthesize a program for each subset.
+We then concatenate the resulting programs from each subset to get a program that explains the entire image,
+and we call this strategy ``incremental solving''.
+Incremental solving is not guaranteed to be faster,
+nor is it guaranteed to find a minimum cost program.
+Thus we allow the search policy to decide
+what fraction of our search time should be allocated to this incremental approach to program synthesis.
+Concretely, we partitioned a spec into its constituent lines, circles, and rectangles.
+\subsection{Baseline comparisons}
+In addition to the end-to-end baseline,
+we compared with a DeepCoder-style baseline (main paper, Section 3.1).
+DeepCoder (DC)~\cite{BalGauBroetal16}
+is an approach for learning to speed up program synthesizers.
+DC models are neural networks that
+predict, starting from a spec,
+the probability of a DSL component being in a minimal-cost program satisfying the spec.
+Writing $\text{DC}(S)$ for the distribution predicted by the neural network,
+DC is trained to maximize  the following objective:
+\begin{equation}
+  \expect_{S\sim\mathcal{D}}\left[\min_{p\in \text{\textsc{Best}}(S)} \sum_{x\in \text{DSL}} \log \left(\indicator\left[x\in p \right] \text{DC}(S)_x + \indicator\left[x\notin p \right] (1 - \text{DC}(S)_x)\right)
+    \right]
+\end{equation}
+where $x$ ranges over DSL components and $\text{DC}(S)_x\in \left[0,1 \right]$  is the probability predicted by the DC model for component $x$ for spec $S$.
 
+We provided our DC model with the same features given to our bias optimal search policy ($\phi_{spec}$ in section~\ref{searchPolicyModel}), and trained using the same 20-fold cross validation splits.
+To evaluate the DC baseline on held out data,
+we used the \emph{Sort-and-Add} policy described in the DeepCoder paper\cite{BalGauBroetal16}.
+
+Figure~\ref{policyEvaluation} shows histograms of the synthesis time for our model and baselines.
+
+\begin{figure}
+  \includegraphics[width = \textwidth]{figures/policyComparison_basic_DC+bias_20.png}
+    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch~\citep{solar2008program}. DC: Deep--Coder style baseline that predicts program components, trained like~\cite{BalGauBroetal16}. Oracle:  upper bounds  the performance of any bias--optimal search policy. $\infty = $ timeout. Red dashed line is median time.}
+  \end{figure}
 \pagebreak
 \section{Neural network architecture}
 
