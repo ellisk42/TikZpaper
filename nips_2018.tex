@@ -140,14 +140,12 @@ MIT\\
   combines techniques from deep learning and program synthesis.  We
   learn a convolutional neural network that proposes plausible drawing
   primitives that explain an image. These drawing primitives are a
-  specification (spec) of what the graphics program needs to draw.
-  We learn a model that uses program synthesis techniques to
-  recover a graphics program from that spec. These programs have
-  constructs like variable bindings, iterative loops, or simple kinds
-  of conditionals. With a graphics program in hand, we can correct
-  errors made by the deep network and extrapolate drawings.  %% Taken
-  %% together these results are a step towards agents that induce useful,
-  %% human-readable programs from perceptual input.
+  specification (spec) of what the graphics program needs to draw.  We
+  learn a model that uses program synthesis techniques to recover a
+  graphics program from that spec. These programs have constructs like
+  variable bindings, iterative loops, or simple kinds of
+  conditionals. With a graphics program in hand, we can correct errors
+  made by the deep network and extrapolate drawings.
 \end{abstract}
 
 \section{Introduction}
@@ -518,10 +516,10 @@ the spec token-by-token (LSTM in Fig.~\ref{syntheticResults}).
 This architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}),
 but, for this domain, cannot parse cluttered scenes with many objects.
 \begin{wrapfigure}{r}{8cm}
-  \vspace{-0.25cm}
+  \vspace{0.4cm}
   \centering
       \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-1cm} 
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-1.5cm} 
 \end{wrapfigure}
 
 
@@ -1013,7 +1011,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
     \end{tabular}
   \end{minipage}\hfill%
   \begin{minipage}[c]{0.5\textwidth}
-    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch~\citep{solar2008program}. DC: Deep--Coder style baseline that predicts program components, trained like~\cite{BalGauBroetal16}. End--to--End: neural network trained to regress directly from images to programs. Oracle:  upper bounds  the performance of any bias--optimal search policy. Ours:  %% $\infty = $ timeout. Red dashed line is median time.
+    \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch~\citep{solar2008program}. DC: Deep--Coder style baseline that predicts program components, trained like~\cite{BalGauBroetal16}. End--to--End: neural net trained to regress directly from images to programs, which fails to find valid programs 94\% of the time. Oracle:  upper bounds  the performance of any bias--optimal search policy. Ours:  %% $\infty = $ timeout. Red dashed line is median time.
            evaluated w/ 20-fold cross validation.}\label{policyEvaluation}
   \end{minipage}
   \vspace{-0.5cm}
