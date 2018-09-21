@@ -5,7 +5,7 @@
 % before loading nips_2018
 
 % ready for submission
-\usepackage{nips_2018}
+\usepackage[final]{nips_2018}
 
 % to compile a preprint version, e.g., for submission to arXiv, add
 % add the [preprint] option:
@@ -99,21 +99,22 @@
 % on the second line, try using \AND instead of \And before the third
 % author name.
 
-\author{Kevin Ellis\\
-  MIT\\
-  \texttt{ellisk@mit.edu} \\
-  \And
-  Daniel Ritchie\\
-Brown University\\
- \texttt{daniel\_ritchie@brown.edu} \\
- \And
- Armando Solar-Lezama\\
- MIT\\
-\texttt{asolar@csail.mit.edu} \\
-\And
-Joshua B. Tenenbaum \\
-MIT\\
-\texttt{jbt@mit.edu}
+\author{Kevin Ellis$^{1,*}$\qquad Daniel Ritchie$^2$\qquad  Armando Solar-Lezama$^1$\qquad Joshua B. Tenenbaum$^1$\\
+  $^1$Massachusetts Institute of Technology\qquad $^2$Brown University\\
+  $^*$Primary contact: \texttt{ellisk@mit.edu}%% \\
+%%   \texttt{ellisk@mit.edu} \\
+%%   \And
+%%   Daniel Ritchie\\
+%% Brown University\\
+%%  \texttt{daniel\_ritchie@brown.edu} \\
+%%  \And
+%%  Armando Solar-Lezama\\
+%%  MIT\\
+%% \texttt{asolar@csail.mit.edu} \\
+%% \And
+%% Joshua B. Tenenbaum \\
+%% MIT\\
+%% \texttt{jbt@mit.edu}
   %% Affiliation \\
   %% Address \\
   %% \texttt{email} \\
@@ -616,13 +617,13 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
 \end{figure}
 \setlength\tabcolsep{6pt}
 
-\begin{figure}[h]\centering
+\begin{figure}[h]\vspace{-1cm}\centering
   \begin{minipage}[c]{0.57\textwidth} 
     \centering  \includegraphics[width = 8cm]{figures/drawingAccuracy.png}            \vspace{-0.5cm} 
   \end{minipage}\hfill%
       \begin{minipage}[c]{0.4\textwidth} 
   \caption{How close are the model's outputs to the ground truth on hand drawings, as we consider larger sets of samples (1, 5, 100)?
-    Distance to ground truth measured by the intersection over union (IoU) of predicted vs. ground truth: IoU of sets $A$ and $B$ is $|A\cap B|/|A\cup B|$. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}            \vspace{-0.5cm}
+    Distance to ground truth measured by the intersection over union (IoU) of predicted spec vs. ground truth spec: IoU of sets (specs) $A$ and $B$ is $|A\cap B|/|A\cup B|$. (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: lesioned versions of our model.}\label{drawingIntersectionOverUnion}            \vspace{-0.5cm}
       \end{minipage}
 
 \end{figure}
@@ -711,7 +712,7 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{table}[t]
-  \caption{Drawings (left), their specs (middle left), and programs synthesized from those specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops  and conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
+  \caption{Drawings (left), their specs (middle left), and programs synthesized from those specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops in second figure, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -755,29 +756,29 @@ for(i<3)
 %%  line(4,9,-3*i+7,6,arrow)
 %% \end{lstlisting}
 %% \end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
-    \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
-\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-Circle(5,8)
-Circle(2,8)
-Circle(8,11)
-Line(2,9, 2,10)
-Circle(8,8)
-Line(3,8, 4,8)
-Line(3,11, 4,11)
-\end{lstlisting}
-  \small\emph{... etc. ...; 21 lines}
-\end{minipage}&\begin{minipage}{\exampleProgramSize}
-\begin{lstlisting}
-for(i<3)
- for(j<3)
-  if(j>0)
-   line(-3*j+8,-3*i+7,
-        -3*j+9,-3*i+7)
-   line(-3*i+7,-3*j+8,
-        -3*i+7,-3*j+9)
-  circle(-3*j+7,-3*i+7)
-\end{lstlisting}
-\end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
+%%     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
+%% \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+%% Circle(5,8)
+%% Circle(2,8)
+%% Circle(8,11)
+%% Line(2,9, 2,10)
+%% Circle(8,8)
+%% Line(3,8, 4,8)
+%% Line(3,11, 4,11)
+%% \end{lstlisting}
+%%   \small\emph{... etc. ...; 21 lines}
+%% \end{minipage}&\begin{minipage}{\exampleProgramSize}
+%% \begin{lstlisting}
+%% for(i<3)
+%%  for(j<3)
+%%   if(j>0)
+%%    line(-3*j+8,-3*i+7,
+%%         -3*j+9,-3*i+7)
+%%    line(-3*i+7,-3*j+8,
+%%         -3*i+7,-3*j+9)
+%%   circle(-3*j+7,-3*i+7)
+%% \end{lstlisting}
+%% \end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-101-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Rectangle(1,10,3,11)
@@ -821,7 +822,7 @@ Line(3,10,3,14,arrow)
 Rectangle(11,8,15,10)
 Rectangle(11,14,15,15)
 Line(13,10,13,14,arrow)
-  \end{lstlisting}\small\emph{... etc. ...; 16 lines}%
+  \end{lstlisting}\small\emph{... etc. ...; 16 lines}
   \end{minipage}&\begin{minipage}{\exampleProgramSize}
 %% \begin{lstlisting}
 %% for (i<3)
@@ -1164,14 +1165,12 @@ Fig.~\ref{extrapolationFigure} shows extrapolations produced by our system.
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix1.png}
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix2.png}
 %  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
-   \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by our system.}
-  \label{extrapolationFigure}
+   \caption{Top, white: drawings. Bottom, black: extrapolations automatically produced by our system.}
+  \label{extrapolationFigure}\vspace{-0.25cm}
   \end{figure}
 %\input{extrapolations.tex}
 
 
-
-% \remark{Seems like you're still fleshing this part out, but I'll give my feedback anyway: (1) This subsection could really use a motivational introduction, e.g. ``The program synthesizer can help correct errors/bad proposals from the neural network by favoring execution traces which lead to more concise/general programs.'' (2) The image likelihood function should probably be introduced sooner, when you talk about SMC/beam search. (3) Where does $\theta$ come from? Is it set by hand? Learned? (4) How does Eq. 4 get used? Is this a modification to the beam search objective / SMC posterior? If so, it'd be great to have set up the version without it in an earlier section, and then be able to refer to this as a small modification of the previous equation.}
 
 
 %\pagebreak
@@ -1192,17 +1191,26 @@ systematically compares constraint-based program synthesis techniques
 against gradient-based search methods, like those used to train
 Differentiable Neural Computers~\citep{graves2016hybrid}.  The TerpreT
 experiments motivate our use of constraint-based techniques.
+Neurally Guided Deductive Search (NGDS:~\cite{ngds})
+is a recent neurosymbolic approach;
+combining our work with ideas from NGDS could be promising.
+
 
 
 
 \textbf{Deep Learning:} Our neural network combines the architectural ideas of Attend-Infer-Repeat~\citep{eslami1603attend} -- which learns to decompose an image into its constituent objects -- with the training regime and SMC inference  of Neurally Guided Procedural Modeling~\cite{ritchie2016neurally} -- which learns to control procedural graphics programs.
+The very recent SPIRAL~\cite{ganin2018synthesizing}  system
+learns to infer
+procedures for controlling a `pen' to derender highly diverse natural images,
+complementing our focus here on more abstract
+procedures but less natural images.
 %AIR learns an iterative inference scheme which infers objects one by one and also decides when to stop inference.
 %; this is similar to our approach's first stage, which parses images into traces. Our approach further produces interpretable, symbolic programs which generate those traces.
 %Our network  differs in its architecture and training regime: AIR learns a recurrent auto-encoding model via variational inference, whereas our parsing stage learns an autoregressive-style model from randomly-generated (trace, image) pairs.
 %Finally, while AIR was evaluated on multi-MNIST images and synthetic 3D scenes, we focus on hand-drawn sketches.
-IM2LATEX~\citep{im2latex} is a recent work that 
- derenders  \LaTeX~ equations,
-recovering a markup language representation.
+IM2LATEX~\citep{im2latex} and pix2code~\cite{DBLP:journals/corr/Beltramelli17} are recent works that 
+ derender  \LaTeX~ equations and GUIs, respectively,
+both recovering a markup-like representation.
 Our goal is to go from
 noisy input to a high-level program,
 which goes beyond markup languages by supporting
@@ -1218,15 +1226,18 @@ programming constructs like loops and conditionals.
 
 
 \textbf{Hand-drawn sketches:} Sketch-n-Sketch is a bi-directional editing system where direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. This work  compliments our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
-Other systems in the computer graphics literature convert sketches to procedural representations, using a convolutional network to match a sketch to the output of a parametric 3D modeling system in~\citep{huang2017shape} or supporting interactive sketch-based instantiation of procedural primitives in~\citep{Nishida:2016:ISU:2897824.2925951}. In contrast, we seek to automatically infer a programmatic representation capturing higher-level visual patterns.
+Other systems in the computer graphics literature convert sketches to procedural representations, e.g. using a convolutional network to match a sketch to the output of a parametric 3D modeling system in~\citep{huang2017shape}. %% or supporting interactive sketch-based instantiation of procedural primitives in~\citep{Nishida:2016:ISU:2897824.2925951}
+In contrast, we seek to automatically infer a programmatic representation capturing higher-level visual patterns.
 The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their  goal is cognitive modeling, whereas we are interested in building an automated AI application.% (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
-
+%\vspace{-0.51cm}
 \section{Contributions}
 
-We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images. The system uses a combination of deep neural networks and stochastic search to parse drawings into symbolic specifications; it then feeds these specs to a general-purpose program synthesis engine to infer a structured graphics program. We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings.
-In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an artificially-intelligent agent write the code.
+We have presented a system for inferring graphics programs which generate \LaTeX-style figures from hand-drawn images using a combination of learning, stochastic search, and program synthesis.
+%We evaluated our model's performance at parsing novel images, and we demonstrated its ability to extrapolate from provided drawings.
+In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an AI write the code.
 More generally, we believe the problem of inferring visual programs is a promising direction for research in machine perception.
-
+\subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl and Jiajun Wu on the design of the neural architecture. Work funded by NSF GRFP (K.E.) and NSF Award 
+\#1753684 (D.R.)
 
 \bibliographystyle{unsrt}
 {\small \bibliography{main}}
