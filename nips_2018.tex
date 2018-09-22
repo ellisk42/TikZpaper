@@ -507,7 +507,7 @@ Here, the network is learning a proposal distribution to amortize the cost of in
   To evaluate which components of the model are necessary to parse complicated scenes,
   we compared  the neural network
   with SMC against the neural network by
-itself or SMC by itself.  Only the combination of the two passes a
+itself (i.e., w/ beam search) or SMC by itself.  Only the combination of the two passes a
 critical test of generalization: when trained on images with $\leq 12$
 objects, it successfully parses scenes with many more objects than the
 training data.
