@@ -1125,78 +1125,54 @@ in accuracy we could possibly get is 70\% by looking at the top 10 specs.
 %% from Fig.~\ref{drawingIntersectionOverUnion} that the best improvement
 %% in accuracy we could possibly get is 65\% by looking at the top 10 traces. 
 
+\subsection{Modeling similarity between drawings}
+Modeling drawings using programs opens up new ways to measure similarity between them.
+For example, we might say that two drawings are similar if they both contain loops of length 4,
+or if they share a reflectional symmetry,
+or if they are both organized according to a grid-like structure.
 
-%% \subsection{Modeling similarity between drawings}
-%% Modeling drawings using programs opens up new ways to measure similarity between them.
-%% For example, we might say that two drawings are similar if they both contain loops of length 4,
-%% or if they share a reflectional symmetry,
-%% or if they are both organized according to a grid-like structure.
+We measure the similarity between two drawings by extracting features
+of the lowest-cost programs that describe them. Our features are counts of the number of times that different components in the
+DSL were used (Tbl.~\ref{DSL}).
+We  then find drawings which are either close together or far apart in program feature space.
+One could use many
+alternative similarity metrics between drawings which would capture pixel-level similarities while missing high-level geometric similarities.
+We used our learned distance metric between specs, $L_{\text{learned}}(\cdot|\cdot)$,
+to find drawings that are either close together or far apart according to the learned
+distance metric over images.
+Fig.~\ref{similarityMatrix} illustrates the kinds of drawings that these different metrics put closely together.
 
-%% We measure the similarity between two drawings by extracting features
-%% of the lowest-cost programs that describe them. Our features are counts of the number of times that different components in the
-%% DSL were used (Tbl.~\ref{DSL}).
-%% We  then find drawings which are either close together or far apart in program feature space.
-%% One could use many
-%% alternative similarity metrics between drawings which would capture pixel-level similarities while missing high-level geometric similarities.
-%% We used our learned distance metric between trace sets, $L_{\text{learned}}(\cdot|\cdot)$,
-%% to find drawings that are either close together or far apart according to the learned
-%% distance metric over images.
-%% Fig.~\ref{similarityMatrix} illustrates the kinds of drawings that these different metrics put closely together,
-%% while Sec.~2 of the supplement shows low dimensional projections of
-%% program and image features.
-
-%% \newcommand{\similaritySize}{1cm}
-%% \newcommand{\similarityArrowSize}{0.35cm}
-%% \begin{figure}[t]
-%%   \begin{tabular}{|c|c|}
-%%     \multicolumn{1}{c}{\textbf{Close in program space, far in image space}}&
-%%     \multicolumn{1}{c}{\textbf{Close in image space, far in program space}}\\\hline&\\
-    
-%%     \begin{tabular}{l}
-%%       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
-%%       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
-%%     \end{tabular} &
-    
-%%     \begin{tabular}{l}
-%%       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-22-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-77-trim.png}\end{minipage}\\\\
-%%       \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-64-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-97-trim.png}\end{minipage}
-%%     \end{tabular}
-%% \\&\\    \hline
-%%     %\\
-%% %    \multicolumn{1}{c|}{}&&\\\cline{2-3}
-%% %    \multicolumn{1}{c|}{}&&\\ \multicolumn{1}{c|}{}
-%%     %& %% \begin{tabular}{l}
-%%     %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
-%%     %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
-%%     %% \end{tabular}
-%%     %&
-%%     %% \begin{tabular}{l}
-%%     %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-75-extra-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-89-trim.png}\end{minipage}\\\\
-%%     %%   \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-3-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-39-trim.png}\end{minipage}
-%%     %% \end{tabular}
-%% %\\ \multicolumn{1}{c|}{}&&\\\cline{2-3}\cline{2-3}
-%%   \end{tabular}
+\newcommand{\similaritySize}{1cm}
+\newcommand{\similarityArrowSize}{0.35cm}
+\begin{figure}[t]
+  \begin{tabular}{c|c|c|}
+    \multicolumn{1}{c}{}    &\multicolumn{1}{c}{\textbf{Close in program space}}&\multicolumn{1}{c}{\textbf{Far apart in program space}}\\\cline{2-3}
+    \multicolumn{1}{c|}{}&&\\
+    \multicolumn{1}{c|}{    \begin{tabular}{l}\textbf{Close in }\\ \textbf{image space} \end{tabular}}    &
+    \begin{tabular}{l}
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-20-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-21-trim.png}\end{minipage}\\\\
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-50-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-2-trim.png}\end{minipage}
+    \end{tabular} &
+    \begin{tabular}{l}
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-22-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-77-trim.png}\end{minipage}\\\\
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-64-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-97-trim.png}\end{minipage}
+    \end{tabular}\\
+    \multicolumn{1}{c|}{}&&\\\cline{2-3}
+    \multicolumn{1}{c|}{}&&\\
+    \multicolumn{1}{c|}{    \begin{tabular}{c}\textbf{Far apart in }\\ \textbf{image space} \end{tabular}}    &        \begin{tabular}{l}
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-52-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-79-trim.png}\end{minipage}\\\\
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-16-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-17-trim.png}\end{minipage}
+    \end{tabular}&
+    \begin{tabular}{l}
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-75-extra-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-89-trim.png}\end{minipage}\\\\
+      \begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-3-trim.png}\end{minipage}\begin{minipage}{\similarityArrowSize}$\leftrightarrow$\end{minipage}\begin{minipage}{\similaritySize}\includegraphics[width = \similaritySize]{figures/expert-39-trim.png}\end{minipage}
+    \end{tabular}
+\\    \multicolumn{1}{c|}{}&&\\\cline{2-3}\cline{2-3}    
+  \end{tabular}
   
-%%   \centering
-%% \caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Features of the program capture abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Sec.~\ref{generalizingTheHandDrawings}). Similarity of programs captures high-level features like repetition and symmetry, whereas similarity of images corresponds to similar drawing commands being in similar places. See Sec. 2 of the supplement for more examples.}\label{similarityMatrix}  \end{figure}
+  \centering
+\caption{Pairs of images either close together or far apart in different features spaces.  The symbol $\leftrightarrow$ points to the compared images. Features of the program capture abstract notions like symmetry and repetition. Distance metric over images is $L_{\text{learned}}(\cdot|\cdot)$ (see Section~\ref{generalizingTheHandDrawings}). The off-diagonal entries highlight the difference between these metrics: similarity of programs captures high-level features like repetition and symmetry, whereas similarity of images correspondends to similar drawing commands being in similar places.}\label{similarityMatrix}  \end{figure}
 
-%% We project these features down to a
-%% 2-dimensional subspace using primary component analysis
-%% (PCA); see Fig.\ref{NMF}.  One could use many
-%% alternative similarity metrics between drawings which would capture pixel-level similarities while missing high-level geometric similarities.
-%% We used our learned distance metric between traces, $L_{\text{learned}}(\cdot|\cdot)$, and projected to a 2-dimensional subspace using multidimensional scaling (MDS:~\cite{cox2008multidimensional}). This reveals similarities between the objects in the drawings,
-%% while missing similarities at the level of the program.
-%% \begin{figure}[h]
-%% \centering  \begin{minipage}{\textwidth}\centering
-%%   %\includegraphics[width = 0.69\textwidth]{figures/PCA.png}
-%%   \includegraphics[width = 0.69\textwidth]{figures/PCA_improved.png}
-%%     \caption{PCA on features of the programs that were synthesized for each drawing. Symmetric figures cluster to the right; ``loopy'' figures cluster to the left; complicated programs are at the top and simple programs are at the bottom.}    \label{NMF}
-%%   \end{minipage} %\hfill
-%%   \begin{minipage}{\textwidth}\centering
-%%     \includegraphics[width = 0.69\textwidth]{figures/imageSimilarity.png} 
-%%     \caption{MDS on drawings using the learned distance metric, $L_{\text{learned}}(\cdot|\cdot)$. Drawings with similar looking parts in similar locations are clustered together.}
-%%   \end{minipage}
-%% \end{figure}
 
 \subsection{Extrapolating figures}
 Having access to the source code of a graphics program facilitates coherent, high-level image editing.
@@ -1212,7 +1188,7 @@ Fig.~\ref{extrapolationFigure} shows extrapolations produced by our system.
 \begin{figure}[H]\centering
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix1.png}
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix2.png}
-%  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
+  \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix3.png}  
    \caption{Top, white: hand drawings. Bottom, black: extrapolations produced by our system.}
   \label{extrapolationFigure}
   \end{figure}
