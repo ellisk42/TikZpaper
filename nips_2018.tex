@@ -337,13 +337,7 @@ different regions of the image while predicting drawing commands.
 %$x$ coordinate.
 We currently constrain
 coordinates to lie on a discrete $16\times 16$ grid,
-but the grid could be made arbitrarily fine.  %% See supplement for the full details
-%% of the architecture, which we implemented in
-%% Tensorflow~\citep{tensorflow2015-whitepaper}.
-%% \remark{There are some more details that are important to provide
-%%   about this architecture in the supplement: the
-%%   functional form(s) of the probability distributions over tokens, the
-%%   network layer sizes, which MLPs share parameters, etc.}
+but the grid could be made arbitrarily fine.
 
 \tikzset{>=latex}
 \begin{figure}[t]
@@ -458,7 +452,7 @@ and maximizing $\probability_\theta[S|I]$,
  the likelihood of $S$ given $I$, with respect to
   model parameters $\theta$, by gradient ascent.
 We trained on $10^5$ scenes, which takes a day on an Nvidia TitanX GPU.
-
+Supplement Section 1 gives the full details of the architecture and training of this network.
 %% Training does not require backpropagation across the sequence
 %% of drawing commands: drawing to the canvas `blocks' the gradients,
 %% effectively offloading memory to an external visual store.  
@@ -543,8 +537,7 @@ but, for this domain, cannot parse cluttered scenes with many objects.
 %A practical application of our neural network is the automatic conversion of hand drawings into a subset of \LaTeX.
  We trained the model
 to generalize to hand drawings by introducing noise into the
-renderings of the training target images, where the noise process  mimics the kinds of variations found in hand drawings (%% Fig.~\ref{handDrawingExamples}; 
-see supplement for details).
+renderings of the training target images, where the noise process  mimics the kinds of variations found in hand drawings.
 While our neurally-guided SMC procedure
 used pixel-wise distance as a surrogate for a likelihood function ($L(\cdot|\cdot)$ in Sec.~\ref{neuralNetworkSection}),
  pixel-wise distance fares poorly on hand drawings, which never exactly match
@@ -558,7 +551,8 @@ We train $L_{\text{learned}}(\cdot |\cdot )$  to approximate the symmetric diffe
 which is  the number of drawing commands by which two specs  differ:
   \begin{equation}
     -\log L_{\text{learned}}(\text{render}(S_1)|\text{render}(S_2))\approx |S_1 - S_2| + |S_2 - S_1|\label{symmetricDistance}
-    \end{equation}
+  \end{equation}
+Supplement Section 2 explains the architecture and training of $L_{\text{learned}}$.
 
 
 
@@ -677,7 +671,7 @@ and seek the minimum cost program consistent with $S$:
 \end{equation}
 We define the
 cost of a program to be the number of Statement's it contains (Tbl.~\ref{DSL}).
-We also penalize using many different numerical constants; see supplement.
+We also penalize using many different numerical constants; see Supplement Section 3.
 Returning to the generative model in Fig.~\ref{roadmap},
 this setup is the same as saying that the prior probability of a program $p$ is $\propto \exp\left(-\text{cost}(p) \right)$ and the likelihood of a spec $S$ given a program $p$ is $\indicator[p\text{ consistent w/ }S]$.
 %\remark{The flow here is a bit off/backwards. ``We want a program that evaluates to $T$ and also minimizes some measure of program cost''---why do we care about cost? It'd be better to start by making a ``Bayesian Occam's razor'' appeal (e.g. the most compact/general program is the more likely explanation) and then saying that one way to do this is to minimize a cost function which is proportional to program length.}
@@ -969,7 +963,7 @@ and for each $\sigma $,
 then minimized~\ref{policyLoss} using gradient descent while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
 %See supplement for details.
 Because we want to learn a policy from only $100$ drawings,
-we parameterize $\pi$ with a  low-capacity bilinear model with only 96 real-valued parameters; see supplement.
+we parameterize $\pi$ with a  low-capacity bilinear model with only 96 real-valued parameters. Supplement Section 4 further details the parameterization and training of the policy.
 %for $\pi$:
 %% \begin{equation}
 %%   \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
@@ -979,7 +973,7 @@ we parameterize $\pi$ with a  low-capacity bilinear model with only 96 real-valu
 %% and $\phi_{\text{spec}}(S)$ extracts a few simple features of the trace set $S$;
 %% see supplement for details.
 
-\textbf{Experiment 3: Table~\ref{policyEvaluation}; Figure~\ref{policyHistogram}.}
+\textbf{Experiment 3: Table~\ref{policyEvaluation}; Figure~\ref{policyHistogram}; Supplement Section 4.}
 We compare synthesis times for our learned search policy
 with 4 alternatives:
  \emph{Sketch}, which poses the
@@ -1084,7 +1078,7 @@ help correct mistakes made by the neural network; %% , and also
 see
 Fig.~\ref{exampleOfProgramCorrectingMistake} for a representative
 example of the kinds of corrections that it makes.
-See supplement for details.
+See Supplement Section 5 for details.
 
 
 
