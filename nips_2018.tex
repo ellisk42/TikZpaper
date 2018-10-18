@@ -35,6 +35,7 @@
 \usepackage{fancyvrb}
 
 \usepackage{caption}
+\usepackage{capt-of}
 \usepackage{subcaption}
 
 \fvset{fontsize=\footnotesize}
@@ -98,23 +99,16 @@
 % if LaTeX puts 3 of 4 authors names on the first line, and the last
 % on the second line, try using \AND instead of \And before the third
 % author name.
-
-\author{Kevin Ellis$^{1,*}$\qquad Daniel Ritchie$^2$\qquad  Armando Solar-Lezama$^1$\qquad Joshua B. Tenenbaum$^1$\\
-  $^1$Massachusetts Institute of Technology\qquad $^2$Brown University\\
-  $^*$Primary contact: \texttt{ellisk@mit.edu}%% \\
-%%   \texttt{ellisk@mit.edu} \\
-%%   \And
-%%   Daniel Ritchie\\
-%% Brown University\\
-%%  \texttt{daniel\_ritchie@brown.edu} \\
-%%  \And
-%%  Armando Solar-Lezama\\
-%%  MIT\\
-%% \texttt{asolar@csail.mit.edu} \\
-%% \And
-%% Joshua B. Tenenbaum \\
-%% MIT\\
-%% \texttt{jbt@mit.edu}
+%% Kevin Ellis$^{1,*}$\qquad Daniel Ritchie$^2$\qquad  Armando Solar-Lezama$^1$\qquad Joshua B. Tenenbaum$^1$\\
+  %% $^1$Massachusetts Institute of Technology\qquad $^2$Brown University\\
+  %% $^*$Primary contact: \texttt{ellisk@mit.edu}%% \\
+\author{Kevin Ellis\\MIT\\\texttt{ellisk@mit.edu}\\
+ \And
+ Daniel Ritchie\\Brown University\\\texttt{daniel\_ritchie@brown.edu}\\
+ \AND
+ Armando Solar-Lezama\\MIT\\\texttt{asolar@csail.mit.edu}\\
+ \And
+ Joshua B. Tenenbaum \\MIT\\\texttt{jbt@mit.edu}\\
   %% Affiliation \\
   %% Address \\
   %% \texttt{email} \\
@@ -458,7 +452,7 @@ but the grid could be made arbitrarily fine.  %% See supplement for the full det
 %% token is emitted by the network to signal that the trace set
 %% explains the image.
 We trained our network by sampling specs $S$ and target
-images $I$ for randomly generated scenes
+images $I$ for randomly generated scenes\footnote{Because rendering ignores ordering  we put the drawing commands into a canonical order}
 and maximizing $\probability_\theta[S|I]$,
 %Eq.~\ref{objective}
  the likelihood of $S$ given $I$, with respect to
@@ -516,11 +510,19 @@ using the CNN to extract features of the input which are passed to an LSTM which
 the spec token-by-token (LSTM in Fig.~\ref{syntheticResults}).
 This architecture is used in several successful neural models of image captioning (e.g.,~\cite{vinyals2015show}),
 but, for this domain, cannot parse cluttered scenes with many objects.
+\begin{figure}[h]\centering
+  \begin{minipage}[c]{7cm}
+      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}    
+  \end{minipage}\hspace{0.5cm}%
+  \begin{minipage}[c]{6cm}
+      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Out-of-sample generalization: Model generalizes to scenes with many more objects ($\approx$ at ceiling when tested on twice as many objects as were in the training data). Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object). Average number of errors is (\# incorrect drawing commands predicted by model)$+$(\# correct commands that were not predicted by model).}\label{syntheticResults}
+    \end{minipage}
+  \end{figure}
 \begin{wrapfigure}{r}{8cm}
-  \vspace{0.4cm}
+  \vspace{-0.2cm}
   \centering
-      \includegraphics[width = 7cm]{figures/averageNumberOfErrors.png}
-      \caption{Parsing~\LaTeX~output after training on diagrams with $\leq 12$ objects. Model generalizes to scenes with many more objects. Neither SMC nor the neural network are sufficient on their own. \# particles varies by model: we compare the models \emph{with equal runtime} ($\approx 1$ sec/object)}\label{syntheticResults}\vspace{-1.5cm} 
+
+
 \end{wrapfigure}
 
 
@@ -903,7 +905,23 @@ search problem.
 
 
 %Intuitively, an $n$-bias optimal search algorithm spends at least $\probability_{\text{bias}}[\sigma ]/n$ of its time exploring solution space $\sigma $.
-Bias-optimal search over program spaces is known as \textbf{Levin Search}~\cite{levin1973universal}; an example of a $1$-bias optimal search algorithm is an ideal time-sharing system that allocates $\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.  We construct a $1$-bias optimal search algorithm by identifying $\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and $t(\sigma )  = t(\sigma|S)$, where $t(\sigma|S)$ is how long the synthesizer takes to search $\sigma $ for a program for $S$. This means that the search algorithm explores the entire program space, but spends most of its time in the regions of the space that  the policy judges to be most promising.
+Bias-optimal search over program spaces is known as \textbf{Levin
+  Search}~\cite{levin1973universal}; an example of a $1$-bias optimal
+search algorithm is an ideal time-sharing system that allocates
+$\probability_{\text{bias}}[\sigma ]$ of its time to trying $\sigma $.
+We construct a $1$-bias optimal search algorithm by identifying
+$\probability_{\text{bias}}[\sigma ] = \pi_\theta(\sigma |S)$ and
+$t(\sigma ) = t(\sigma|S)$, where $t(\sigma|S)$ is how long the
+synthesizer takes to search $\sigma $ for a program for
+$S$. Intuitively, this means that the search algorithm explores the
+entire program space, but spends most of its time in the regions of
+the space that the policy judges to be most promising.  Concretely,
+this means that our synthesis strategy is to run many different
+program searches \emph{in parallel} (i.e., run in parallel different
+instances of the synthesizer, one for each $\sigma$), but to
+allocate compute time to a $\sigma $ in proportion to
+$\pi_\theta(\sigma |S)$.
+
 
 
 %% \begin{figure}\centering
@@ -948,10 +966,10 @@ and for each $\sigma $,
 %\footnote{There are 100 the drawings and $2\times 2\times 2\times 3 = 24$ different values of $\sigma $}
 %synthesis problems takes a little over a day on 40 CPUs.
 %With the training set in hand we  %This loss is differentiable but nonconvex even if $\pi_{\theta}(\cdot |\cdot )^{-1}$ is convex.
-then minimized~\ref{policyLoss} using gradient descent. % while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
+then minimized~\ref{policyLoss} using gradient descent while annealing a softened minimum to the hard minimization equation~\ref{policyLoss}.
 %See supplement for details.
 Because we want to learn a policy from only $100$ drawings,
-we parameterize $\pi$ with a  low-capacity bilinear model; see supplement.
+we parameterize $\pi$ with a  low-capacity bilinear model with only 96 real-valued parameters; see supplement.
 %for $\pi$:
 %% \begin{equation}
 %%   \pi_{\theta}(\sigma |S)\propto \exp \left( \phi_{\text{params}}(\sigma )^\top\theta \phi_{\text{spec}}(S)\right)
@@ -961,7 +979,7 @@ we parameterize $\pi$ with a  low-capacity bilinear model; see supplement.
 %% and $\phi_{\text{spec}}(S)$ extracts a few simple features of the trace set $S$;
 %% see supplement for details.
 
-\textbf{Experiment 3: Table~\ref{policyEvaluation}.}
+\textbf{Experiment 3: Table~\ref{policyEvaluation}; Figure~\ref{policyHistogram}.}
 We compare synthesis times for our learned search policy
 with 4 alternatives:
  \emph{Sketch}, which poses the
@@ -1015,11 +1033,16 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
     \caption{Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch~\citep{solar2008program}. DC: Deep--Coder style baseline that predicts program components, trained like~\cite{BalGauBroetal16}. End--to--End: neural net trained to regress directly from images to programs, which fails to find valid programs 94\% of the time. Oracle:  upper bounds  the performance of any bias--optimal search policy. Ours:  %% $\infty = $ timeout. Red dashed line is median time.
            evaluated w/ 20-fold cross validation.}\label{policyEvaluation}
   \end{minipage}
-  \vspace{-0.5cm}
-\end{figure} 
+
+\vspace{1cm}
+  
+  \includegraphics[width = \textwidth]{figures/policyComparison_basic_DC+bias_20.png}%
+  \captionof{figure}{Time to synthesize a minimum cost program (compare w/ Table~\ref{policyEvaluation}). End--to--End: not shown because it times out on 96\% of drawings, and has its median time (63s) calculated only on non-timeouts, wheras the other comparisons include timeouts in their median calculation. $\infty = $ timeout. Red dashed line is median time.}\label{policyHistogram}
+\end{table}
 
 
 
+\pagebreak
 
 
 
@@ -1152,9 +1175,9 @@ See supplement for details.
 
 \subsection{Extrapolating figures}
 Having access to the source code of a graphics program facilitates coherent, high-level image editing.
-%For example,
-%we could change all of the circles to squares or make all of the lines be dashed.
-For example we can extrapolate figures
+For example,
+we could change all of the circles to squares or make all of the lines be dashed,
+or we can (automatically) extrapolate figures
 by increasing the number of times that loops are executed.
 Extrapolating repetitive visuals patterns comes naturally to humans,
 and is a practical application:
@@ -1226,7 +1249,7 @@ programming constructs like loops and conditionals.
 
 
 \textbf{Hand-drawn sketches:} Sketch-n-Sketch is a bi-directional editing system where direct manipulations to a program's output automatically propagate to the program source code~\citep{Hempel:2016:SSP:2984511.2984575}. This work  compliments our own: programs produced by our method could be provided to a Sketch-n-Sketch-like system as a starting point for further editing.
-Other systems in the computer graphics literature convert sketches to procedural representations, e.g. using a convolutional network to match a sketch to the output of a parametric 3D modeling system in~\citep{huang2017shape}. %% or supporting interactive sketch-based instantiation of procedural primitives in~\citep{Nishida:2016:ISU:2897824.2925951}
+Other systems in the computer graphics literature convert sketches to procedural representations, e.g. using a convolutional network to match a sketch to the output of a parametric 3D modeling system in~\citep{huang2017shape} or supporting interactive sketch-based instantiation of procedural primitives in~\citep{Nishida:2016:ISU:2897824.2925951}
 In contrast, we seek to automatically infer a programmatic representation capturing higher-level visual patterns.
 The CogSketch system~\citep{forbus2011cogsketch} also aims to have a high-level understanding of hand-drawn figures. Their  goal is cognitive modeling, whereas we are interested in building an automated AI application.% (e.g. in our system the user need not annotate which strokes correspond to which shapes; our neural network produces something equivalent to the annotations).
 %\vspace{-0.51cm}
@@ -1237,7 +1260,7 @@ We have presented a system for inferring graphics programs which generate \LaTeX
 In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an AI write the code.
 More generally, we believe the problem of inferring visual programs is a promising direction for research in machine perception.
 \subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl and Jiajun Wu on  the neural architecture. Funding from NSF GRFP, NSF Award 
-\#1753684, and the MUSE program (Darpa grant FA8750-14-2-0242).
+\#1753684, and the MUSE program (DARPA grant FA8750-14-2-0242).
 
 \bibliographystyle{unsrt}
 {\small \bibliography{main}}
