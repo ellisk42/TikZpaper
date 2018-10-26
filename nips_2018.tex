@@ -575,7 +575,7 @@ corrects some of these small errors (Sec.~\ref{synthesizerHelpsParsing}).
 
 \setlength\tabcolsep{3.5pt}
 \begin{figure}[H]
-  \begin{minipage}[t]{8.25cm}
+  \begin{minipage}[t]{9cm}
     \begin{tabular}{llll}
       \includegraphics[width = 2cm]{figures/expert-38.png}&
       \includegraphics[width = 2cm]{figures/expert-73.png}&
@@ -701,7 +701,7 @@ timing out on 2\% of the drawings and solving 58\% of problems within a minute.
 \lstset{basicstyle = \scriptsize\ttfamily}
 
 \begin{table}[t]
-  \caption{Drawings (left), their specs (middle left), and programs synthesized from those specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops in second figure, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
+  \caption{Drawings (left), their specs (middle left), and programs synthesized from those specs (middle right). Compared to the specs the programs are more compressive (right: programs have fewer lines than specs) and automatically group together related drawing commands. Note the nested loops  and conditionals in the Ising model, combination of symmetry and iteration in the bottom figure,  affine transformations in the top figure, and the complicated program in the second figure to bottom.}\label{exampleSynthesisResults}
 %  \vspace{-0.6cm}
 \centering  \begin{tabular}{m{1.5cm}llc}
     \toprule
@@ -726,48 +726,48 @@ for(i<3)
  line(i,-2*i+4,i,-1*i+6)
        \end{lstlisting}
      \end{minipage}&$\frac{6}{3} = 2\text{x}$\\\midrule
-%%      \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
-%% \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-%% Line(5,13,2,10,arrow)
-%% Circle(5,9)
-%% Circle(8,5)
-%% Line(2,8, 2,6,arrow)
-%% Circle(2,5)
-%% \end{lstlisting}
-%% \small\emph{... etc. ...; 13 lines}
-%% \end{minipage}&
-%%              \begin{minipage}{\exampleProgramSize}\begin{lstlisting}
-%% circle(4,10)
-%% for(i<3)
-%%  circle(-3*i+7,5)
-%%  circle(-3*i+7,1)
-%%  line(-3*i+7,4,-3*i+7,2,arrow)
-%%  line(4,9,-3*i+7,6,arrow)
-%% \end{lstlisting}
-%% \end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
-%%     \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
-%% \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
-%% Circle(5,8)
-%% Circle(2,8)
-%% Circle(8,11)
-%% Line(2,9, 2,10)
-%% Circle(8,8)
-%% Line(3,8, 4,8)
-%% Line(3,11, 4,11)
-%% \end{lstlisting}
-%%   \small\emph{... etc. ...; 21 lines}
-%% \end{minipage}&\begin{minipage}{\exampleProgramSize}
-%% \begin{lstlisting}
-%% for(i<3)
-%%  for(j<3)
-%%   if(j>0)
-%%    line(-3*j+8,-3*i+7,
-%%         -3*j+9,-3*i+7)
-%%    line(-3*i+7,-3*j+8,
-%%         -3*i+7,-3*j+9)
-%%   circle(-3*j+7,-3*i+7)
-%% \end{lstlisting}
-%% \end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
+     \includegraphics[width = \exampleDrawingSize]{figures/expert-52-trim.png}&
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+Line(5,13,2,10,arrow)
+Circle(5,9)
+Circle(8,5)
+Line(2,8, 2,6,arrow)
+Circle(2,5)
+\end{lstlisting}
+\small\emph{... etc. ...; 13 lines}
+\end{minipage}&
+             \begin{minipage}{\exampleProgramSize}\begin{lstlisting}
+circle(4,10)
+for(i<3)
+ circle(-3*i+7,5)
+ circle(-3*i+7,1)
+ line(-3*i+7,4,-3*i+7,2,arrow)
+ line(4,9,-3*i+7,6,arrow)
+\end{lstlisting}
+\end{minipage}&$\frac{13}{6} = 2.2\text{x}$\\\midrule
+    \includegraphics[width = \exampleDrawingSize]{figures/expert-38-trim.png}&
+\begin{minipage}{\exampleTraceSize}\begin{lstlisting}
+Circle(5,8)
+Circle(2,8)
+Circle(8,11)
+Line(2,9, 2,10)
+Circle(8,8)
+Line(3,8, 4,8)
+Line(3,11, 4,11)
+\end{lstlisting}
+  \small\emph{... etc. ...; 21 lines}
+\end{minipage}&\begin{minipage}{\exampleProgramSize}
+\begin{lstlisting}
+for(i<3)
+ for(j<3)
+  if(j>0)
+   line(-3*j+8,-3*i+7,
+        -3*j+9,-3*i+7)
+   line(-3*i+7,-3*j+8,
+        -3*i+7,-3*j+9)
+  circle(-3*j+7,-3*i+7)
+\end{lstlisting}
+\end{minipage}&$\frac{21}{6} = 3.5\text{x}$\\\midrule
 \includegraphics[width = \exampleDrawingSize]{figures/expert-101-trim.png}&
 \begin{minipage}{\exampleTraceSize}\begin{lstlisting}
 Rectangle(1,10,3,11)
@@ -909,31 +909,40 @@ instances of the synthesizer, one for each $\sigma$), but to
 allocate compute time to a $\sigma $ in proportion to
 $\pi_\theta(\sigma |S)$.
 
-
-
 %% \begin{figure}\centering
-%%   \begin{tikzpicture}
-%%     \node[anchor = west] at (0,5.25) {Entire program search space};
+%%   \begin{minipage}[c]{0.4\textwidth}
+%%     \begin{tikzpicture}[scale=0.8]
+%%         \node[anchor = west] at (0,5.25) {Entire program search space};
+%%         \footnotesize
 %%     \draw[fill = yellow,fill opacity = 0.15,draw = black] (0,0) rectangle (5,5);
 %%     \draw [fill = yellow, opacity = 0.2] (0,0)--(0,2)--(4,0)--(0,0);
-%%     \draw [fill = yellow, opacity = 0.4,cycle] (0,5)--(0,1)--(3,5);
-%%     \draw [fill = yellow, opacity = 0.6,cycle] (2.5,5)--(3.2,0)--(5,0)--(5,5);
+%%     \draw [fill = yellow, opacity = 0.4] (0,5)--(0,1)--(3,5);
+%%     \draw [fill = yellow, opacity = 0.6] (2.5,5)--(3.2,0)--(5,0)--(5,5);
 %%     \draw (0,2) -- node[below,sloped]{short programs} (4,0);
 %%     \draw (0,2) -- node[above,sloped]{long programs} (4,0);
 %%     \draw (2.5,5) -- node[above,sloped]{programs w/ reflections} (3.2,0);
 %%     \draw (0,1) -- node[above,sloped]{ programs w/ loops} (3,5);
-%%     \node(p1)[anchor =west ] at (5.5,3.5) {$\pi_\theta(\text{short, no loop/reflect}) = $};
-%%     \draw [fill = yellow, fill opacity = 0.2,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p1.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p1.east);
-%%     \node(p2)[anchor =west ] at ([yshift = -0.5cm]p1.west) {$\pi_\theta(\text{long, loops}) = $};
-%%     \draw [fill = yellow, fill opacity = 0.4,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p2.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p2.east);
-%%     \node(p3)[anchor =west ] at ([yshift = -0.5cm]p2.west) {$\pi_\theta(\text{long, no loop/reflect}) = $};
-%%     \draw [fill = yellow, fill opacity = 0.15,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p3.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p3.east);
-%%     \node(p4)[anchor =west ] at ([yshift = -0.5cm]p3.west) {$\pi_\theta(\text{long, reflects}) = $};
-%%     \draw [fill = yellow, fill opacity = 0.6,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p4.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p4.east);
-%%     \node(p5)[anchor =west ] at ([yshift = -0.5cm]p4.west) {\emph{etc.}};
+%%     %% \node(p1)[anchor =west ] at (5.5,3.5) {$\pi_\theta(\text{short, no loop/reflect}|S) = $};
+%%     %% \draw [fill = yellow, fill opacity = 0.2,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p1.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p1.east);
+%%     %    \node(p2)[anchor =west ] at ([yshift = -0.5cm]p1.west) {$\pi_\theta(\text{long, loops}|S) = $};
+    
+%%     %% \node(p2)[anchor =west ] at (0,-0.5) {$\pi_\theta(\text{long, loops}|S) = $};
+%%     %% \draw [fill = yellow, fill opacity = 0.4,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p2.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p2.east);
+%%     %% \node(p3)[anchor =west ] at ([yshift = -0.5cm]p2.west) {$\pi_\theta(\text{long, no loop/reflect}|S) = $};
+%%     %% \draw [fill = yellow, fill opacity = 0.15,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p3.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p3.east);
+    
+%%     %% \node(p4)[anchor =west ] at ([yshift = -0.5cm]p3.west) {$\pi_\theta(\text{long, reflects}|S) = $};
+%%     %% \draw [fill = yellow, fill opacity = 0.6,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p4.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p4.east);
+
+%%     %\node(p5)[anchor =west ] at ([yshift = -0.5cm]p3.west) {\emph{etc.}};
 %%   \end{tikzpicture}
-%%   \caption{The bias-optimal search algorithm divides the entire (intractable) program search space in to (tractable) program subspaces (written $\sigma $), each of which contains a restricted set of programs. For example, one subspace might be short programs which don't loop. The policy $\pi$ predicts a distribution over program subspaces. The weight that $\pi$ assigns to a subspace is indicated by it's yellow shading in the above figure.}
+%%     \end{minipage}
+%%   \begin{minipage}[c]{0.5\textwidth}
+%%           \caption{The bias-optimal search algorithm divides the entire (intractable) program search space in to (tractable) program subspaces (written $\sigma $), each of which contains a restricted set of programs. For example, one subspace might be short programs which don't loop. The policy $\pi$ predicts a distribution over program subspaces. The weight that $\pi$ assigns to a subspace is indicated by its yellow shading in the above figure, and is conditioned on the spec $S$.}
+%%     \end{minipage}
 %%   \end{figure}
+
+
 Now in theory any $\pi_\theta(\cdot |\cdot ) $ is a bias-optimal searcher.
 But the actual runtime of the algorithm depends strongly upon
 the bias $\probability_{\text{bias}}[\cdot ]$.
@@ -1021,7 +1030,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
            evaluated w/ 20-fold cross validation.}\label{policyEvaluation}
   \end{minipage}
 
-\vspace{1cm}
+\vspace{0.2cm}
   
   \includegraphics[width = \textwidth]{figures/policyComparison_basic_DC+bias_20.png}%
   \captionof{figure}{Time to synthesize a minimum cost program (compare w/ Table~\ref{policyEvaluation}). End--to--End: not shown because it times out on 96\% of drawings, and has its median time (63s) calculated only on non-timeouts, wheras the other comparisons include timeouts in their median calculation. $\infty = $ timeout. Red dashed line is median time.}\label{policyHistogram}
@@ -1029,7 +1038,7 @@ With this learned policy in hand we can synthesize 58\% of programs within a min
 
 
 
-\pagebreak
+%\pagebreak
 
 
 
@@ -1174,9 +1183,9 @@ Fig.~\ref{extrapolationFigure} shows extrapolations produced by our system.
 \begin{figure}[H]\centering
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix1.png}
   \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix2.png}
-%  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  
+  \includegraphics[width = 0.885\textwidth]{figures/extrapolationMatrix3.png}  
    \caption{Top, white: drawings. Bottom, black: extrapolations automatically produced by our system.}
-  \label{extrapolationFigure}\vspace{-0.25cm}
+  \label{extrapolationFigure}\vspace{-0.5cm}
   \end{figure}
 %\input{extrapolations.tex}
 
@@ -1247,7 +1256,8 @@ We have presented a system for inferring graphics programs which generate \LaTeX
 In the near future, we believe it will be possible to produce professional-looking figures just by drawing them and then letting an AI write the code.
 More generally, we believe the problem of inferring visual programs is a promising direction for research in machine perception.
 \subsubsection*{Acknowledgments} We are grateful for advice from Will Grathwohl and Jiajun Wu on  the neural architecture. Funding from NSF GRFP, NSF Award 
-\#1753684, and the MUSE program (DARPA grant FA8750-14-2-0242).
+\#1753684, the MUSE program (DARPA grant FA8750-14-2-0242),
+and AFOSR award FA9550-16-1-0012.
 
 \bibliographystyle{unsrt}
 {\small \bibliography{main}}
