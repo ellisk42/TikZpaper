@@ -83,7 +83,7 @@
 
 \usepackage{etoolbox}
 \makeatletter
-\patchcmd{\beamer@@tmpl@headline}{wd=47in}{wd=75in}{}{}
+\patchcmd{\beamer@@tmpl@headline}{wd=47in}{wd=95in}{}{}
 \makeatother
 
 \usepackage{graphicx}  % Required for including images
@@ -157,10 +157,10 @@ Character ::= a | b | c | ...
 \begin{document}
 \addtobeamertemplate{headline}{} 
 {\begin{tikzpicture}[remember picture, overlay]
-     \node [anchor=north east, inner sep=3cm]  at (current page.north east)
-           {\includegraphics[height=7cm]{figures/csail.png}};
+     \node [anchor=north east, inner sep=3cm]  at ([yshift=2cm]current page.north east)
+           {\includegraphics[height=10cm]{figures/Brown.png}};
                 \node [anchor=north west, inner sep=3cm]  at (current page.north west)
-     {\includegraphics[height=5cm]{figures/bcs.png}};
+     {\includegraphics[height=7cm]{figures/csail.png}};
 \end{tikzpicture}}
 
 \addtobeamertemplate{block end}{}{\vspace*{2ex}} % White space under blocks
@@ -186,32 +186,21 @@ Character ::= a | b | c | ...
     \includegraphics[width = \textwidth]{firstPageExample.pdf}
 \end{alertblock}
 
-\begin{block}{Two-Stage Pipeline}
-\hspace{-5cm}  \includegraphics[width = 50cm]{pipeline.pdf}
-  
-  Black arrows: Top--down generative model; Program$\to$Spec$\to$Image. {\color{red}Red} arrows: Bottom--up inference procedure. \textbf{Bold:} Random variables (image/spec/program)
-\end{block}
+      \begin{block}{Example System Outputs}
+\includegraphics[width = \textwidth]{examplePrograms.pdf} 
+      \end{block}
+
+      \begin{alertblock}{\red Acknowledgments}
+         We are grateful for advice from Will Grathwohl and Jiajun Wu on  the neural architecture. Funding from NSF GRFP, NSF Award 
+\#1753684, the MUSE program (DARPA grant FA8750-14-2-0242),
+and AFOSR award FA9550-16-1-0012.
+        \end{alertblock}
 
 %----------------------------------------------------------------------------------------
 %	INTRODUCTION
 %----------------------------------------------------------------------------------------
 
-\begin{block}{Parsing Images into Drawing Commands (specs)}
-\vspace{-3cm}  \includegraphics[width = 40cm]{architecture.pdf}
 
-{\small   \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: draws from a multinomial. \texttt{Typewriter font}: network outputs. Renders on a $16\times 16$ grid, shown in \textcolor{gray}{gray}. STN: differentiable attention mechanism. \textbf{Combined with stochastic search (Sequential Monte Carlo)}}
-
-%\begin{figure}[h]\centering
-  \begin{minipage}[c]{0.49\textwidth} 
-    \centering  \includegraphics[width = \textwidth]{figures/drawingAccuracy.png}            \vspace{-0.5cm} 
-  \end{minipage}\hfill%
-      \begin{minipage}[c]{0.5\textwidth} 
-  {\small (Left) NN outputs vs ground truth on hand drawings (measured by IoU), as we consider larger sets of samples (1, 5, 100).
-     (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: ablations. Model is at ceiling for synthetic $\LaTeX$ output.}
-      \end{minipage}
-
-%\end{figure}
-\end{block}
 
 %% \begin{block}{Problem Framing}
 %%   \begin{itemize}
@@ -237,6 +226,12 @@ Character ::= a | b | c | ...
 
 \begin{column}{\twocolwid} % Begin a column which is two columns wide (column 2)
 
+  \begin{block}{Two-Stage Pipeline}
+\centering  \includegraphics[width = 80cm]{pipeline.pdf}
+  
+  Black arrows: Top--down generative model; Program$\to$Spec$\to$Image. {\color{red}Red} arrows: Bottom--up inference procedure. \textbf{Bold:} Random variables (image/spec/program)
+\end{block}
+
 \begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column
 
 \begin{column}{\onecolwid}\vspace{-.6in} % The first column within column 2 (column 2.1)
@@ -259,6 +254,60 @@ Character ::= a | b | c | ...
     %% like intuitive theory learning~\cite{logical}.
 %%\end{alertblock}
   
+\begin{block}{Parsing Images into Drawing Commands (specs)}
+\hspace{10cm}  \includegraphics[width = 40cm]{architecture.pdf}
+
+{\small   \textcolor{blue}{Blue}: network inputs. Black: network operations. \textcolor{red}{Red}: draws from a multinomial. \texttt{Typewriter font}: network outputs. Renders on a $16\times 16$ grid, shown in \textcolor{gray}{gray}. STN: differentiable attention mechanism. \textbf{Combined with stochastic search (Sequential Monte Carlo)}}
+
+\end{block}
+
+\begin{block}{Generalizing to real hand drawings}
+  \textbf{  Train on simulated noisy data (left) \& learn distance metric between images (right)}\\
+  \newcommand{\noisySize}{0.2\textwidth}
+  \begin{minipage}[t]{\noisySize}
+    \centering\includegraphics[width = \textwidth]{figures/expert-60-reduced.png}\\
+{\small     (a): hand drawing}
+  \end{minipage}%
+  \begin{minipage}[t]{\noisySize}
+    \centering\includegraphics[width = \textwidth]{figures/60-1-reduced.png}\\
+{\small     (b): noisy render of (a)}
+  \end{minipage}\hfill%
+  \begin{minipage}[t]{0.5\textwidth}\vspace{-9cm}
+    \textbf{Learned distance metric}\\
+    Serves as likelihood surrogate for SMC
+      \begin{align*}
+    -\log L_{\text{learned}}(\text{render}&(S_1)|\text{render}(S_2))\approx\\& |S_1 - S_2| + |S_2 - S_1|\label{symmetricDistance}
+      \end{align*}
+      $S_1$: noisy render of random scene\\
+      $S_2$: nonnoisy render of random scene
+  \end{minipage}%
+
+  \vspace{3cm}
+
+    \begin{minipage}[c]{0.49\textwidth} 
+    \centering  \includegraphics[width = \textwidth]{figures/drawingAccuracy.png}            \vspace{-0.5cm} 
+  \end{minipage}\hfill%
+      \begin{minipage}[c]{0.5\textwidth} 
+  {\small (Left) NN outputs vs ground truth on hand drawings (measured by IoU), as we consider larger sets of samples (1, 5, 100).
+     (a) for 63\% of drawings the model's top prediction is exactly correct; (b) for 70\% of drawings the ground truth is in the top 5 model predictions; (c) for 4\% of drawings all of the model outputs have no overlap with the ground truth. Red: the full model. Other colors: ablations. Model is at ceiling for synthetic $\LaTeX$ output.}
+      \end{minipage}
+
+  \end{block}
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{column} % End of column 2.1
+
+\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
+
+%----------------------------------------------------------------------------------------
+%	METHODS
+%----------------------------------------------------------------------------------------
+
+
+
   \begin{block}{Domain-Specific Language for Graphics Programs}
  We allow loops (\texttt{for}) with conditionals (\texttt{if}), vertical/horizontal reflections (\texttt{reflect}), variables (Var) and affine transformations ($\mathbb{Z}\times$Var\texttt{+}$\mathbb{Z}$).
   \begin{tabular}{rl}\toprule
@@ -323,52 +372,11 @@ Differentiable loss ($\mathcal{D}$ a corpus of synthesis problems):
 \text{where }  \sigma \in\text{\textsc{Best}}(S) &\text{ if  a minimum cost program for }S \text{ is in }\sigma .\nonumber %\text{cost}(\text{program}(p)) = \min_{p\in \sigma \text{, s.t. }p\text{ evaluates to }S} \text{cost}(p) \nonumber
 \end{align}
 
-\includegraphics[width = \textwidth]{figures/policyComparison_basic_DC+bias_20.png}
+\begin{flushright}
+  Experimental results on synthesis policy: See lower right of poster
+  \end{flushright}
 
-Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch. DC: Deep--Coder style baseline that predicts program components, trained like Balog 2016. Oracle:  upper bounds  the performance of any bias--optimal search policy. $\infty = $ timeout. Red dashed line is median time
   \end{block}
-
-
-
-%----------------------------------------------------------------------------------------
-
-\end{column} % End of column 2.1
-
-\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
-
-%----------------------------------------------------------------------------------------
-%	METHODS
-%----------------------------------------------------------------------------------------
-
-  \begin{block}{Extrapolating Drawings}
-    Automatically extrapolate by increasing loop bounds. Top white: Hand drawing. Bottom black: extrapolation.
-    
-      \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}\\
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}\\
-  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  \\
-  \end{block}
-
-  \begin{block}{Error correction}
-    `Top down' influences upon perception: reasoning engine (program synthesizer) can influence
-    agent's percept through higher-level considerations like symmetry and alignment.
-    \begin{align*}
-      \hat{S}(I) &= \argmax_{S\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(S))\times \probability_\theta[S|I] \times\probability_{\beta} [ \text{program}(S)] \\
-        \beta^* &= \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(S)]\times L_{\text{learned}}(I|\text{render}(S))\times \probability_\theta[S|I]}{\sum_{S'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(S')]\times L_{\text{learned}}(I|\text{render}(S'))\times \probability_\theta[S'|I]} \right]
-    \end{align*}
-    where $\mathcal{F}(I)$ is set of parses output by neural net on image $I$;
-    $\probability_\beta[\cdot ]$ is prior over programs parameterized by $\beta$;
-    and expectation is taken over a corpus of
-    program synthesis problems.
-
-    \vspace{2cm}
-    \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{figures/programSuccess7.png}\hfill
-  \includegraphics[width = 0.6\textwidth]{figures/programSuccess16.png}
-  \caption{Left: hand drawings. Center: interpretations favored by the deep network. Right: interpretations favored after learning a prior over programs. The prior favors  simpler programs, thus (top) continuing the pattern of not having an arrow is preferred, or (bottom) continuing the ``binary search tree'' is preferred.}
-      \end{figure}
-    \end{block}
-
-
 
 %----------------------------------------------------------------------------------------
 
@@ -406,10 +414,41 @@ Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of
 %	CONCLUSION
 %----------------------------------------------------------------------------------------
 
+  \begin{block}{Extrapolating Drawings}
+    Automatically extrapolate by increasing loop bounds. Top white: Hand drawing. Bottom black: extrapolation.
+    
+      \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}\\
+  \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}\\
+  \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  \\
+  \end{block}
 
-      \begin{block}{Example System Outputs}
-\includegraphics[width = \textwidth]{examplePrograms.pdf} 
-\end{block}
+  \begin{block}{Error correction}
+    `Top down' influences upon perception: reasoning engine (program synthesizer) can influence
+    agent's percept through higher-level considerations like symmetry and alignment.
+    \begin{align*}
+      \hat{S}(I) &= \argmax_{S\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(S))\times \probability_\theta[S|I] \times\probability_{\beta} [ \text{program}(S)] \\
+        \beta^* &= \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(S)]\times L_{\text{learned}}(I|\text{render}(S))\times \probability_\theta[S|I]}{\sum_{S'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(S')]\times L_{\text{learned}}(I|\text{render}(S'))\times \probability_\theta[S'|I]} \right]
+    \end{align*}
+    where $\mathcal{F}(I)$ is set of parses output by neural net on image $I$;
+    $\probability_\beta[\cdot ]$ is prior over programs parameterized by $\beta$;
+    and expectation is taken over a corpus of
+    program synthesis problems.
+
+    \vspace{2cm}
+    \begin{figure}
+        \includegraphics[width = 0.5\textwidth]{figures/programSuccess7.png}\\
+  \includegraphics[width = 0.5\textwidth]{figures/programSuccess16.png}
+  \caption{Left: hand drawings. Center: interpretations favored by the deep network. Right: interpretations favored after learning a prior over programs. The prior favors  simpler programs, thus (top) continuing the pattern of not having an arrow is preferred, or (bottom) continuing the ``binary search tree'' is preferred.}
+    \end{figure}
+\vspace{-1cm}
+  \end{block}
+
+  \begin{block}{Synthesis times}    
+    \includegraphics[width = \textwidth]{figures/policyComparison_basic_DC+bias_20.png}
+
+{\small Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of Sketch. DC: Deep--Coder style baseline that predicts program components, trained like Balog 2016. Oracle:  upper bounds  the performance of any bias--optimal search policy. $\infty = $ timeout. Red dashed line is median time}
+    \end{block}
+
 
 %----------------------------------------------------------------------------------------
 %	REFERENCES
