@@ -72,8 +72,8 @@
 \newlength{\onecolwid}
 \newlength{\twocolwid}
 \newlength{\threecolwid}
-\setlength{\paperwidth}{76in} % A0 width: 46.8in
-\setlength{\paperheight}{41in} % NIPS16 : 36
+\setlength{\paperwidth}{96in} % A0 width: 46.8in
+\setlength{\paperheight}{48in} % NIPS16 : 36
 \setlength{\sepwid}{0.024\paperwidth} % Separation width (white space) between columns
 \setlength{\onecolwid}{0.22\paperwidth} % Width of one column
 \setlength{\twocolwid}{0.464\paperwidth} % Width of two columns
@@ -148,7 +148,7 @@ Character ::= a | b | c | ...
 \newcommand{\theSystem}{\textsc{DreamCoder}}
 \title{Learning to Infer Graphics Programs from Hand-Drawn Images} % Poster title
 
-\author{Kevin Ellis, Daniel Ritchie, Lucas Morales, Mathias Sabl\'e Meyer,  Joshua B. Tenenbaum, Armando Solar-Lezama} % Author(s)
+\author{Kevin Ellis, Daniel Ritchie, Armando Solar-Lezama,  Joshua B. Tenenbaum} % Author(s)
 
 \institute{Massachusetts Institute of Technology \& Brown University} % Institution(s)
 
@@ -346,57 +346,30 @@ Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of
       \includegraphics[width = \textwidth]{figures/extrapolationMatrix1.png}\\
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix2.png}\\
   \includegraphics[width = \textwidth]{figures/extrapolationMatrix3.png}  \\
-\end{block}
+  \end{block}
 
-  \begin{block}{Example System Outputs}
-\includegraphics[width = \textwidth]{examplePrograms.pdf} 
-\end{block}
+  \begin{block}{Error correction}
+    `Top down' influences upon perception: reasoning engine (program synthesizer) can influence
+    agent's percept through higher-level considerations like symmetry and alignment.
+    \begin{align*}
+      \hat{S}(I) &= \argmax_{S\in \mathcal{F}(I)} L_{\text{learned}}(I | \text{render}(S))\times \probability_\theta[S|I] \times\probability_{\beta} [ \text{program}(S)] \\
+        \beta^* &= \argmax_{\beta} \expect \left[ \log \frac{\probability_{\beta} [\text{program}(S)]\times L_{\text{learned}}(I|\text{render}(S))\times \probability_\theta[S|I]}{\sum_{S'\in \mathcal{F}(I)} \probability_{\beta} [\text{program}(S')]\times L_{\text{learned}}(I|\text{render}(S'))\times \probability_\theta[S'|I]} \right]
+    \end{align*}
+    where $\mathcal{F}(I)$ is set of parses output by neural net on image $I$;
+    $\probability_\beta[\cdot ]$ is prior over programs parameterized by $\beta$;
+    and expectation is taken over a corpus of
+    program synthesis problems.
 
-\begin{block}{Learning from very few examples}
-\begin{figure}[h]\centering
-  \begin{minipage}{0.45\textwidth}\centering
-    \includegraphics[width=\textwidth]{smallFractionSolving.png}
-  \caption{Results averaged across 19 problems. Solid: \theSystem{} . Dashed: enumerating 100 programs. Dotted: MDL.}\label{flashPerformance}        \end{minipage}%
-\hspace{0.025\textwidth}\begin{minipage}{0.45\textwidth}\centering
-    \includegraphics[width=0.7\textwidth]{small_mdl.png}
-    \caption{MDL learner vs \theSystem{} on one-shot learning. Predictions marginalize out the program.}\label{mdl}
-  \end{minipage}
-\end{figure}
-
-%\textbf{Multiple explanations aids one-shot learning.} After a single example, the shortest program is probably not correct -- but one of the top sampled \emph{behaviors} (marginalizing over the program) might be.
-
-\textbf{Good performance needs tilt correction.} w/o low-tilt approximation, get no samples for any of these problems after an hour, vs $\approx 1$ minute w/ \theSystem
+    \vspace{2cm}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{figures/programSuccess7.png}\hfill
+  \includegraphics[width = 0.6\textwidth]{figures/programSuccess16.png}
+  \caption{Left: hand drawings. Center: interpretations favored by the deep network. Right: interpretations favored after learning a prior over programs. The prior favors  simpler programs, thus (top) continuing the pattern of not having an arrow is preferred, or (bottom) continuing the ``binary search tree'' is preferred.}
+      \end{figure}
+    \end{block}
 
 
 
-\end{block}
-
-%% \begin{block}{The Cost of Sampling}
-%%   Amortized cost of 100 samples from \theSystem :
-  
-%%   \vspace{1cm}
-
-%%   \hspace{9cm}\vspace{1cm}    \begin{tabular}{lll}\toprule
-%%      1 example\hspace{0.9cm}      &  2 examples\hspace{0.9cm}          &     3 examples\\\midrule
-%% $84 \pm 3$ sec &$21 \pm 1$ sec & $49\pm 3$ sec
-%% \end{tabular}
-
-%% \textbf{Good performance needs tilt correction.} w/o low-tilt approximation, get no samples for any of these problems after an hour!
-
-%% \textbf{Can closely approximate posterior with little overhead.}
-
-%% %\vspace{-2.5cm}
-%% \begin{tabular}{cl}
-%%   \begin{tabular}{c}
-%%     \includegraphics[width=25cm]{trim-trade-off.png}
-%%     \end{tabular}&
-%%   \begin{tabular}{l}
-%%     \parbox{15cm}{Accuracy (colored contours) vs Performance (monochrome cells) trade-off; upper bounds plotted. Performance measured in expected solver invocations; accuracy measured in log KL divergence.}
-%%     \end{tabular}
-%% \end{tabular}
-%% %\end{figure}
-
-%%   \end{block}
 %----------------------------------------------------------------------------------------
 
 \end{column} % End of column 2.2
@@ -433,102 +406,9 @@ Time to synthesize a minimum cost program. Sketch: out-of-the-box performance of
 %	CONCLUSION
 %----------------------------------------------------------------------------------------
 
-  \begin{alertblock}{NEW: Wake-Sleep DSL learning with \theSystem}
 
-    \begin{minipage}[c]{0.45\textwidth}
-    \begin{itemize}
-    \item \textbf{Wake:} Synthesize programs from DSL + neural net (`recognition model') to guide search
-    \item \textbf{Sleep-G:} Grow DSL, using grammar induction algorithms
-    \item \textbf{Sleep-R:} Train neural net on programs found during waking (`experience replay') and samples from DSL (`dreaming')
-    \end{itemize}
-    \end{minipage}%
-    \begin{minipage}[c]{0.48\textwidth}      
-    \begin{tikzpicture}[scale=3,line width=1.5mm]
-    \begin{scope}[shift = {(1,-1)}]
-    \node[align = center](synthesis) at (6,4) {Search for \\programs: $p$};
-    \node[align = center](DSL) at (3,1) {DSL: $\mathcal{D}$};
-    \node[align = center](recognitionModel) at (9,1) {Recognition \\model: $Q$};
-
-    \draw [->] (synthesis.-120) to[out = -150,in = 60] node[below,rotate = 45,align = center]{{\footnotesize Trains}\\{\footnotesize (Sleep-G)}} (DSL.30);
-    \draw [->] (synthesis.-60) to[out = -30,in = 120] node[below,rotate=-45,align = center]{{\footnotesize Trains}\\{\footnotesize (Sleep-R)}} (recognitionModel.150);
-    \draw [->] (DSL.east) to[out = -30,in = 210] node[above, align = center]{{\footnotesize Trains}\\{\footnotesize (Sleep-R)}} (recognitionModel.west);
-
-    \draw [->,dashed] (DSL.north) to[out = 90,in = 180] node[fill=dblue!10,align = center]{  \footnotesize{Inductive bias}\\\footnotesize{(Wake)}} (synthesis.west);
-    \draw [->,dashed] (recognitionModel.north) to[out = 90,in = 0] node[fill=dblue!10,align = center]{{\footnotesize Makes tractable}\\{\footnotesize (Wake)}} (synthesis.east);
-  \end{scope}
-    \end{tikzpicture}
-      \end{minipage}
-  \end{alertblock}
-
-\begin{block}{\theSystem~outputs for three different task domains}
-
-\hspace{-2cm}\includegraphics[width = 1.15\textwidth]{figures/3DSL.png}
-{\small Top: Tasks from three domains we apply our algorithm to, each followed by the programs \theSystem~ discovers for them. Bottom: Several examples from learned DSL. Notice that learned DSL primitives can call each other, and that \theSystem~rediscovers higher-order functions like \code{filter} ($f_1$ under List Functions)}
-\end{block}
-
-%----------------------------------------------------------------------------------------
-%	ADDITIONAL INFORMATION
-%----------------------------------------------------------------------------------------
-
-\begin{block}{Bayesian framing}
-
-  \begin{minipage}[c]{0.45\textwidth}
-      \begin{tikzpicture}[scale=4,line width=1.5mm]
-
-  \node[latent,scale=3] at (3.5,3) (dx){$\mathcal{D}$};
-  \node[latent,scale=3] at ([xshift=2cm]dx) (zp){$p_n$};
-  \node[obs,scale=3] at ([xshift=2cm]zp) (xp) {$x_n$};
-  \plate {}{(zp)(xp)}{};
-%  \node[align = center] at ([yshift = -1.2cm,xshift = 1cm]xp.east) {(b) \\recognition model};
-  \draw [->,red] (xp.south) to[out = -90,in = -90] node(nn){} (zp.south);
-%  \draw [->,red] (tx.west) -- (zp.east);
-  \draw [->] (dx.east) -- (zp.west);
-  \draw [->] (zp.east) -- (xp.west);
-
-  \node at (nn) {
-    \begin{tikzpicture}[x=2.5cm,y=1.25cm,transform canvas={scale=0.5,shift={+(-1,2.5)}}]
-      \tikzstyle{neuron}=[circle,fill=blue!50,minimum size=20pt]
-      \fill[fill=white] (-0.25,-0.5) rectangle (2.25,-4.5);
-      \node[rectangle] at (1,1) {};
-      \foreach \name / \y in {1,...,4}
-          \node[neuron] (I-\name) at (0,-\y) {};
-      \foreach \name / \y in {1,...,3}
-          \node[neuron] (H-\name) at (1,-\y-0.5) {};
-      \foreach \name / \y in {1,...,4}
-          \node[neuron] (O-\name) at (2,-\y) {};
-      \foreach \source in {1,...,4}
-          \foreach \dest in {1,...,3}
-              \draw [-latex] (I-\source) -- (H-\dest);
-      \foreach \source in {1,...,3}
-          \foreach \dest in {1,...,4}
-              \draw [-latex] (H-\source) -- (O-\dest);
-    \end{tikzpicture}
-  };
-  \node[shift={+(0,-1.7)}] at (nn) { $Q$  };
-
-
-
-  
-
-
-      \end{tikzpicture}
-      $x_n$: program synthesis problem. $p_n$: (latent) program solving $x_n$. $Q(p|x)$: (learned) neural recognition model. $\mathcal{D}$: (latent) DSL.
-  \end{minipage}\qquad%
-  \begin{minipage}[c]{0.4\textwidth}
-    
-  $$
-\underbrace{p_n^* =   \argmax_{p_n}\probability[x_n|p_n]\probability[p_n|\mathcal{D}^*]}_{\text{\textbf{Wake}}}
-$$
-\vspace{0.5cm}
-$$
-\underbrace{\mathcal{D}^* = \argmax_{\mathcal{D}}    \probability[\mathcal{D}]\prod_n\sum_{p_n}\probability[x_n|p_n]\probability[p_n|\mathcal{D}]}_{\textbf{\text{Sleep-G}}}
-$$
-\vspace{0.5cm}
-$$\underbrace{Q^* = \argmin_Q \text{KL}\left(\probability[p|x,\mathcal{D}] || Q(p|x)\right) }_{\text{\textbf{Sleep-R}}}$$
-    \end{minipage}
-
-  
-    
+      \begin{block}{Example System Outputs}
+\includegraphics[width = \textwidth]{examplePrograms.pdf} 
 \end{block}
 
 %----------------------------------------------------------------------------------------

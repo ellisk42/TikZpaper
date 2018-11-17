@@ -102,7 +102,7 @@ Kevin Ellis\\
   Daniel Ritchie\\
 Brown University\\
  \texttt{daniel\_ritchie@brown.edu} \\
- \And
+ \AND
  Armando Solar-Lezama\\
  MIT\\
 \texttt{asolar@csail.mit.edu} \\
@@ -387,6 +387,40 @@ a repetition of length 2 as being a reflection rather a loop.
 
 
 \section{Learning a search policy}
+
+Figure~\ref{yellow} provides additional intuition for
+how the policy biases and informs the program synthesizer:
+the entire program search space is carved up into smaller subsets,
+and we search within each of these subsets \emph{simultaneously and in parallel},
+but where the fraction of
+compute time allocated to each subset
+is proportional to the weight assigned to it by the policy.
+
+
+\begin{figure}\centering
+  \begin{tikzpicture}
+    \node[anchor = west] at (0,5.25) {Entire program search space};
+    \draw[fill = yellow,fill opacity = 0.15,draw = black] (0,0) rectangle (5,5);
+    \draw [fill = yellow, opacity = 0.2] (0,0)--(0,2)--(4,0)--(0,0);
+    \draw [fill = yellow, opacity = 0.4] (0,5)--(0,1)--(3,5);
+    \draw [fill = yellow, opacity = 0.6] (2.5,5)--(3.2,0)--(5,0)--(5,5);
+    \draw (0,2) -- node[below,sloped]{short programs} (4,0);
+    \draw (0,2) -- node[above,sloped]{long programs} (4,0);
+    \draw (2.5,5) -- node[above,sloped]{programs w/ reflections} (3.2,0);
+    \draw (0,1) -- node[above,sloped]{ programs w/ loops} (3,5);
+    \node(p1)[anchor =west ] at (5.5,3.5) {$\pi_\theta(\text{short, no loop/reflect}|S) = $};
+    \draw [fill = yellow, fill opacity = 0.2,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p1.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p1.east);
+    \node(p2)[anchor =west ] at ([yshift = -0.5cm]p1.west) {$\pi_\theta(\text{long, loops}|S) = $};
+    \draw [fill = yellow, fill opacity = 0.4,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p2.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p2.east);
+    \node(p3)[anchor =west ] at ([yshift = -0.5cm]p2.west) {$\pi_\theta(\text{long, no loop/reflect}|S) = $};
+    \draw [fill = yellow, fill opacity = 0.15,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p3.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p3.east);
+    \node(p4)[anchor =west ] at ([yshift = -0.5cm]p3.west) {$\pi_\theta(\text{long, reflects}|S) = $};
+    \draw [fill = yellow, fill opacity = 0.6,draw = black]  ([xshift = 0cm,yshift = -0.2cm]p4.east) rectangle ([xshift = 0.4cm,yshift = 0.2cm]p4.east);
+    \node(p5)[anchor =west ] at ([yshift = -0.5cm]p4.west) {\emph{etc.}};
+  \end{tikzpicture}
+  \caption{The bias-optimal search algorithm divides the entire (intractable) program search space in to (tractable) program subspaces (written $\sigma $), each of which contains a restricted set of programs. For example, one subspace might be short programs which don't loop. The policy $\pi$ predicts a distribution over program subspaces. The weight that $\pi$ assigns to a subspace is indicated by its yellow shading in the above figure, and is conditioned on the spec $S$.}\label{yellow}
+  \end{figure}
+
 \subsection{Modeling}\label{searchPolicyModel}
 Recall from the main paper that our goal is to estimate the policy minimizing the following loss:
 \begin{align}
